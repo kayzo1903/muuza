@@ -1,0 +1,190 @@
+{
+  "HomePage": {
+    "title": "Hello welcome to Muuza",
+    "about": "Go to the about page",
+    "heroTitle": "Get Food Quickly, Nearby",
+    "heroDescription": "Muuza helps you find food quickly from nearby food businesses.",
+    "placeholder": "Enter Your Location (e.g., Dar es Salaam, Kariakoo, Msimbazi)",
+    "ctaButton": "Find Food"
+  },
+  "Dashboard": {
+    "title": "Welcome to Your Muuza Dashboard"
+  },
+  "LocaleSwichert": {
+    "label": "Change language",
+    "locale": "{locale, select, sw {🇹🇿 Sw} en {🇺🇸 Eng} other {Unknown}}"
+  },
+  "header": {
+    "sell": "sell on muuza",
+    "about": "about",
+    "blog": "blog",
+    "try muuza": "try muuza"
+  },
+  "footer": {
+    "about": "About",
+    "help": "help",
+    "sell": "sell on muuza",
+    "blog": "Blog",
+    "privacy and terms": "Privacy Policy & Terms of Service",
+    "rightsReserved": "All rights reserved"
+  },
+  "howToEarnWithMuuza": {
+    "title": "How to Earn with Muuza",
+    "trackSales": {
+      "title": "Track Sales",
+      "description": "Monitor your sales growth with detailed insights, helping you improve and scale your business."
+    },
+    "easyOrders": {
+      "title": "Easy Orders",
+      "description": "Simplify the buying process for your customers, and receive more orders through our streamlined system."
+    },
+    "growAudience": {
+      "title": "Grow Your Audience",
+      "description": "Reach a wider audience and boost your visibility on Muuza to attract more customers and increase revenue."
+    }
+  },
+  "servicesWeProvide": {
+    "title": "Services We Provide",
+    "fastDelivery": {
+      "title": "Fast Delivery",
+      "description": "We ensure timely and reliable delivery of products to customers through our efficient logistics partners."
+    },
+    "customerSupport": {
+      "title": "Customer Support",
+      "description": "Our dedicated support team is here to assist both vendors and customers with any queries or issues."
+    },
+    "vendorAssistance": {
+      "title": "Vendor Assistance",
+      "description": "We provide resources and guidance to help vendors optimize their store and increase sales on Muuza."
+    }
+  },
+  "about": {
+    "heading": "About Muuza",
+    "subheading": "Connecting Vendors with Customers",
+    "description": "Muuza is a platform that empowers small and medium-sized businesses to reach more customers, grow their sales, and enhance their business operations. We offer fast delivery, excellent customer support, and resources to help vendors thrive."
+  },
+  "blog": {
+    "newsAndUpdates": "News and Updates",
+    "readMore": "Read more",
+    "loadMore": "Load more"
+  },
+  "newsletter": {
+    "heading": "Stay Updated on Food Safety and Nutrition",
+    "subheading": "Subscribe to our newsletter for the latest insights and tips on food business, safety, and nutrition.",
+    "button": "Subscribe"
+  },
+  "navigation": {
+    "My business": "My business",
+    "dashboard": "Dashboard",
+    "categories": "Categories",
+    "foods": "Foods",
+    "mostReviewed": "Most Reviewed",
+    "trending": "Trending",
+    "nearby": "Near-By",
+    "sellOnMuuza": "Sell on Muuza",
+    "myFavourites": "My Favourites",
+    "help": "Help",
+    "changeLocation": "Change Location"
+  },
+  "search": {
+    "business": "Business",
+    "foods": "Foods",
+    "locations": "Locations",
+    "placeholder": "Search for {filter}",
+    "searchButton": "Search"
+  },
+  "locationpage": {
+    "addLocationMessage": "Add your location for a better experience",
+    "addlocation": "Add location",
+    "placeholder": "Enter Your Location (e.g., Dar es Salaam, Kariakoo, Msimbazi)"
+  },
+  "form": {
+    "businessCategories": {
+      "Restaurant": "Restaurant",
+      "Bakery": "Bakery",
+      "Grocery Store": "Grocery Store",
+      "Food Truck": "Food Truck",
+      "Cafe": "Cafe",
+      "Catering Service": "Catering Service",
+      "Farmers Market": "Farmers Market",
+      "Butchery": "Butchery",
+      "Seafood Market": "Seafood Market",
+      "Juice Bar": "Juice Bar",
+      "Ice Cream Parlor": "Ice Cream Parlor",
+      "Health Food Store": "Health Food Store",
+      "Dairy Shop": "Dairy Shop",
+      "Other": "Other"
+    },
+    "formLabels": {
+      "businessName": "Business Name",
+      "category": "Category",
+      "address": "Business Address",
+      "phone": "Phone",
+      "selectCategory": "Select a category"
+    },
+    "buttons": {
+      "next": "Next",
+      "back": "Back",
+      "submit": "Submit",
+      "loading": "loading..."
+    },
+    "messages": {
+      "winning": "congratulation",
+      "success": "You have successfully joined Muuza!!",
+      "failure": "Failed to create business",
+      "validationErrors": {
+        "nameRequired": "Business name must be at least 2 characters long.",
+        "nametaken": "name is already exist",
+        "serverError": "server errors",
+        "addressRequired": "Address must be at least 5 characters long.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "categoryInvalid": "Select a valid category."
+      }
+    },
+    "placeholders": {
+      "businessName": "Enter your business name",
+      "address": "ex.Dar es salaa ,kariakoo , Msimbazi",
+      "phone": "ex.0123 456 876"
+    },
+    "page": {
+      "register": "Register Your Business"
+    }
+  },
+  "WhyMuuza": {
+    "intro": "At Muuza, we're not just a marketplace — we're a movement. A movement to reconnect people with real food, real flavors, and real communities.",
+    "features": {
+      "authenticTitle": "Authentic Local Taste",
+      "authenticDescription": "Enjoy dishes prepared by real people, inspired by generations of culinary tradition.",
+      "supportTitle": "Support Small Businesses",
+      "supportDescription": "Every order helps a local vendor, cook, or farmer grow their business and thrive.",
+      "paymentsTitle": "Safe & Easy Payments",
+      "paymentsDescription": "Pay securely with flexible options, knowing your order is always protected.",
+      "deliveryTitle": "Fast & Reliable Delivery",
+      "deliveryDescription": "Timely delivery from your favorite local kitchens right to your doorstep."
+    },
+    "communityTitle": "What Our Community Says",
+    "testimonials": [
+      {
+        "name": "Amina N.",
+        "quote": "Muuza connects me with the flavors I missed from home. It's like eating at my grandmother’s again!"
+      },
+      {
+        "name": "Kevin M.",
+        "quote": "I run a small kitchen, and Muuza gave me a platform to reach hundreds of new customers. Love it!"
+      },
+      {
+        "name": "Lydia K.",
+        "quote": "Their delivery is always on point, and I feel good knowing I’m supporting local chefs and farmers."
+      }
+    ]
+  },
+  "AuthPage": {
+    "title": "Sign in to Muuza",
+    "google": "Continue with Google",
+    "facebook": "Continue with Facebook",
+    "apple": "Continue with Apple",
+    "agreement": "By continuing, you agree to our",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  }
+}

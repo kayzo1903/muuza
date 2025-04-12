@@ -1,0 +1,186 @@
+{
+  "HomePage": {
+    "title": "Hello! karibu muuza",
+    "about": "nenda kwa dashibodi yako",
+    "heroTitle": "Pata Chakula Kwa Haraka, Karibu Na Wewe",
+    "heroDescription": "Muuza inakusaidia kupata chakula kwa haraka kutoka biashara za chakula za karibu.",
+    "placeholder": "Ingiza Eneo Lako (Mfano: Dar es Salaam, Kariakoo, Msimbazi)",
+    "ctaButton": "Tafuta Chakula"
+  },
+  "Dashboard": {
+    "title": "karibu kwa Muuza Dashbodi"
+  },
+  "LocaleSwichert": {
+    "label": "Badili Lugha",
+    "locale": "{locale, select, sw {🇹🇿 Sw} en {🇺🇸 Eng} other {Unknown}}"
+  },
+  "header": {
+    "sell": "Uza na muuza",
+    "about": "kutuhusu",
+    "blog": "Blog",
+    "try muuza": "tumia muuza"
+  },
+  "footer": {
+    "about": "Kuhusu",
+    "help": "msaada",
+    "sell": "Uza na muuza",
+    "blog": "Blogu",
+    "privacy and terms": "Sera ya Faragha na Masharti ya Huduma",
+    "rightsReserved": "Haki zote zimehifadhiwa"
+  },
+  "howToEarnWithMuuza": {
+    "title": "Jinsi ya Kupata Kipato na Muuza",
+    "trackSales": {
+      "title": "Fuatilia Mauzo",
+      "description": "Fuatilia ukuaji wa mauzo yako kwa taarifa za kina, kukusaidia kuboresha na kukuza biashara yako."
+    },
+    "easyOrders": {
+      "title": "Oda Rahisi",
+      "description": "Rahisisha mchakato wa kununua kwa wateja wako na pokea oda zaidi kupitia mfumo wetu ulioboreshwa."
+    },
+    "growAudience": {
+      "title": "Kukuza Wateja",
+      "description": "Fikia wateja wengi zaidi na ongeza mwonekano wako kwenye Muuza kuvutia wateja zaidi na kuongeza mapato."
+    }
+  },
+  "servicesWeProvide": {
+    "title": "Huduma Tunazotoa",
+    "fastDelivery": {
+      "title": "Uwasilishaji Haraka",
+      "description": "Tunahakikisha uwasilishaji wa bidhaa kwa wakati na wa kuaminika kwa wateja kupitia washirika wetu wa usafirishaji."
+    },
+    "customerSupport": {
+      "title": "Huduma kwa Wateja",
+      "description": "Timu yetu ya msaada inapatikana kuwasaidia wauzaji na wateja na maswali au matatizo yoyote."
+    },
+    "vendorAssistance": {
+      "title": "Msaada kwa Wauzaji",
+      "description": "Tunatoa rasilimali na mwongozo kusaidia wauzaji kuboresha maduka yao na kuongeza mauzo kwenye Muuza."
+    }
+  },
+  "about": {
+    "heading": "Kuhusu Muuza",
+    "subheading": "Kuleta Wafanyabiashara na Wateja Pamoja",
+    "description": "Muuza ni jukwaa linalowezesha wafanyabiashara wadogo na wa kati kufikia wateja wengi zaidi, kukua kwa mauzo yao, na kuboresha biashara zao. Tunatoa huduma ya haraka, msaada bora kwa wateja, na rasilimali kusaidia wauzaji kujiendeleza."
+  },
+  "blog": {
+    "newsAndUpdates": "Habari na Sasisho",
+    "readMore": "Soma zaidi",
+    "loadMore": "Pakua zaidi"
+  },
+  "navigation": {
+    "My business": "Biashara yangu",
+    "dashboard": "Dashibodi",
+    "categories": "Aina za Bidhaa",
+    "foods": "Vyakula",
+    "mostReviewed": "Zilizokaguliwa Zaidi",
+    "trending": "Zinazovuma",
+    "nearby": "Karibu yako",
+    "sellOnMuuza": "Uza kwenye Muuza",
+    "myFavourites": "Vipendwa Vyangu",
+    "help": "Msaada",
+    "changeLocation": "Badilisha Eneo"
+  },
+
+  "search": {
+    "business": "Biashara",
+    "foods": "Vyakula",
+    "locations": "Maeneo",
+    "placeholder": "Tafuta {filter}",
+    "searchButton": "Tafuta"
+  },
+  "locationpage": {
+    "addLocationMessage": "Ongeza eneo lako kwa uzoefu bora",
+    "addlocation": "weka eneo",
+    "placeholder": "Ingiza Eneo Lako (Mfano: Dar es Salaam, Kariakoo, Msimbazi)"
+  },
+  "form": {
+    "businessCategories": {
+      "Restaurant": "Mgahawa",
+      "Bakery": "Duka la Mkate",
+      "Grocery Store": "Duka la Vyakula",
+      "Food Truck": "Gari la Chakula",
+      "Cafe": "Kahawa",
+      "Catering Service": "Huduma ya Chakula",
+      "Farmers Market": "Soko la Wakulima",
+      "Butchery": "Bucha",
+      "Seafood Market": "Soko la Samaki",
+      "Juice Bar": "Baa ya Juisi",
+      "Ice Cream Parlor": "Duka la Ice Cream",
+      "Health Food Store": "Duka la Vyakula vya Afya",
+      "Dairy Shop": "Duka la Maziwa",
+      "Other": "Nyingine"
+    },
+    "formLabels": {
+      "businessName": "Jina la Biashara",
+      "category": "Kategoria",
+      "address": "Mahala biashara ilipo",
+      "phone": "Simu",
+      "selectCategory": "Chagua kategoria"
+    },
+    "buttons": {
+      "next": "Inayofuata",
+      "back": "Rudi",
+      "submit": "Wasilisha",
+      "loading": "inatafuta..."
+    },
+    "messages": {
+      "winning": "Hongera",
+      "success": "Umeweza kufanikisha kujiunga kwenye mtandao wa Muuza!!",
+      "failure": "Imeshindwa kuunda biashara",
+      "validationErrors": {
+        "nameRequired": "Jina la biashara lazima liwe na angalau herufi 2.",
+        "nametaken": "Jina hilo tayari lipo",
+        "serverError": "server zinahitilafu",
+        "addressRequired": "Anwani lazima iwe na angalau herufi 5.",
+        "phoneInvalid": "Weka namba halali ya simu.",
+        "categoryInvalid": "Chagua kategoria halali."
+      }
+    },
+    "placeholders": {
+      "businessName": "Ingiza jina la biashara yako",
+      "address": "mf.Dar es salaa ,kariakoo , Msimbazi",
+      "phone": "mf.0123 456 876"
+    },
+    "page": {
+      "register": "Sajili Biashara yako sasa"
+    }
+  },
+  "WhyMuuza": {
+    "intro": "Muuza si soko tu — ni harakati. Harakati ya kuunganisha watu na chakula halisi, ladha halisi, na jamii halisi.",
+    "features": {
+      "authenticTitle": "Ladha Halisi ya Kienyeji",
+      "authenticDescription": "Furahia vyakula vilivyopikwa na watu halisi, kwa mapishi ya kizazi hadi kizazi.",
+      "supportTitle": "Saidia Biashara Ndogo",
+      "supportDescription": "Kila agizo linamsaidia muuzaji, mpishi au mkulima wa kienyeji kukua na kustawi.",
+      "paymentsTitle": "Malipo Salama & Rahisi",
+      "paymentsDescription": "Lipa kwa usalama kwa chaguo rahisi, ukiwa na uhakika wa ulinzi kwa kila agizo.",
+      "deliveryTitle": "Uwasilishaji wa Haraka & wa Kuaminika",
+      "deliveryDescription": "Chakula kinawasilishwa kwa wakati kutoka jikoni unazozipenda hadi mlangoni kwako."
+    },
+    "communityTitle": "Maoni ya Jamii Yetu",
+    "testimonials": [
+      {
+        "name": "Amina N.",
+        "quote": "Muuza inaniletea ladha nilizozikosa toka nyumbani. Ni kama kula kwa bibi tena!"
+      },
+      {
+        "name": "Kevin M.",
+        "quote": "Ninaendesha jiko dogo, na Muuza imenisaidia kufikia wateja wapya wengi. Napenda sana!"
+      },
+      {
+        "name": "Lydia K.",
+        "quote": "Uwasilishaji wao ni sahihi kila mara, na najisikia vizuri kuwaunga mkono wapishi na wakulima wa ndani."
+      }
+    ]
+  },
+  "AuthPage": {
+    "title": "Ingia kwenye Muuza",
+    "google": "Endelea na Google",
+    "facebook": "Endelea na Facebook",
+    "apple": "Endelea na Apple",
+    "agreement": "Kwa kuendelea, unakubaliana na",
+    "terms": "Masharti ya Huduma",
+    "privacy": "Sera ya Faragha"
+  }
+}
