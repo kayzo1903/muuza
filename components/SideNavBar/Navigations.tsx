@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "../ui/button";
 import userAvatar from "@/public/others/user_avatar.png";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -76,17 +75,16 @@ export default function AuthLinks({ session }: { session: Session }) {
             <Heart size={36} />
             <span>Favourites</span>
           </Link>
+          <button
+            className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            <LogOut size={36} />
+            <span className="text-xl">Sign Out</span>
+          </button>
         </nav>
       </div>
-
       {/* Bottom section - Sign Out */}
-      <Button
-        className="h-16 w-full flex items-center gap-4"
-        onClick={() => signOut({ callbackUrl: "/" })}
-      >
-        <LogOut size={36} />
-        <span className="text-xl">Sign Out</span>
-      </Button>
     </aside>
   );
 }

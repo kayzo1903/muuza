@@ -8,9 +8,9 @@ import { AlignLeft, X } from "lucide-react";
 import { ModeToggle } from "../Mode-toggle";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
 import { Button } from "../ui/button";
-import AuthLinks from "../AuthLinks/AuthLinks";
+import AuthLinks from "../SideNavBar/Navigations";
 import { Session } from "next-auth";
-import NoauthLinks from "../AuthLinks/NoauthLinks";
+import NoauthLinks from "../SideNavBar/AuthNavs";
 
 const ShopHeader = ({ session }: { session: Session | null }) => {
   const [isSticky, setSticky] = useState(false);
