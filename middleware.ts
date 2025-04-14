@@ -1,11 +1,30 @@
 import createMiddleware from 'next-intl/middleware';
-import {routing} from './i18n/routing';
- 
-export default createMiddleware(routing);
- 
+import { auth } from "@/auth";
+import { routing } from '@/i18n/routing';
+
+// Initialize the i18n middleware
+const handleI18nRouting = createMiddleware(routing);
+
+export default auth(async (req) => {
+  const { pathname, origin } = req.nextUrl;
+
+  // Protected routes
+  const protectedRoutes = ['/business', '/dashboard'];
+
+  // Check if the user is authenticated for protected routes
+  if (!req.auth && protectedRoutes.some((route) => pathname.startsWith(route))) {
+    const newUrl = new URL("/", origin); // Redirect to home or login page
+    return Response.redirect(newUrl);
+  }
+
+  // If not a protected route, proceed with i18n routing
+  const i18nResponse = handleI18nRouting(req);
+
+  // Return the i18n middleware's response
+  return i18nResponse;
+});
+
+// Define the matcher to include all relevant paths
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
+  matcher: ['/((?!api|_next|.*\\..*).*)'], // Avoid applying middleware to API routes, Next.js assets, or static files
 };

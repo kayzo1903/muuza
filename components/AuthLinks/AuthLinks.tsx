@@ -1,6 +1,3 @@
-"use client";
-
-
 import {
   LogOut,
   Settings,
@@ -13,8 +10,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import userAvatar from "@/public/others/user_avatar.png";
+import { Session } from "next-auth";
+import { signOut } from "next-auth/react";
 
-export default function AuthLinks() {
+export default function AuthLinks({ session }: { session: Session }) {
+  const user = session.user;
 
   return (
     <aside className="w-full h-screen shadow-xl flex flex-col justify-between p-6 pb-16">
@@ -23,7 +23,7 @@ export default function AuthLinks() {
         {/* User Info */}
         <div className="flex items-center space-x-4 mb-8">
           <Image
-            src={userAvatar}
+            src={user?.image || userAvatar}
             alt="User Avatar"
             width={68}
             height={68}
@@ -31,7 +31,7 @@ export default function AuthLinks() {
           />
           <div>
             <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-              John Doe
+              {user?.name || "Quest"}
             </p>
             <p className="text-sm text-gray-500 dark:text-zinc-400">
               Welcome back
@@ -80,7 +80,10 @@ export default function AuthLinks() {
       </div>
 
       {/* Bottom section - Sign Out */}
-      <Button className="h-16">
+      <Button
+        className="h-16 w-full flex items-center gap-4"
+        onClick={() => signOut({ callbackUrl: "/" })}
+      >
         <LogOut size={36} />
         <span className="text-xl">Sign Out</span>
       </Button>

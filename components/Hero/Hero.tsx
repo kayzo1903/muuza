@@ -1,15 +1,15 @@
 import Image from "next/image";
-import Header from "../Header/Header";
 import muuza from "@/public/Hero/litoon-dev-UphGuoCzSmw-unsplash.jpg";
 import { useTranslations } from "next-intl";
 import SearchFoods from "../PlaceInput/GooglMapsearch";
+import HeaderWrapper from "../Headers/HeaderWrapper";
 
 export default function Hero() {
   const t = useTranslations("HomePage"); // Use translation hook
-
+  
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      <Header />
+       <HeaderWrapper />
 
       {/* Background image */}
       <Image

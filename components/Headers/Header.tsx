@@ -10,8 +10,10 @@ import LocaleSwitcher from "../(lang)/LocaleSwitcher";
 import { Button } from "../ui/button";
 //import NoauthLinks from "../AuthLinks/NoauthLinks";
 import AuthLinks from "../AuthLinks/AuthLinks";
+import { Session } from "next-auth";
+import NoauthLinks from "../AuthLinks/NoauthLinks";
 
-const Header = () => {
+const Header = ({ session }: { session: Session | null }) => {
   const [isSticky, setSticky] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
 
@@ -32,7 +34,10 @@ const Header = () => {
     >
       <div className="px-4 lg:px-20 py-4 flex items-center justify-between">
         <div className="flex items-center justify-betweens space-x-4">
-          <button onClick={() => setMenuOpen(true)} className="text-gray-950 dark:text-gray-50">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="text-gray-950 dark:text-gray-50"
+          >
             <AlignLeft size={30} />
           </button>
           <Link href="/">
@@ -47,15 +52,20 @@ const Header = () => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-8
-         flex-nowrap">
+        <div
+          className="flex items-center gap-8
+         flex-nowrap"
+        >
           {/* auth button */}
           <div className="gap-2 items-center flex-nowrap hidden lg:flex">
-            <Button asChild className="bg-white text-black hover:text-white hover:dark:text-black ">
-              <Link href="/Auth">Login</Link>
+            <Button
+              asChild
+              className="bg-white text-black hover:text-white hover:dark:text-black "
+            >
+              <Link href="/auth">Login</Link>
             </Button>
             <Button asChild>
-              <Link href="/Auth">Sign up</Link>
+              <Link href="/auth">Sign up</Link>
             </Button>
           </div>
 
@@ -97,11 +107,8 @@ const Header = () => {
             </button>
           </div>
           {/* no auth links */}
-          <nav>
-             {/* <NoauthLinks /> */}
-             <AuthLinks />
-          </nav>
-        </div>
+          <nav>{session ? <AuthLinks session={session} /> : <NoauthLinks />}</nav>
+          </div>
       </div>
     </header>
   );

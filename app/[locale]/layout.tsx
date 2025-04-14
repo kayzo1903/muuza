@@ -12,7 +12,10 @@ const poppin = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Muuza",
+  title: {
+    template: "%s | muuza",
+    default: "muuza",
+  },
   description: `Welcome to Muuza – Discover Local Food, Celebrate Culture!
 Muuza is a platform that connects food lovers with local chefs, vendors, 
 and home cooks offering authentic, cultural meals straight from their kitchen to your hands.
@@ -41,7 +44,9 @@ export default async function LocaleLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider>
+            {children}
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

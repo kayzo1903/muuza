@@ -1,5 +1,10 @@
 import Auth from "@/components/Auth/Register";
-import AuthHeader from "@/components/Header/AuthHeader";
+import AuthHeader from "@/components/Headers/AuthHeader";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Auth",
+};
 
 export default function AuthPage() {
   return (

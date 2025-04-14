@@ -2,16 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaApple } from "react-icons/fa";
 import Link from "next/link";
 import { useState } from "react";
+import { signInWithGoogle } from "./action";
 
 export default function Auth() {
   const t = useTranslations("AuthPage");
@@ -27,15 +23,17 @@ export default function Auth() {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4 pt-2">
-          <Button
-            variant="outline"
-            className="flex items-center gap-4 justify-start h-14 text-base font-medium border-gray-300"
-            disabled={!agreed}
-            // onClick={() => signIn("google")}
-          >
-            <FcGoogle className="text-xl" />
-            {t("google")}
-          </Button>
+          <form action={signInWithGoogle}>
+            <Button
+              variant="outline"
+              className="flex items-center gap-4 justify-start h-14 text-base font-medium border-gray-300 w-full"
+              disabled={!agreed}
+              type="submit"
+            >
+              <FcGoogle className="text-xl" />
+              {t("google")}
+            </Button>
+          </form>
 
           <Button
             variant="default"
