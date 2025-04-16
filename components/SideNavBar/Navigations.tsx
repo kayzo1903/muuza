@@ -6,11 +6,11 @@ import {
   Heart,
   ShoppingBag,
 } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 import userAvatar from "@/public/others/user_avatar.png";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
+import { Link } from "@/i18n/routing";
 
 export default function AuthLinks({ session }: { session: Session }) {
   const user = session.user;
@@ -48,7 +48,7 @@ export default function AuthLinks({ session }: { session: Session }) {
             <span className="text-green-600">Manage Account</span>
           </Link>
           <Link
-            href="/bussiness"
+            href="/dashboard"
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
           >
             <Briefcase size={36} />
@@ -83,8 +83,12 @@ export default function AuthLinks({ session }: { session: Session }) {
             <span className="text-xl">Sign Out</span>
           </button>
         </nav>
+        <div className="mt-16">
+        <Link href={"/business"} className="text-xl text-gray-700 font-semibold">sell in muuza</Link>
+      </div>
       </div>
       {/* Bottom section - Sign Out */}
+     
     </aside>
   );
 }
