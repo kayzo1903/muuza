@@ -1,9 +1,3 @@
-import ShopHeaderWrapper from "@/components/Headers/ShopHeaderWrapper";
-
 export default function Shoppingpge() {
-  return (
-    <main>
-      <ShopHeaderWrapper />
-    </main>
-  );
+  return <main className="h-screen w-full"></main>;
 }

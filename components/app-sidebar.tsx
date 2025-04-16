@@ -14,12 +14,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils"; // Optional: if you use a cn helper
 import Image from "next/image";
+import LocaleSwitcher from "./(lang)/LocaleSwitcher";
+import { ModeToggle } from "./Mode-toggle";
 
 const navLinks = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Add Product", href: "/dashboard/products/add", icon: PlusCircle },
   { title: "My Products", href: "/dashboard/products", icon: Package },
-  { title: "My Store", href: "/store/my-store", icon: Store }, // Replace 'my-store' dynamically later
+  { title: "My Store", href: "/dashboard/store", icon: Store }, // Replace 'my-store' dynamically later
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
   { title: "Exit", href: "/shop", icon: LogOut },
 ];
@@ -55,7 +57,7 @@ export function AppSidebar() {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-2xl font-semibold text-gray-700 transition hover:bg-muted",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-2xl font-semibold text-gray-700 dark:text-gray-50 transition hover:bg-muted",
                   isActive && "bg-muted text-primary"
                 )}
               >
@@ -65,6 +67,10 @@ export function AppSidebar() {
             );
           })}
         </nav>
+        <div className="px-4">
+          <LocaleSwitcher />
+          <ModeToggle />
+        </div>
       </aside>
     </Sidebar>
   );

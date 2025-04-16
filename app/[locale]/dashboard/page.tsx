@@ -1,3 +1,5 @@
 export default function ManagementProductPage() {
-  return <main>muuza restaurant</main>;
+  return <main className="w-full px-6">
+    muuza
+  </main>;
 }

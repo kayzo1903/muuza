@@ -99,7 +99,7 @@ export default function BusinessRegistrationForm() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-20 p-4">
+    <div className="max-w-xl mx-auto lg:mt-20 p-4">
       <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
 
       {showAlert && (

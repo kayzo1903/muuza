@@ -52,7 +52,7 @@ export default function AuthLinks({ session }: { session: Session }) {
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
           >
             <Briefcase size={36} />
-            <span>Business</span>
+            <span>My Business</span>
           </Link>
           <Link
             href="/orders"
@@ -84,7 +84,7 @@ export default function AuthLinks({ session }: { session: Session }) {
           </button>
         </nav>
         <div className="mt-16">
-        <Link href={"/business"} className="text-xl text-gray-700 font-semibold">sell in muuza</Link>
+        <Link href={"/business"} className="text-xl text-gray-700 dark:text-gray-100 font-semibold">sell in muuza</Link>
       </div>
       </div>
       {/* Bottom section - Sign Out */}
