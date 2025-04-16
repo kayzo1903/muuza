@@ -1,7 +1,9 @@
+import ProductsPage from "@/components/Dashboard/ProductsPage";
+
 export default function Products() {
   return (
-    <main>
-      Show cassing your product
+    <main className="w-full">
+      <ProductsPage />
     </main>
   );
 }
