@@ -186,5 +186,18 @@
     "agreement": "By continuing, you agree to our",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy"
+  },
+  "bussinesform": {
+    "title": "Register as a Business",
+    "businessName": "Business Name",
+    "businessType": "Type of Business",
+    "address": "Business Address",
+    "phoneLabel": "Business Phone Number",
+    "submit": "Submit Information",
+    "agreement": "I agree to the",
+    "terms": "Terms",
+    "privacy": "Privacy Policy",
+    "mustAgree": "You must agree to the terms to continue."
   }
+  
 }

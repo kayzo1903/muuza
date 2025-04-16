@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import logo from "@/public/logo/muuzalogo.png";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
+import { ModeToggle } from "../Mode-toggle";
 
 export default function AuthHeader() {
   return (
@@ -19,7 +20,10 @@ export default function AuthHeader() {
             className="h-auto w-auto"
           />
         </Link>
-        <LocaleSwitcher />
+        <div className="flex items-center gap-4">
+          <LocaleSwitcher />
+          <ModeToggle/>
+        </div>
       </div>
     </header>
   );

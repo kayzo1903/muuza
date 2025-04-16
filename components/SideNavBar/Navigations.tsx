@@ -48,11 +48,11 @@ export default function AuthLinks({ session }: { session: Session }) {
             <span className="text-green-600">Manage Account</span>
           </Link>
           <Link
-            href="/register-business"
+            href="/bussiness"
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
           >
             <Briefcase size={36} />
-            <span>Register Business</span>
+            <span>Business</span>
           </Link>
           <Link
             href="/orders"

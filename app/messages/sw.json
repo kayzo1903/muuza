@@ -182,5 +182,17 @@
     "agreement": "Kwa kuendelea, unakubaliana na",
     "terms": "Masharti ya Huduma",
     "privacy": "Sera ya Faragha"
+  },
+  "bussinesform": {
+    "title": "Jisajili kama Mfanyabiashara",
+    "businessName": "Jina la biashara",
+    "businessType": "Aina ya biashara",
+    "address": "Anuani ya biashara",
+    "phoneLabel": "Namba ya simu ya biashara",
+    "submit": "Tuma Maelezo",
+    "agreement": "Ninakubali",
+    "terms": "Masharti ya Matumizi",
+    "privacy": "Sera ya Faragha",
+    "mustAgree": "Lazima ukubali masharti ili kuendelea."
   }
 }
