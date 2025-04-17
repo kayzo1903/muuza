@@ -57,7 +57,7 @@ export default function ProductForm({ onClose }: { onClose: () => void }) {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       {/* Image Upload */}
-      <div>
+      <div className="space-y-3">
         <Label htmlFor="image">Image</Label>
         <Input
           id="image"
@@ -77,19 +77,19 @@ export default function ProductForm({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Name */}
-      <div>
+      <div className="space-y-3">
         <Label htmlFor="name">Product Name</Label>
         <Input id="name" {...form.register("name")} />
       </div>
 
       {/* Description */}
-      <div>
+      <div className="space-y-3">
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" {...form.register("description")} />
       </div>
 
       {/* Price */}
-      <div>
+      <div className="space-y-3">
         <Label htmlFor="price">Price</Label>
         <Input
           id="price"

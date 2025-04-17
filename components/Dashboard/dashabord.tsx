@@ -4,7 +4,7 @@ import { ShoppingCart, DollarSign, Flame, BarChart } from "lucide-react";
 
 export default function Dashboard() {
   return (
-    <div className="p-6 space-y-8 w-full bg-green-400">
+    <div className="p-6 space-y-8 w-full ">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card>

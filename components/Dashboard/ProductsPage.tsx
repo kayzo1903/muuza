@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ProductForm from "./ProductForm";
+import ProductList from "./productList";
 
 export default function ProductsPage() {
   const [open, setOpen] = useState(false);
@@ -43,7 +44,7 @@ export default function ProductsPage() {
 
       {/* Products Table Placeholder */}
       <div className="border rounded-md p-4 text-muted-foreground">
-        Product list will go here (table or grid)
+        <ProductList />
       </div>
     </div>
   );
