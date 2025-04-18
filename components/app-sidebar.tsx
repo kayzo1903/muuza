@@ -9,8 +9,9 @@ import {
   PlusCircle,
   Package,
   Store,
-  Settings,
   LogOut,
+  ShoppingCart,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils"; // Optional: if you use a cn helper
 import Image from "next/image";
@@ -21,8 +22,9 @@ const navLinks = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Add Product", href: "/dashboard/products/add", icon: PlusCircle },
   { title: "My Products", href: "/dashboard/products", icon: Package },
+  { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { title: "My Store", href: "/dashboard/store", icon: Store }, // Replace 'my-store' dynamically later
-  { title: "Settings", href: "/dashboard/settings", icon: Settings },
+  { title: "Help", href: "/dashboard/help", icon: HelpCircle },
   { title: "Exit", href: "/shop", icon: LogOut },
 ];
 

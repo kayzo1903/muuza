@@ -1,7 +1,9 @@
-export default function Addproduct(){
-    return (
-        <main>
-            Add product
-        </main>
-    )
+import NewProductPage from "@/components/Dashboard/ProductForm";
+
+export default function Addproduct() {
+  return (
+    <main>
+      <NewProductPage />
+    </main>
+  );
 }
