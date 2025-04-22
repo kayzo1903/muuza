@@ -1,3 +1,9 @@
+import BrowsePage from "@/components/shop/Browsepage";
+
 export default function Shoppingpge() {
-  return <main className="h-screen w-full"></main>;
+  return (
+    <section className="h-screen w-full">
+      <BrowsePage />
+    </section>
+  );
 }
