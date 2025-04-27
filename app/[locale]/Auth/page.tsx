@@ -5,7 +5,7 @@ import { auth } from "@/auth"; // assuming you use auth.js
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Auth",
+  title: "Register",
 };
 
 export default async function AuthPage() {

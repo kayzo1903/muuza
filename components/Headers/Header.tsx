@@ -15,7 +15,7 @@ import NoauthLinks from "../SideNavBar/AuthNavs";
 const Header = ({ session }: { session: Session | null }) => {
   const [isSticky, setSticky] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
-  
+
   useEffect(() => {
     const handleScroll = () => {
       setSticky(window.scrollY > 0);
@@ -56,18 +56,21 @@ const Header = ({ session }: { session: Session | null }) => {
          flex-nowrap"
         >
           {/* auth button */}
-          <div className="gap-2 items-center flex-nowrap hidden lg:flex">
-            <Button
-              asChild
-              className="bg-white text-black hover:text-white hover:dark:text-black "
-            >
-              <Link href="/auth">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/auth">Sign up</Link>
-            </Button>
-          </div>
-
+          {session ? (
+            <></>
+          ) : (
+            <div className="gap-2 items-center flex-nowrap hidden lg:flex">
+              <Button
+                asChild
+                className="bg-white text-black hover:text-white hover:dark:text-black "
+              >
+                <Link href="/auth">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth">Sign up</Link>
+              </Button>
+            </div>
+          )}
           {/* mode toggle */}
           <div className="flex gap-6 flex-nowrap items-center">
             <LocaleSwitcher />
@@ -106,8 +109,10 @@ const Header = ({ session }: { session: Session | null }) => {
             </button>
           </div>
           {/* no auth links */}
-          <nav>{session ? <AuthLinks session={session} /> : <NoauthLinks />}</nav>
-          </div>
+          <nav>
+            {session ? <AuthLinks session={session} /> : <NoauthLinks />}
+          </nav>
+        </div>
       </div>
     </header>
   );

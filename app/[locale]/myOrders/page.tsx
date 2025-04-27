@@ -1,4 +1,4 @@
-import CustomerOrdersPage from "@/components/customer/Customerorderpage";
+import CustomerOrdersPage from "@/components/customer/customerOrderpage";
 import Footer from "@/components/Footer/footer";
 import { Metadata } from "next";
 import AuthHeader from "@/components/Headers/SimpleHeader";
