@@ -55,7 +55,7 @@ export default function AuthLinks({ session }: { session: Session }) {
             <span>My Business</span>
           </Link>
           <Link
-            href="/orders"
+            href="/myOrders"
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
           >
             <ShoppingBag size={36} />
