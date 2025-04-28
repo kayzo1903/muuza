@@ -1,17 +1,17 @@
-import FavouritePage from "@/components/customer/favorites";
+import Help from "@/components/Dashboard/help";
 import Footer from "@/components/Footer/footer";
 import AuthHeader from "@/components/Headers/SimpleHeader";
-import { Metadata } from "next";
+import { Metadata } from "next/types";
 
 export const metadata: Metadata = {
-  title: "favourites",
-};
+    title: "support",
+  };
 
-export default function MyfavouritePage() {
+export default function HelpPage() {
   return (
     <main className="w-full">
       <AuthHeader />
-      <FavouritePage />
+      <Help />
       <Footer />
     </main>
   );
