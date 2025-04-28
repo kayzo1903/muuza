@@ -14,6 +14,7 @@ const dummyCustomerOrders = [
     price: 8000,
     quantity: 1,
     status: "Pending",
+    date: "2025-04-25",
   },
   {
     id: "o2",
@@ -22,6 +23,7 @@ const dummyCustomerOrders = [
     price: 3000,
     quantity: 2,
     status: "Delivered",
+    date: "2025-04-20",
   },
 ];
 
@@ -42,6 +44,9 @@ export default function CustomerOrdersPage() {
               <CardContent className="space-y-2">
                 <p className="text-sm text-muted-foreground">
                   From: {order.businessName}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Ordered on: {new Date(order.date).toLocaleDateString()}
                 </p>
                 <p className="text-sm">Quantity: {order.quantity}</p>
                 <p className="text-sm font-semibold">
