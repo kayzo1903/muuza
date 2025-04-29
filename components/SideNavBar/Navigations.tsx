@@ -41,12 +41,20 @@ export default function AuthLinks({ session }: { session: Session }) {
         {/* Navigation Links */}
         <nav className="space-y-8 text-gray-700 dark:text-gray-300 text-2xl font-semibold pt-16">
           <Link
-            href="/account"
+            href="/myOrders"
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
           >
-            <Settings size={36} />
-            <span className="text-green-600">Manage Account</span>
+            <ShoppingBag size={36} />
+            <span>Orders</span>
           </Link>
+          <Link
+            href="/favourites"
+            className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
+          >
+            <Heart size={36} />
+            <span>Favourites</span>
+          </Link>
+
           <Link
             href="/dashboard"
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
@@ -55,25 +63,19 @@ export default function AuthLinks({ session }: { session: Session }) {
             <span>My Business</span>
           </Link>
           <Link
-            href="/myOrders"
-            className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
-          >
-            <ShoppingBag size={36} />
-            <span>Orders</span>
-          </Link>
-          <Link
             href="/help"
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
           >
             <HelpCircle size={36} />
             <span>Help</span>
           </Link>
+
           <Link
-            href="/favourites"
+            href="/account"
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
           >
-            <Heart size={36} />
-            <span>Favourites</span>
+            <Settings size={36} />
+            <span>Manage Account</span>
           </Link>
           <button
             className="flex items-center space-x-4 hover:text-black dark:hover:text-white"
@@ -84,11 +86,15 @@ export default function AuthLinks({ session }: { session: Session }) {
           </button>
         </nav>
         <div className="mt-16">
-        <Link href={"/business"} className="text-xl text-gray-700 dark:text-gray-100 font-semibold">sell in muuza</Link>
-      </div>
+          <Link
+            href={"/business"}
+            className="text-xl text-gray-700 dark:text-gray-100 font-semibold"
+          >
+            sell in muuza
+          </Link>
+        </div>
       </div>
       {/* Bottom section - Sign Out */}
-     
     </aside>
   );
 }
