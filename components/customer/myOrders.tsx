@@ -29,7 +29,7 @@ const dummyCustomerOrders = [
 
 export default function CustomerOrdersPage() {
   return (
-    <div className="px-4 lg:px-20 pt-20 space-y-6 h-screen">
+    <div className="px-6 pt-20 space-y-6 h-screen">
       <h1 className="text-2xl font-bold">My Orders</h1>
 
       {dummyCustomerOrders.length === 0 ? (

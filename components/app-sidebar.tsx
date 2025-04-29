@@ -59,7 +59,7 @@ export function AppSidebar() {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-2xl font-semibold text-gray-700 dark:text-gray-50 transition hover:bg-muted",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-semibold text-gray-700 dark:text-gray-50 transition hover:bg-muted",
                   isActive && "bg-muted text-primary"
                 )}
               >
@@ -69,7 +69,7 @@ export function AppSidebar() {
             );
           })}
         </nav>
-        <div className="px-4">
+        <div className="flex items-center scale-75">
           <LocaleSwitcher />
           <ModeToggle />
         </div>
