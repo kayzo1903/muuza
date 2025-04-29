@@ -1,13 +1,8 @@
 
+import CustomerOrders from "@/components/customer/orders";
 import Footer from "@/components/Footer/footer";
-import { Metadata } from "next";
 import AuthHeader from "@/components/Headers/SimpleHeader";
-import CustomerOrdersPage from "@/components/customer/myOrders";
-<<<<<<< HEAD
-
-=======
->>>>>>> beedd2443a060ac0b83a315ac973410f0208854e
-
+import { Metadata } from "next";
 
 
 export const metadata: Metadata = {
@@ -16,13 +11,9 @@ export const metadata: Metadata = {
 
 export default function MyOrdersPage() {
   return (
-    <main>
+    <main className="w-full">
       <AuthHeader />
-<<<<<<< HEAD
-      <CustomerOrdersPage />
-=======
-     <CustomerOrdersPage />
->>>>>>> beedd2443a060ac0b83a315ac973410f0208854e
+      <CustomerOrders />
       <Footer />
     </main>
   );
