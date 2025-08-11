@@ -69,7 +69,7 @@ export default function BrowsePage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Trending Products</h2>
+        <h2 className="text-xl font-semibold">Trending Foods</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {dummyProducts.map((product) => (
             <Card key={product.id} className="relative">

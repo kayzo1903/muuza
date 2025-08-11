@@ -1,5 +1,3 @@
-// app/shop/order/[id]/page.tsx
-
 "use client";
 
 import { useParams } from "next/navigation";
@@ -8,6 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"; // import carousel components
+import Image from "next/image";
 
 // Mock data (to simulate fetched product info)
 const dummyProducts = [
@@ -16,19 +22,26 @@ const dummyProducts = [
     name: "Chicken Biryani",
     price: 8000,
     businessName: "Mama John's Kitchen",
+    images: [
+      "/images/biryani1.jpg",
+      "/images/biryani2.jpg",
+      "/images/biryani3.jpg",
+    ],
   },
   {
     id: "p2",
     name: "Chapati & Beans",
     price: 3000,
     businessName: "Swahili Tamu",
+    images: [
+      "/images/chapati1.jpg",
+      "/images/chapati2.jpg",
+    ],
   },
 ];
 
 export default function OrderPage() {
   const { id } = useParams();
-
-  
 
   const [form, setForm] = useState({
     name: "",
@@ -45,7 +58,7 @@ export default function OrderPage() {
   };
 
   if (!id) return <div className="p-6">Invalid order link.</div>;
-  
+
   const product = dummyProducts.find((p) => p.id === id[1]);
   if (!product) return <div className="p-6">Product not found.</div>;
 
@@ -57,10 +70,31 @@ export default function OrderPage() {
     // TODO: Send order to backend
   };
 
-  if (!product) return <div className="p-6">Product not found.</div>;
-  
   return (
-    <div className="p-6 max-w-xl mx-auto pt-20">
+    <div className="p-6 max-w-xl mx-auto pt-20 space-y-6">
+      {/* Carousel Section */}
+      {product.images && (
+        <Carousel className="w-full">
+          <CarouselContent>
+            {product.images.map((src, idx) => (
+              <CarouselItem key={idx}>
+                <div className="relative h-80 w-full rounded-xl overflow-hidden bg-red-500">
+                  <Image
+                    src={src}
+                    alt={`${product.name} image ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      )}
+
+      {/* Order Card Section */}
       <Card>
         <CardHeader>
           <CardTitle>Order: {product.name}</CardTitle>
@@ -94,9 +128,7 @@ export default function OrderPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium">
-              Delivery Address
-            </label>
+            <label className="block text-sm font-medium">Delivery Address</label>
             <Input
               name="address"
               value={form.address}

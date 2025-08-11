@@ -7,12 +7,11 @@ import logo from "@/public/logo/muuzalogo.png";
 import { AlignLeft, X } from "lucide-react";
 import { ModeToggle } from "../Mode-toggle";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
-import { Button } from "../ui/button";
-import AuthLinks from "../SideNavBar/Navigations";
-import { Session } from "next-auth";
-import NoauthLinks from "../SideNavBar/AuthNavs";
+// import { Button } from "../ui/button";
+// import AuthLinks from "../SideNavBar/Navigations";
+// import NoauthLinks from "../SideNavBar/AuthNavs";
 
-const Header = ({ session }: { session: Session | null }) => {
+const Header = () => {
   const [isSticky, setSticky] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
 
@@ -56,7 +55,7 @@ const Header = ({ session }: { session: Session | null }) => {
          flex-nowrap"
         >
           {/* auth button */}
-          {session ? (
+          {/* {session ? (
             <></>
           ) : (
             <div className="gap-2 items-center flex-nowrap hidden lg:flex">
@@ -70,7 +69,7 @@ const Header = ({ session }: { session: Session | null }) => {
                 <Link href="/auth">Sign up</Link>
               </Button>
             </div>
-          )}
+          )} */}
           {/* mode toggle */}
           <div className="flex gap-6 flex-nowrap items-center">
             <LocaleSwitcher />
@@ -110,7 +109,7 @@ const Header = ({ session }: { session: Session | null }) => {
           </div>
           {/* no auth links */}
           <nav>
-            {session ? <AuthLinks session={session} /> : <NoauthLinks />}
+            {/* {session ? <AuthLinks session={session} /> : <NoauthLinks />} */}
           </nav>
         </div>
       </div>

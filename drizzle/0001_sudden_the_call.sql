@@ -1,1 +1,0 @@
-ALTER TABLE "business" ALTER COLUMN "deliveryOptions" SET DEFAULT 'not-available';

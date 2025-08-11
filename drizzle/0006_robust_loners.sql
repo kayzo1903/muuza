@@ -1,1 +1,0 @@
-CREATE TYPE "public"."roles" AS ENUM('buyer', 'seller', 'admin');

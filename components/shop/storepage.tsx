@@ -1,8 +1,7 @@
-// app/business/[id]/page.tsx
-
 "use client";
 
 import { useParams } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Phone, MapPin, Clock, Star } from "lucide-react";
@@ -10,7 +9,7 @@ import { Phone, MapPin, Clock, Star } from "lucide-react";
 export default function BusinessPage() {
   const { id } = useParams();
 
-  // Simulated data (replace with fetch from backend)
+  // Simulated data (replace with real backend data)
   const business = {
     id,
     name: "Mama John's Kitchen",
@@ -23,10 +22,29 @@ export default function BusinessPage() {
     rating: 4.7,
     specialOffer: "10% off on Fridays",
     isOpen: true,
+    gallery: [
+      "/images/biryani.jpg",
+      "/images/ugali-nyama.jpg",
+      "/images/chapati-beans.jpg",
+      "/images/pilau.jpg",
+    ],
+    reviews: [
+      {
+        name: "Amina M.",
+        comment: "Delicious food and quick delivery. Highly recommend!",
+        rating: 5,
+      },
+      {
+        name: "Juma K.",
+        comment: "Loved the biryani. It tastes just like home.",
+        rating: 4.5,
+      },
+    ],
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="p-6 space-y-8 max-w-5xl mx-auto">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">{business.name}</h1>
         <p className="text-muted-foreground">{business.bio}</p>
@@ -38,6 +56,7 @@ export default function BusinessPage() {
 
       <Separator />
 
+      {/* About Card */}
       <Card>
         <CardHeader>
           <CardTitle>About</CardTitle>
@@ -76,13 +95,56 @@ export default function BusinessPage() {
         </CardContent>
       </Card>
 
-      {/* TODO: Add Product Grid */}
+      {/* Food Gallery */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Food Gallery</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {business.gallery.map((src, i) => (
+              <div key={i} className="overflow-hidden rounded-xl shadow-sm">
+                <Image
+                  src={src}
+                  alt={`food-${i}`}
+                  width={300}
+                  height={200}
+                  className="w-full h-40 object-cover hover:scale-105 transition-transform"
+                />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Product Placeholder */}
       <Card>
         <CardHeader>
           <CardTitle>Available Products</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Products will be displayed here.</p>
+        </CardContent>
+      </Card>
+
+      {/* Customer Reviews */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Customer Reviews</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {business.reviews.map((review, index) => (
+            <div key={index} className="border-b pb-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold">{review.name}</h4>
+                <div className="flex items-center text-yellow-500 text-sm">
+                  <Star className="w-4 h-4 mr-1" />
+                  {review.rating}
+                </div>
+              </div>
+              <p className="text-muted-foreground">{review.comment}</p>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>
