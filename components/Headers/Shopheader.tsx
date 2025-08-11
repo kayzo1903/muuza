@@ -7,13 +7,11 @@ import logo from "@/public/logo/muuzalogo.png";
 import { AlignLeft, X } from "lucide-react";
 import { ModeToggle } from "../Mode-toggle";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
-import { Button } from "../ui/button";
-
+import Addlocation from "../Addlocation/Addlocation";
 
 const ShopHeader = () => {
   const [isSticky, setSticky] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [location, setLocation] = useState("");
 
   useEffect(() => {
     const handleScroll = () => setSticky(window.scrollY > 0);
@@ -31,7 +29,10 @@ const ShopHeader = () => {
         {/* Large screen layout */}
         <div className="hidden lg:flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <button onClick={() => setMenuOpen(true)} className="text-gray-950 dark:text-gray-50">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="text-gray-950 dark:text-gray-50"
+            >
               <AlignLeft size={26} />
             </button>
             <Link href="/">
@@ -45,19 +46,7 @@ const ShopHeader = () => {
             </Link>
           </div>
 
-          <div className="text-sm text-gray-800 dark:text-gray-100">
-            {location ? (
-              <span className="font-medium">📍 {location}</span>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation("Dar es Salaam")}
-              >
-                + Add Location
-              </Button>
-            )}
-          </div>
+          <Addlocation />
 
           <input
             type="text"
@@ -71,7 +60,10 @@ const ShopHeader = () => {
 
         {/* Small screen layout */}
         <div className="lg:hidden flex items-center justify-between gap-4">
-          <button onClick={() => setMenuOpen(true)} className="text-gray-950 dark:text-gray-50">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="text-gray-950 dark:text-gray-50"
+          >
             <AlignLeft size={26} />
           </button>
           <Link href="/">
@@ -89,29 +81,17 @@ const ShopHeader = () => {
           </div>
         </div>
 
-        <div className="lg:hidden">
-          <div className="text-sm text-gray-800 dark:text-gray-100">
-            {location ? (
-              <span className="font-medium">📍 {location}</span>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation("Dar es Salaam")}
-              >
-                + Add Location
-              </Button>
-            )}
-          </div>
+        <div className="lg:hidden flex items-center justify-between gap-4">
+          <Addlocation />
         </div>
+      </div>
 
-        <div className="lg:hidden">
-          <input
-            type="text"
-            placeholder="Search for products, foods, etc."
-            className="w-full px-4 py-2 border border-border bg-background text-sm rounded-lg"
-          />
-        </div>
+      <div className="lg:hidden">
+        <input
+          type="text"
+          placeholder="Search for products, foods, etc."
+          className="w-full px-4 py-2 border border-border bg-background text-sm rounded-lg"
+        />
       </div>
 
       {/* Slide-in Sidebar Nav */}
@@ -141,7 +121,7 @@ const ShopHeader = () => {
             </button>
           </div>
           <nav>
-       {/* <nav>{session ? <AuthLinks session={session} /> : <NoauthLinks />}</nav> */}
+            {/* <nav>{session ? <AuthLinks session={session} /> : <NoauthLinks />}</nav> */}
           </nav>
         </div>
       </div>

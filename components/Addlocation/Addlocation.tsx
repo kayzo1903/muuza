@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { IoLocation } from "react-icons/io5";
 import { Link } from "@/i18n/routing";
+
 
 function Addlocation() {
   const [savedLocation, setSavedLocation] = useState<string | null>(null);
@@ -13,13 +13,13 @@ function Addlocation() {
 
   return (
     <div className="px-4 flex gap-2 items-center pb-4">
-      <IoLocation className="text-3xl text-skin" />
+      📍
       {savedLocation ? (
-        <p className="text-sm font-thin text-balance">
+        <Link href={"/location"} className="text-md text-balance">
            {savedLocation}
-        </p>
+        </Link>
       ) : (
-        <Link href={"/location"} className="text-sm font-thin text-balance capitalize">
+        <Link href={"/location"} className="text-xl text-balance capitalize">
           Add your location for a better experience
         </Link>
       )}
