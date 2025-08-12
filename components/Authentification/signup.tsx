@@ -12,19 +12,26 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaApple } from "react-icons/fa";
 import { Eye, EyeOff } from "lucide-react";
+import SocialAuthButton from "../outh-sign-Btn";
 
 // 1️⃣ Zod schema
 const signUpSchema = z.object({
   name: z
     .string()
-    .regex(/^[A-Za-z]+$/, "Name must contain only letters, no spaces or numbers")
+    .regex(
+      /^[A-Za-z]+$/,
+      "Name must contain only letters, no spaces or numbers"
+    )
     .min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Password must contain at least one special character"
+    ),
   agreeTerms: z.boolean().refine((val) => val === true, {
     message: "You must agree to the terms",
   }),
@@ -100,7 +107,9 @@ export default function SignUp() {
               {...register("email")}
             />
             {errors.email && (
-              <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+              <p className="text-sm text-red-500 mt-1">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
@@ -123,7 +132,9 @@ export default function SignUp() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
+              <p className="text-sm text-red-500 mt-1">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
@@ -138,7 +149,9 @@ export default function SignUp() {
             </Label>
           </div>
           {errors.agreeTerms && (
-            <p className="text-sm text-red-500 mt-1">{errors.agreeTerms.message}</p>
+            <p className="text-sm text-red-500 mt-1">
+              {errors.agreeTerms.message}
+            </p>
           )}
 
           {/* Submit button */}
@@ -159,16 +172,11 @@ export default function SignUp() {
         </div>
 
         {/* Social logins */}
+        {/* Social logins */}
         <div className="flex gap-4 justify-center items-center">
-          <Button variant="outline" className="rounded-full w-14 h-14">
-            <FcGoogle className="scale-150" />
-          </Button>
-          <Button variant="outline" className="rounded-full w-14 h-14">
-            <FaFacebook className="text-blue-600 scale-150" />
-          </Button>
-          <Button variant="outline" className="rounded-full w-14 h-14">
-            <FaApple className="scale-150" />
-          </Button>
+          <SocialAuthButton provider="google" />
+          <SocialAuthButton provider="facebook" />
+          <SocialAuthButton provider="apple" />
         </div>
 
         {/* Sign in link */}

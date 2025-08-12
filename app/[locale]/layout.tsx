@@ -5,6 +5,8 @@ import { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+
 
 const poppin = Poppins({
   subsets: ["latin"],
@@ -46,6 +48,7 @@ export default async function LocaleLayout({
         >
           <NextIntlClientProvider>
             {children}
+             <Toaster />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

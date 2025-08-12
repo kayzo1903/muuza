@@ -9,9 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebook, FaApple } from "react-icons/fa";
 import { Eye, EyeOff } from "lucide-react";
+import SocialAuthButton from "../outh-sign-Btn";
 
 // 1️⃣ Zod schema
 const signInSchema = z.object({
@@ -127,7 +126,11 @@ export default function SignIn() {
           </div>
 
           {/* Submit button */}
-          <Button type="submit" className="w-full rounded-3xl bg-[#00BF63]" disabled={pending}>
+          <Button
+            type="submit"
+            className="w-full rounded-3xl bg-[#00BF63]"
+            disabled={pending}
+          >
             {pending ? "Signing in..." : "Sign In"}
           </Button>
         </form>
@@ -141,36 +144,18 @@ export default function SignIn() {
 
         {/* Social logins */}
         <div className="flex gap-4 justify-center items-center">
-          <Button
-            variant="outline"
-            className="rounded-full w-14 h-14"
-            // onClick={() => signIn("google")}
-          >
-            <FcGoogle className="scale-150" />
-            
-          </Button>
-          <Button
-             variant="outline"
-            className="rounded-full w-14 h-14"
-            // onClick={() => signIn("facebook")}
-          >
-            <FaFacebook className="text-blue-600 scale-150" />
-            
-          </Button>
-          <Button
-             variant="outline"
-            className="rounded-full w-14 h-14"
-            // onClick={() => signIn("apple")}
-          >
-            <FaApple className="scale-150" />
-       
-          </Button>
+          <SocialAuthButton provider="google" />
+          <SocialAuthButton provider="facebook" />
+          <SocialAuthButton provider="apple" />
         </div>
 
         {/* Sign up link */}
         <p className="text-center text-sm text-gray-600">
           Don’t have an account?{" "}
-          <Link href="/auth/register" className="text-green-600 hover:underline">
+          <Link
+            href="/auth/register"
+            className="text-green-600 hover:underline"
+          >
             Sign up
           </Link>
         </p>
