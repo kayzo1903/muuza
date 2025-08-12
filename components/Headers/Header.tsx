@@ -43,6 +43,7 @@ export default function Header({ session }: { session: HeaderProps["session"] })
           toast.error("Failed to sign out , check your connection");
         },
         onSuccess: () => {
+          setPending(false);
           router.push("/auth/sign-in");
           toast.success("Signed out successfully");
         },
