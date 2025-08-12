@@ -37,7 +37,7 @@ export default function SocialAuthButton({
 
   const handleSignIn = async () => {
     await signIn.social({
-      provider: { provider },
+      provider ,
       callbackURL,
       errorCallbackURL,
       fetchOptions: {
