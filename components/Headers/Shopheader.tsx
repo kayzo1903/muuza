@@ -22,7 +22,7 @@ const ShopHeader = () => {
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-shadow duration-300 ${
-        isSticky ? "bg-white dark:bg-gray-950 shadow-md" : "bg-transparent"
+        isSticky ? "bg-white dark:bg-gray-800 shadow-md" : "bg-transparent"
       }`}
     >
       <div className="w-full px-4 lg:px-20 py-3 space-y-3 lg:space-y-0">

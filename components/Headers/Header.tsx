@@ -27,7 +27,7 @@ const Header = () => {
   return (
     <header
       className={`fixed top-0 w-full mx-auto z-50 h-20 transition-shadow duration-300 py-2 ${
-        isSticky ? "bg-white dark:bg-gray-950 shadow-md" : "bg-transparent"
+        isSticky ? "bg-white dark:bg-gray-800 shadow-md" : "bg-transparent"
       }`}
     >
       <div className="px-4 lg:px-20 py-4 flex items-center justify-between">
