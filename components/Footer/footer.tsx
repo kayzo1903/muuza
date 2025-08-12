@@ -8,7 +8,8 @@ const Footer = () => {
     { path: "#", name: `${t("about")}` },
     { path: "#", name: `${t("sell")}` },
     { path: "#", name: `${t("help")}` },
-    { path: "#", name: `${t("privacy and terms")}` },
+    { path: "/privacy-policy", name: `${"privacy policy"}` },
+    { path: "/terms-of-service", name: `${"terms-of-service"}` },
     { path: "/blog", name: `${t("blog")}` },
   ];
 
