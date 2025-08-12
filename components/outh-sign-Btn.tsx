@@ -7,9 +7,9 @@ import { toast } from "sonner";
 
 // Icons
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook, FaApple } from "react-icons/fa";
+import { FaFacebook } from "react-icons/fa";
 
-type SocialProvider = "google" | "facebook" | "apple";
+type SocialProvider = "google" | "facebook" 
 
 interface SocialAuthButtonProps {
   provider: SocialProvider;
@@ -24,7 +24,6 @@ const providerConfig: Record<
 > = {
   google: { icon: <FcGoogle className="scale-150" /> },
   facebook: { icon: <FaFacebook className="scale-150 text-blue-600" /> },
-  apple: { icon: <FaApple className="scale-150 text-black dark:text-white" /> },
 };
 
 export default function SocialAuthButton({
