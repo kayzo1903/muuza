@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
 import logo from "@/public/logo/muuzalogo.png";
-import { AlignLeft, X, User, Heart, ShoppingBag, LogOut } from "lucide-react";
+import { AlignLeft, X, User, Heart, ShoppingBag, LogOut, Store } from "lucide-react";
 import { ModeToggle } from "../Mode-toggle";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
 import Addlocation from "../Addlocation/Addlocation";
@@ -182,26 +182,32 @@ export default function ShopHeader({
             <nav className="flex flex-col p-4 gap-4">
               <Link
                 href="/profile"
-                className="flex items-center gap-3 hover:text-blue-600"
+                className="flex items-center gap-3 hover:text-green-600"
               >
                 <User size={20} /> Profile
               </Link>
               <Link
                 href="/my-orders"
-                className="flex items-center gap-3 hover:text-blue-600"
+                className="flex items-center gap-3 hover:text-green-600"
               >
                 <ShoppingBag size={20} /> Orders
               </Link>
               <Link
                 href="/favorites"
-                className="flex items-center gap-3 hover:text-blue-600"
+                className="flex items-center gap-3 hover:text-green-600"
               >
                 <Heart size={20} /> Favorites
+              </Link>
+              <Link
+                href="/get-store"
+                className="flex items-center gap-3 hover:text-green-600"
+              >
+                <Store size={20} /> get your store
               </Link>
               <Button
                 disabled={pending}
                 onClick={handleSignout}
-                className="flex items-center gap-3 text-red-500 hover:text-red-700"
+                className="flex items-center gap-3 bg-red-400"
               >
                 <LogOut size={20} /> Logout
               </Button>

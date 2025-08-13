@@ -1,4 +1,4 @@
-import BusinessForm from "@/components/business/Bussiness_form";
+import BusinessForm from "@/components/store-register/Bussiness_form";
 import AuthHeader from "@/components/Headers/SimpleHeader";
 
 export default function BussinessPage() {

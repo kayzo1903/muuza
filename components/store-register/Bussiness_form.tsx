@@ -243,11 +243,11 @@ export default function BusinessRegistrationForm() {
             />
             <label htmlFor="agree">
               {t("agreement")}{" "}
-              <Link href="/terms" className="underline">
+              <Link href="/terms-of-service" className="underline">
                 {t("terms")}
               </Link>{" "}
               &{" "}
-              <Link href="/privacy" className="underline">
+              <Link href="/privacy-policy" className="underline">
                 {t("privacy")}
               </Link>
             </label>
