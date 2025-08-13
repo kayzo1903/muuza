@@ -8,6 +8,7 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
+  trustedOrigins: ["http://localhost:3000", "https://muuza.vercel.app"],
   session: {
     cookieCache: {
       enabled: true,
