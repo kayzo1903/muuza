@@ -21,10 +21,12 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      redirectUri: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth/callback/google`
     },
     facebook: {
       clientId: process.env.FACEBOOK_CLIENT_ID as string,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
+      redirectUri: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth/callback/facebook`
     }
   },
 });
