@@ -55,12 +55,13 @@ export default function SignUp() {
     },
   });
 
-  // 2️⃣ Submit handler
   const onSubmit = async (data: SignUpFormData) => {
     setPending(true);
+    console.log(data.email , data.password, data.name);
+    
     try {
       // await signUp("credentials", data);
-      console.log(data);
+      console.log(data.email , data.password, data.name);
     } catch (error) {
       console.error(error);
     } finally {
