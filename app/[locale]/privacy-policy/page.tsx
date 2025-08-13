@@ -2,12 +2,17 @@ import Footer from "@/components/Footer/footer";
 import AuthHeader from "@/components/Headers/SimpleHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "privacy-policy",
+};
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="w-full">
+    <main className="w-full">
       <AuthHeader />
-      <div className="container max-w-4xl mx-auto py-12 px-4">
+      <section className="container max-w-4xl mx-auto py-12 px-4">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-3xl font-bold">Privacy Policy</CardTitle>
@@ -98,8 +103,8 @@ export default function PrivacyPolicyPage() {
             </section>
           </CardContent>
         </Card>
-      </div>
+      </section>
       <Footer />
-    </div>
+    </main>
   );
 }
