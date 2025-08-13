@@ -187,7 +187,7 @@ export default function ShopHeader({
                 <User size={20} /> Profile
               </Link>
               <Link
-                href="/orders"
+                href="/my-orders"
                 className="flex items-center gap-3 hover:text-blue-600"
               >
                 <ShoppingBag size={20} /> Orders
