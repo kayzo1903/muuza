@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa"; // You can also use FaXTwitter if you have it in your icon set
 
-type SocialProvider = "google" | "facebook" | "twitter";
+type SocialProvider = "google" | "facebook" 
 
 interface SocialAuthButtonProps {
   provider: SocialProvider;
