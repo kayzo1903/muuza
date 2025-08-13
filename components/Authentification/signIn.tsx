@@ -146,7 +146,6 @@ export default function SignIn() {
         <div className="flex gap-4 justify-center items-center">
           <SocialAuthButton provider="google" />
           <SocialAuthButton provider="facebook" />
-          
         </div>
 
         {/* Sign up link */}

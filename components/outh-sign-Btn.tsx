@@ -7,9 +7,9 @@ import { toast } from "sonner";
 
 // Icons
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
+import { FaFacebook } from "react-icons/fa"; // You can also use FaXTwitter if you have it in your icon set
 
-type SocialProvider = "google" | "facebook" 
+type SocialProvider = "google" | "facebook" | "twitter";
 
 interface SocialAuthButtonProps {
   provider: SocialProvider;
@@ -36,7 +36,7 @@ export default function SocialAuthButton({
 
   const handleSignIn = async () => {
     await signIn.social({
-      provider ,
+      provider,
       callbackURL,
       errorCallbackURL,
       fetchOptions: {
