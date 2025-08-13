@@ -20,7 +20,7 @@ export default function ShopHeader({
 }) {
   const [isSticky, setSticky] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [pending , setPending] = useState(true)
+  const [pending , setPending] = useState(false)
   const router = useRouter();
   
 
