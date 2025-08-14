@@ -16,6 +16,7 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification : true, // require email verification for sign up
   },
   emailVerification: {
     sendOnSignUp: true,
