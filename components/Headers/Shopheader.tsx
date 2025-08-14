@@ -4,7 +4,15 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
 import logo from "@/public/logo/muuzalogo.png";
-import { AlignLeft, X, User, Heart, ShoppingBag, LogOut, Store } from "lucide-react";
+import {
+  AlignLeft,
+  X,
+  User,
+  Heart,
+  ShoppingBag,
+  LogOut,
+  Store,
+} from "lucide-react";
 import { ModeToggle } from "../Mode-toggle";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
 import Addlocation from "../Addlocation/Addlocation";
@@ -12,6 +20,7 @@ import { HeaderProps } from "@/lib/session-props";
 import { signOut } from "@/lib/auth-client"; // Better Auth logout
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export default function ShopHeader({
   session,
@@ -20,9 +29,8 @@ export default function ShopHeader({
 }) {
   const [isSticky, setSticky] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [pending , setPending] = useState(false)
+  const [pending, setPending] = useState(false);
   const router = useRouter();
-  
 
   useEffect(() => {
     const handleScroll = () => setSticky(window.scrollY > 0);
@@ -30,13 +38,12 @@ export default function ShopHeader({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  
-    async function handleSignout() {
+  async function handleSignout() {
     await signOut({
       fetchOptions: {
         onRequest: () => {
-          setPending(true)
-        } ,
+          setPending(true);
+        },
         onError: (ctx) => {
           console.log(ctx.error.message);
           toast.error("Failed to sign out , check your connection");
@@ -78,12 +85,6 @@ export default function ShopHeader({
           </div>
 
           <Addlocation />
-
-          <input
-            type="text"
-            placeholder="Search for products, foods, etc."
-            className="flex-1 max-w-md px-4 py-2 border border-border bg-background text-sm rounded-lg"
-          />
 
           <LocaleSwitcher />
           <ModeToggle />
@@ -152,29 +153,31 @@ export default function ShopHeader({
           </div>
 
           {/* User Info */}
-          {session ? (
+          {session?.user ? (
             <div className="flex flex-col items-center gap-2 p-4 border-b border-border">
-              <Image
-                src={session.user.image || "/default-avatar.png"}
-                alt={session.user.name || "User"}
-                width={64}
-                height={64}
-                className="rounded-full object-cover"
-              />
-              <p className="font-medium">{session.user.name}</p>
-              <p className="text-sm text-gray-500">{session.user.email}</p>
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={session.user.image ?? ""} />
+                <AvatarFallback>{session.user.name?.[0] ?? ""}</AvatarFallback>
+              </Avatar>
+              <p className="font-medium">
+                {session.user.name ?? "Unknown User"}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col gap-4 px-4">
-              <Button
-                className="bg-green-600 text-white hover:bg-green-700"
+              <Link
+                href="/auth/sign-in"
+                className="bg-green-600 text-white hover:bg-green-700 flex items-center justify-center rounded-md px-4 py-2"
               >
-                <Link href="/auth/sign-in">Login</Link>
-              </Button>
-              <Button >
-                <Link href="/auth/register">Sign up</Link>
-              </Button>
-            </ div>
+                Login
+              </Link>
+              <Link
+                href="/auth/register"
+                className="flex items-center justify-center rounded-md border px-4 py-2 hover:bg-gray-100"
+              >
+                Sign up
+              </Link>
+            </div>
           )}
 
           {/* Nav Links */}

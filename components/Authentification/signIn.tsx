@@ -11,6 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
 import SocialAuthButton from "../outh-sign-Btn";
+import { signIn } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "@/i18n/routing";
 
 // 1️⃣ Zod schema
 const signInSchema = z.object({
@@ -24,6 +27,8 @@ type SignInFormData = z.infer<typeof signInSchema>;
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
+
+  const router = useRouter();
 
   const {
     register,
@@ -39,16 +44,35 @@ export default function SignIn() {
   });
 
   // 3️⃣ Submit handler
-  const onSubmit = async (data: SignInFormData) => {
-    setPending(true);
+ const onSubmit = async (data: SignInFormData) => {
     try {
-      // await signIn("credentials", {
-      //   email: data.email,
-      //   password: data.password,
-      // });
-      console.log(data);
-    } catch (error) {
-      console.error(error);
+      setPending(true);
+      await signIn.email(
+        {
+          email: data.email,
+          password: data.password,
+          rememberMe: data.remember,
+        },
+        {
+          onRequest: () => {
+            setPending(true);
+            toast("Creating your account...", {
+              description: "Please wait while we set up your account.",
+              duration: 5000,
+            });
+          },
+          onResponse: () => {
+            setPending(false);
+            toast.success("Your sucessfull login!");
+          },
+          onError: () => {
+            toast.error("Something went wrong. Please try again.");
+          },
+          onSuccess: () => {
+            router.push("/");
+          },
+        }
+      );
     } finally {
       setPending(false);
     }
@@ -56,7 +80,7 @@ export default function SignIn() {
 
   return (
     <div className="flex items-center justify-center px-4">
-      <div className="w-full max-w-md p-6 rounded-2xl shadow-lg space-y-6">
+      <div className="w-full max-w-md p-6 rounded-2xl shadow-lg space-y-6 bg-white dark:bg-gray-900">
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-300">
           Log In
         </h1>

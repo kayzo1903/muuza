@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,15 +11,16 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
 import SocialAuthButton from "../outh-sign-Btn";
+import { signUp } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "@/i18n/routing";
+import { log } from "console";
 
-// 1️⃣ Zod schema
+// ✅ 1. Zod schema
 const signUpSchema = z.object({
   name: z
     .string()
-    .regex(
-      /^[A-Za-z]+$/,
-      "Name must contain only letters, no spaces or numbers"
-    )
+    .regex(/^[A-Za-z\s]+$/, "Name must contain only letters and spaces")
     .min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z
@@ -41,9 +42,12 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
 
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -56,14 +60,35 @@ export default function SignUp() {
   });
 
   const onSubmit = async (data: SignUpFormData) => {
-    setPending(true);
-    console.log(data.email , data.password, data.name);
-    
     try {
-      // await signUp("credentials", data);
-      console.log(data.email , data.password, data.name);
-    } catch (error) {
-      console.error(error);
+      setPending(true);
+      await signUp.email(
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        },
+        {
+          onRequest: () => {
+            setPending(true);
+            toast("Creating your account...", {
+              description: "Please wait while we set up your account.",
+              duration: 5000,
+            });
+          },
+          onResponse: () => {
+            setPending(false);
+            toast.success(`Congratulations! You have successfully registered. Please check your
+          email for the verification link.!`);
+          },
+          onError: () => {
+            toast.error("Failed to create account. Please try again.");
+          },
+          onSuccess: () => {
+            router.push("/");
+          },
+        }
+      );
     } finally {
       setPending(false);
     }
@@ -71,16 +96,16 @@ export default function SignUp() {
 
   return (
     <div className="flex items-center justify-center px-4">
-      <div className="w-full max-w-md p-6 rounded-2xl shadow-lg space-y-6">
+      <div className="w-full max-w-md p-6 rounded-2xl shadow-lg space-y-6 bg-white dark:bg-gray-900">
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-300">
           Create Account
         </h1>
 
-        <p className="text-gray-400 dark:text-gray-200 text-sm text-center pt-4">
+        <p className="text-gray-500 dark:text-gray-200 text-sm text-center pt-2">
           Fill in your details to register and start using our services
         </p>
 
-        {/* Form */}
+        {/* ✅ Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           {/* Name */}
           <div>
@@ -137,9 +162,21 @@ export default function SignUp() {
             )}
           </div>
 
-          {/* Agree to terms */}
+          {/* ✅ Agree to terms - fixed Controller */}
           <div className="flex items-center space-x-2">
-            <Checkbox id="agreeTerms" {...register("agreeTerms")} />
+            <Controller
+              name="agreeTerms"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  id="agreeTerms"
+                  checked={field.value}
+                  onCheckedChange={(checked) =>
+                    field.onChange(Boolean(checked))
+                  }
+                />
+              )}
+            />
             <Label htmlFor="agreeTerms" className="text-sm text-gray-600">
               I agree to the{" "}
               <Link href="/terms" className="text-green-600 hover:underline">
@@ -170,7 +207,6 @@ export default function SignUp() {
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
-        {/* Social logins */}
         {/* Social logins */}
         <div className="flex gap-4 justify-center items-center">
           <SocialAuthButton provider="google" />

@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "@/db/schema";
+import { sendEmailAction } from "@/actions/send-email.action";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -10,13 +11,30 @@ export const auth = betterAuth({
   }),
   trustedOrigins: ["http://localhost:3000", "https://muuza.vercel.app"],
   session: {
-    cookieCache: {
-      enabled: true,
-      maxAge: 24 * 60 * 60, // Cache duration in seconds
-    },
+    expiresIn: 60 * 1, // session expires in 1 minute
+    updateAge: 60 * 0.5, // session is updated every 30 seconds
   },
   emailAndPassword: {
     enabled: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    expiresIn: 60 * 60, // email verification link expires in 24 hours
+    autoSignInAfterVerification: true, // automatically sign in user after email verification
+    sendVerificationEmail: async ({ user, url }) => {
+      const link = new URL(url);
+      link.searchParams.set("callbackURL", "/auth/email-verification");
+
+      await sendEmailAction({
+        to: user.email,
+        subject: "Verify your email address",
+        meta: {
+          description:
+            "Please verify your email address to complete the registration process.",
+          link: String(link),
+        },
+      });
+    },
   },
   socialProviders: {
     google: {
