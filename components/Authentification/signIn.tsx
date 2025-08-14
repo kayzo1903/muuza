@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -11,13 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
 import SocialAuthButton from "../outh-sign-Btn";
-import { signIn } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { useRouter } from "@/i18n/routing";
+import { signInAction } from "@/actions/sign-in.action";
 
-// 1️⃣ Zod schema
 const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   remember: z.boolean().optional(),
 });
@@ -26,9 +24,7 @@ type SignInFormData = z.infer<typeof signInSchema>;
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
-  const [pending, setPending] = useState(false);
-
-  const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
   const {
     register,
@@ -36,70 +32,40 @@ export default function SignIn() {
     formState: { errors },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      remember: false,
-    },
+    defaultValues: { email: "", password: "", remember: false },
   });
 
-  // 3️⃣ Submit handler
- const onSubmit = async (data: SignInFormData) => {
-    try {
-      setPending(true);
-      await signIn.email(
-        {
-          email: data.email,
-          password: data.password,
-          rememberMe: data.remember,
-        },
-        {
-          onRequest: () => {
-            setPending(true);
-            toast("Creating your account...", {
-              description: "Please wait while we set up your account.",
-              duration: 5000,
-            });
-          },
-          onResponse: () => {
-            setPending(false);
-            toast.success("Your sucessfull login!");
-          },
-          onError: () => {
-            toast.error("Something went wrong. Please try again.");
-          },
-          onSuccess: () => {
-            router.push("/");
-          },
-        }
-      );
-    } finally {
-      setPending(false);
-    }
+  const onSubmit = (data: SignInFormData) => {
+    startTransition(async () => {
+      const result = await signInAction(data);
+
+      if (result?.success === false) {
+        toast.error(result.message);
+      } else {
+        toast.success("Login successful! Redirecting...");
+      }
+    });
   };
 
   return (
     <div className="flex items-center justify-center px-4">
-      <div className="w-full max-w-md p-6 rounded-2xl shadow-lg space-y-6 bg-white dark:bg-gray-900">
-        <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-300">
+      <div className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-900 space-y-6">
+        <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200">
           Log In
         </h1>
-
-        <p className="text-gray-400 dark:text-gray-200 text-sm text-center pt-4">
-          Enter you email and password to securely access your account and
-          manage your services
+        <p className="text-sm text-gray-500 text-center">
+          Enter your credentials to securely access Muuza.
         </p>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Email */}
           <div>
             <Input
-              className="h-12 rounded-3xl pl-4"
               id="email"
               type="email"
               placeholder="you@example.com"
               {...register("email")}
+              className="h-12 rounded-3xl pl-4"
             />
             {errors.email && (
               <p className="text-sm text-red-500 mt-1">
@@ -112,16 +78,16 @@ export default function SignIn() {
           <div>
             <div className="relative">
               <Input
-                className="h-12 rounded-3xl pl-4"
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 {...register("password")}
+                className="h-12 rounded-3xl pl-4"
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
-                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-3 flex items-center"
+                onClick={() => setShowPassword((p) => !p)}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -133,9 +99,9 @@ export default function SignIn() {
             )}
           </div>
 
-          {/* Remember me + Forgot password */}
+          {/* Remember + Forgot */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Checkbox id="remember" {...register("remember")} />
               <Label htmlFor="remember" className="text-sm text-gray-600">
                 Remember me
@@ -149,7 +115,7 @@ export default function SignIn() {
             </Link>
           </div>
 
-          {/* Submit button */}
+          {/* Submit */}
           <Button
             type="submit"
             className="w-full rounded-3xl bg-[#00BF63]"
@@ -166,19 +132,15 @@ export default function SignIn() {
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
-        {/* Social logins */}
-        <div className="flex gap-4 justify-center items-center">
+        {/* Social login */}
+        <div className="flex justify-center gap-4">
           <SocialAuthButton provider="google" />
           <SocialAuthButton provider="facebook" />
         </div>
 
-        {/* Sign up link */}
         <p className="text-center text-sm text-gray-600">
           Don’t have an account?{" "}
-          <Link
-            href="/auth/register"
-            className="text-green-600 hover:underline"
-          >
+          <Link href="/auth/register" className="text-green-600 hover:underline">
             Sign up
           </Link>
         </p>
