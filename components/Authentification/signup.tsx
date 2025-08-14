@@ -14,7 +14,6 @@ import SocialAuthButton from "../outh-sign-Btn";
 import { signUp } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/routing";
-import { log } from "console";
 
 // ✅ 1. Zod schema
 const signUpSchema = z.object({
