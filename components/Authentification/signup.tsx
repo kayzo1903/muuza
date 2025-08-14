@@ -63,7 +63,7 @@ export default function SignUp() {
 
       if (res.success) {
         toast.success(res.message);
-        router.push("/");
+        router.push("/auth/sign-in"); // Redirect to sign-in page after successful registration
       } else {
         toast.error(res.message);
       }
