@@ -13,12 +13,12 @@ export const auth = betterAuth({
   }),
   trustedOrigins: ["http://localhost:3000", "https://muuza.vercel.app"],
   session: {
-    expiresIn: 60 * 1, // session expires in 1 minute
-    updateAge: 60 * 0.5, // session is updated every 30 seconds
+    expiresIn: 60 * 60 * 24, // session expires in 1 day
+    updateAge: 60 * 60 , // session is updated every 1 hr
   },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true, // require email verification for sign up
+    requireEmailVerification: true, // require email verification for sign up    
   },
   emailVerification: {
     sendOnSignUp: true,
@@ -37,7 +37,6 @@ export const auth = betterAuth({
   },
   plugins: [
     emailOTP({
-      overrideDefaultEmailVerification: true,
       async sendVerificationOTP({ email, otp, type }) {
         sendEmailAction({
           to: email,

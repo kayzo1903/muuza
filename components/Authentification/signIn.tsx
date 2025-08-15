@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { signInAction } from "@/actions/sign-in.action";
 import { redirect } from "next/navigation";
 
-
 const signInSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -28,7 +27,6 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  
 
   const {
     register,
@@ -44,10 +42,11 @@ export default function SignIn() {
       const result = await signInAction(data);
 
       if (result?.success === false) {
-        setError(result.message);
+        setError(result.message || "You must verify your email before sign in"); // show error message
       } else {
-        toast.success("Login successful! Redirecting...");
-        redirect("/shop")
+        // Redirect handled in server action
+        toast.success("Redirecting...");
+        redirect("/shop");
       }
     });
   };

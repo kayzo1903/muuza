@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "shop",
 };
 
+
 export default function Shoppingpge() {
   return (
     <section className="h-screen w-full pt-24 lg:pt-4">

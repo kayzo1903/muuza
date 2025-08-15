@@ -1,7 +1,12 @@
 "use server";
 
-import { signIn } from "@/lib/auth-client"; // or better-auth
-import z from "zod";
+import { z } from "zod";
+import { sendVerificationOTP } from "./request-OTP";
+import { setEmailCookie } from "./cookies";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { APIError } from "better-auth/api";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -9,24 +14,31 @@ const signInSchema = z.object({
   remember: z.boolean().optional(),
 });
 
-export type SignUpInput = z.infer<typeof signInSchema>;
+export type SignInInput = z.infer<typeof signInSchema>;
 
-export async function signInAction( data : SignUpInput) {
-   const parsed = signInSchema.parse(data);
-  
+export async function signInAction(data: SignInInput) {
   try {
-    const result = await signIn.email({
-      email: parsed.email,
-      password: parsed.password,
-      rememberMe: parsed.remember,
+    await auth.api.signInEmail({
+      headers: await headers(),
+      body: {
+        email: data.email,
+        password: data.password,
+      },
     });
-
-    if (result.error) {
-      return { success: false, message: "Invalid credentials" };
+    return { success: true, message: "You have sucessfull sign-in" };
+  } catch (err) {
+    if (err instanceof APIError) {
+      const errCode = err.body ? err.body.code : "UNKNOWN";
+      switch (errCode) {
+        case "EMAIL_NOT_VERIFIED":
+          await setEmailCookie(data.email);
+          await sendVerificationOTP(data.email, "email-verification");
+          redirect("/auth/email-verification");
+        default:
+          return { success: false, message: err.message };
+      }
     }
 
-  } catch (error) {
-    console.error("[signInAction]", error);
-    return { success: false, message: "Something went wrong" };
+    return { success: false, message: "Internal Server Error" };
   }
 }

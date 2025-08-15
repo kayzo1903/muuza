@@ -66,12 +66,12 @@ export default function SignUp() {
         password: data.password,
       });
 
-      if (res.success) {
+      if (res?.success) {
         await setEmailCookie(data.email);
         await sendVerificationOTP(data.email , "email-verification")
         router.push("/auth/email-verification"); // Redirect to sign-in page after successful registration
       } else {
-        setError(res.message);
+        setError(res?.message || "something went wrong");
       }
     } catch {
       toast.error("Unexpected error. Please try again.");

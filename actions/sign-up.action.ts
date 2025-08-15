@@ -1,9 +1,9 @@
 "use server";
 
-import { signUp } from "@/lib/auth-client";
+import { auth } from "@/lib/auth";
+import { APIError } from "better-auth/api";
 import { z } from "zod";
 
-// Same validation schema
 const signUpSchema = z.object({
   name: z
     .string()
@@ -24,32 +24,37 @@ export type SignUpInput = z.infer<typeof signUpSchema>;
 
 export async function registerUser(data: SignUpInput) {
   try {
-    // Validate input again on server for safety
+    // Validate before hitting the API
     const parsed = signUpSchema.parse(data);
 
-    const response = await signUp.email({
-      name: parsed.name,
-      email: parsed.email,
-      password: parsed.password,
+    // Better Auth always returns an object with { data, error }
+    await auth.api.signUpEmail({
+      body: {
+        name: parsed.name,
+        email: parsed.email,
+        password: parsed.password,
+      },
     });
 
-    if (!response) {
-      throw new Error("Registration failed, please try again.");
-    }
-    
-    return { success: true, message: "Please verify your account" };
-
-  } catch (error: unknown | Error) {
-    console.error("SignUp Error:", error);
-
-    // Prevent leaking raw errors from server
-    if (error === "ZodError") {
-      return { success: false, message: "Invalid form input." };
-    }
-
     return {
-      success: false,
-      message: "Something went wrong, please try again later.",
+      success: true,
+      message:
+        "You have sucessfully register your account , please verify your Email",
     };
+  } catch (err) {
+
+    if (err instanceof APIError) {
+      const errCode = err.body ? err.body.code : "UNKNOWN";
+
+      switch (errCode) {
+        case "USER_ALREADY_EXISTS":
+          return {
+            success: false,
+            message: "User is Already exists , please sign-in",
+          };
+        default:
+          return { success: false, message: err.message };
+      }
+    }
   }
 }
