@@ -4,6 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "@/db/schema";
 import { sendEmailAction } from "@/actions/send-email.action";
 import { emailOTP } from "better-auth/plugins";
+import { myCustomDecryptor, myCustomEncryptor } from "@/actions/encryptor";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -21,7 +22,7 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
-    autoSignInAfterVerification: true ,
+    autoSignInAfterVerification: true,
   },
   socialProviders: {
     google: {
@@ -36,6 +37,7 @@ export const auth = betterAuth({
   },
   plugins: [
     emailOTP({
+      overrideDefaultEmailVerification: true,
       async sendVerificationOTP({ email, otp, type }) {
         sendEmailAction({
           to: email,
@@ -45,6 +47,14 @@ export const auth = betterAuth({
             otp,
           },
         });
+      },
+      storeOTP: {
+        encrypt: async (otp) => {
+          return myCustomEncryptor(otp);
+        },
+        decrypt: async (otp) => {
+          return myCustomDecryptor(otp);
+        },
       },
     }),
   ],
