@@ -27,17 +27,27 @@ const styles = {
     margin-bottom:20px;
     text-align:center;
   `,
-  button: `
-    display:inline-block;
-    margin:0 auto;
-    padding:12px 24px;
-    background:#00BF63;
-    color:#fff;
-    font-size:16px;
-    font-weight:600;
-    border-radius:30px;
-    text-decoration:none;
+  otpContainer: `
+    margin: 30px auto;
+    text-align: center;
+  `,
+  otp: `
+    display: inline-block;
+    padding: 12px 24px;
+    background: #f0f0f0;
+    color: #1a1a1a;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    border-radius: 8px;
+    border: 1px dashed #00BF63;
+  `,
+  note: `
+    font-size:14px;
+    color:#6b7280;
+    margin-top:10px;
     text-align:center;
+    font-style:italic;
   `,
   footer: `
     font-size:12px;
@@ -56,7 +66,8 @@ export async function sendEmailAction({
   subject: string;
   meta: {
     description: string;
-    link: string;
+    otp: string;
+    expiresIn?: string; // Optional: can show when the OTP expires
   };
 }) {
   const mailOptions = {
@@ -67,11 +78,13 @@ export async function sendEmailAction({
       <div style="${styles.container}">
         <h1 style="${styles.heading}">${subject}</h1>
         <p style="${styles.paragraph}">${meta.description}</p>
-        <div style="text-align:center;">
-          <a href="${meta.link}" style="${styles.button}">Continue</a>
+        <div style="${styles.otpContainer}">
+          <div style="${styles.otp}">${meta.otp}</div>
+          ${meta.expiresIn ? `<p style="${styles.note}">This OTP will expire in ${meta.expiresIn}</p>` : ''}
         </div>
+        <p style="${styles.note}">Please do not share this code with anyone.</p>
         <p style="${styles.footer}">
-          If you didn’t request this, please ignore this email.<br/>
+          If you didn't request this, please ignore this email.<br/>
           © ${new Date().getFullYear()} Muuza. All rights reserved.
         </p>
       </div>

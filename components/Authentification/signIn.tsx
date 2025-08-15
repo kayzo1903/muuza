@@ -13,7 +13,8 @@ import { Eye, EyeOff } from "lucide-react";
 import SocialAuthButton from "../outh-sign-Btn";
 import { toast } from "sonner";
 import { signInAction } from "@/actions/sign-in.action";
-import {  useRouter } from "@/i18n/routing";
+import { redirect } from "next/navigation";
+
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -26,7 +27,8 @@ type SignInFormData = z.infer<typeof signInSchema>;
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, startTransition] = useTransition();
-  const route =  useRouter()
+  const [error, setError] = useState<string | null>(null);
+  
 
   const {
     register,
@@ -42,10 +44,10 @@ export default function SignIn() {
       const result = await signInAction(data);
 
       if (result?.success === false) {
-        toast.error(result.message);
+        setError(result.message);
       } else {
         toast.success("Login successful! Redirecting...");
-        route.push("/"); // Redirect to home page after successful login
+        redirect("/shop")
       }
     });
   };
@@ -56,6 +58,11 @@ export default function SignIn() {
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200">
           Log In
         </h1>
+        {error && (
+          <p className="text-red-500 text-sm text-center">
+            {error} {" please try again."}
+          </p>
+        )}
         <p className="text-sm text-gray-500 text-center">
           Enter your credentials to securely access Muuza.
         </p>
@@ -143,7 +150,10 @@ export default function SignIn() {
 
         <p className="text-center text-sm text-gray-600">
           Don’t have an account?{" "}
-          <Link href="/auth/register" className="text-green-600 hover:underline">
+          <Link
+            href="/auth/register"
+            className="text-green-600 hover:underline"
+          >
             Sign up
           </Link>
         </p>

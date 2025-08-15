@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "@/db/schema";
 import { sendEmailAction } from "@/actions/send-email.action";
+import { emailOTP } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -16,26 +17,11 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification : true, // require email verification for sign up
+    requireEmailVerification: true, // require email verification for sign up
   },
   emailVerification: {
     sendOnSignUp: true,
-    expiresIn: 60 * 60, // email verification link expires in 24 hours
-    autoSignInAfterVerification: true, // automatically sign in user after email verification
-    sendVerificationEmail: async ({ user, url }) => {
-      const link = new URL(url);
-      link.searchParams.set("callbackURL", "/auth/email-verification");
-
-      await sendEmailAction({
-        to: user.email,
-        subject: "Verify your email address",
-        meta: {
-          description:
-            "Please verify your email address to complete the registration process.",
-          link: String(link),
-        },
-      });
-    },
+    autoSignInAfterVerification: true ,
   },
   socialProviders: {
     google: {
@@ -48,4 +34,18 @@ export const auth = betterAuth({
       scope: ["email", "public_profile"], // make sure email is here
     },
   },
+  plugins: [
+    emailOTP({
+      async sendVerificationOTP({ email, otp, type }) {
+        sendEmailAction({
+          to: email,
+          subject: `Your ${type} OTP`,
+          meta: {
+            description: `use the code below to verify your account.`,
+            otp,
+          },
+        });
+      },
+    }),
+  ],
 });

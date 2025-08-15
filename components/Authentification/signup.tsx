@@ -13,9 +13,10 @@ import SocialAuthButton from "../outh-sign-Btn";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/routing";
 
-
 import { z } from "zod";
 import { registerUser } from "@/actions/sign-up.action";
+import { setEmailCookie } from "@/actions/cookies";
+import { sendVerificationOTP } from "@/actions/request-OTP";
 
 // Reuse schema for client-side validation
 const signUpSchema = z.object({
@@ -28,7 +29,10 @@ const signUpSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Password must contain at least one special character"
+    ),
   agreeTerms: z.boolean().refine((val) => val === true, {
     message: "You must agree to the terms",
   }),
@@ -39,6 +43,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const {
@@ -62,10 +67,11 @@ export default function SignUp() {
       });
 
       if (res.success) {
-        toast.success(res.message);
-        router.push("/auth/sign-in"); // Redirect to sign-in page after successful registration
+        await setEmailCookie(data.email);
+        await sendVerificationOTP(data.email , "email-verification")
+        router.push("/auth/email-verification"); // Redirect to sign-in page after successful registration
       } else {
-        toast.error(res.message);
+        setError(res.message);
       }
     } catch {
       toast.error("Unexpected error. Please try again.");
@@ -80,6 +86,7 @@ export default function SignUp() {
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-300">
           Create Account
         </h1>
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <p className="text-gray-500 dark:text-gray-200 text-sm text-center pt-2">
           Fill in your details to register and start using our services
@@ -87,12 +94,25 @@ export default function SignUp() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           {/* Name */}
-          <Input {...register("name")} placeholder="Your Name" className="h-12 rounded-3xl pl-4" />
-          {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+          <Input
+            {...register("name")}
+            placeholder="Your Name"
+            className="h-12 rounded-3xl pl-4"
+          />
+          {errors.name && (
+            <p className="text-sm text-red-500">{errors.name.message}</p>
+          )}
 
           {/* Email */}
-          <Input {...register("email")} type="email" placeholder="you@example.com" className="h-12 rounded-3xl pl-4" />
-          {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+          <Input
+            {...register("email")}
+            type="email"
+            placeholder="you@example.com"
+            className="h-12 rounded-3xl pl-4"
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email.message}</p>
+          )}
 
           {/* Password */}
           <div className="relative">
@@ -110,7 +130,9 @@ export default function SignUp() {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password.message}</p>
+          )}
 
           {/* Terms */}
           <div className="flex items-center space-x-2">
@@ -118,16 +140,29 @@ export default function SignUp() {
               name="agreeTerms"
               control={control}
               render={({ field }) => (
-                <Checkbox id="agreeTerms" checked={field.value} onCheckedChange={(c) => field.onChange(Boolean(c))} />
+                <Checkbox
+                  id="agreeTerms"
+                  checked={field.value}
+                  onCheckedChange={(c) => field.onChange(Boolean(c))}
+                />
               )}
             />
             <Label htmlFor="agreeTerms" className="text-sm">
-              I agree to the <Link href="/terms" className="text-green-600 hover:underline">terms</Link>
+              I agree to the{" "}
+              <Link href="/terms" className="text-green-600 hover:underline">
+                terms
+              </Link>
             </Label>
           </div>
-          {errors.agreeTerms && <p className="text-sm text-red-500">{errors.agreeTerms.message}</p>}
+          {errors.agreeTerms && (
+            <p className="text-sm text-red-500">{errors.agreeTerms.message}</p>
+          )}
 
-          <Button type="submit" disabled={pending} className="w-full rounded-3xl bg-[#00BF63]">
+          <Button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-3xl bg-[#00BF63]"
+          >
             {pending ? "Creating..." : "Sign Up"}
           </Button>
         </form>
@@ -147,7 +182,9 @@ export default function SignUp() {
 
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link href="/auth/sign-in" className="text-green-600 hover:underline">Sign in</Link>
+          <Link href="/auth/sign-in" className="text-green-600 hover:underline">
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

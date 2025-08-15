@@ -1,98 +1,95 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MailCheck, Loader2 } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"; 
 import { toast } from "sonner";
-import Link from "next/link";
+import { sendVerificationOTP, verifyEmailOTP } from "@/actions/request-OTP";
+import { redirect } from "next/navigation";
 
-export default function EmailVerification() {
-  const [loading, setLoading] = useState(false);
-  const [timer, setTimer] = useState(120); // 2 minutes in seconds
 
-  // Countdown effect
+interface EmailVerificationProps {
+  email: string ;
+}
+
+export default function EmailVerification({ email }: EmailVerificationProps) {
+  const [otp, setOtp] = useState("");
+  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
+  const [isResending, setIsResending] = useState(false);
+
+  // countdown timer
   useEffect(() => {
-    if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [timer]);
+    if (timeLeft <= 0) return;
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timeLeft]);
 
-  const handleResend = async () => {
-    try {
-      setLoading(true);
-      // Simulate API call (replace with actual resend logic)
-      await new Promise((res) => setTimeout(res, 2000));
-      toast.success("Verification email sent again!");
-      setTimer(120); // restart countdown
-    } catch {
-      toast.error("Failed to resend verification email.");
-    } finally {
-      setLoading(false);
+const handleVerify = async () => {
+    const res = await verifyEmailOTP( email , otp);
+    if (res.success) {
+      toast.success("Your sucessfull verify your email");
+      redirect("/shop")
+    } else {
+      toast.error(res.error);
     }
   };
 
-  // Format time as mm:ss
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(1, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
+  const handleSend = async () => {
+    setIsResending(true)
+    const res = await sendVerificationOTP(email, "email-verification");
+    if (res.success) {
+      toast.success("OTP sent ✅");
+      setIsResending(false)
+    } else {
+      toast.error(res.error);
+    }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4">
-      <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 text-center space-y-6">
-        {/* Icon */}
-        <div className="flex justify-center">
-          <div className="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-            <MailCheck className="text-[#00BF63]" size={36} />
-          </div>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-          Verify your email
-        </h1>
-
-        {/* Description */}
-        <p className="text-gray-600 dark:text-gray-400 text-sm">
-          We’ve sent a verification link to your email.  
-          Please check your inbox and click the link to activate your account.
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 ">
+      <div className="w-full max-w-md flex flex-col justify-center items-center shadow-lg rounded-2xl p-6 space-y-6 text-center bg-white dark:bg-gray-900">
+        <h1 className="text-2xl font-bold text-[#00BF63]">Verify Your Email</h1>
+        <p className="text-gray-600">
+          Enter the 6-digit code we sent to your email: <span className="font-semibold">{email}</span>
         </p>
 
-        {/* Resend Button */}
+        {/* OTP Input */}
+        <InputOTP maxLength={6} value={otp} onChange={(val) => setOtp(val)}>
+          <InputOTPGroup className="gap-2 justify-center">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <InputOTPSlot
+                key={i}
+                index={i}
+                className="w-10 h-12 text-lg border rounded-lg focus:ring-2 focus:ring-[#00BF63]"
+              />
+            ))}
+          </InputOTPGroup>
+        </InputOTP>
+
+        {/* Verify Button */}
         <Button
-          className="w-full rounded-full bg-[#00BF63] hover:bg-[#00a857] text-white font-medium"
-          onClick={handleResend}
-          disabled={loading || timer > 0}
+          onClick={handleVerify}
+          className="w-full bg-[#00BF63] hover:bg-[#009e52] text-white rounded-2xl py-2"
         >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              Resending...
-            </>
-          ) : timer > 0 ? (
-            `Resend available in ${formatTime(timer)}`
-          ) : (
-            "Resend verification email"
-          )}
+          Verify
         </Button>
 
-        {/* Back to login */}
-        <div className="pt-4">
-          <p className="text-sm text-gray-500">
-            Already verified?{" "}
-            <Link
-              href="/auth/login"
-              className="text-[#00BF63] font-medium hover:underline"
+        {/* Countdown & Resend */}
+        <div className="text-sm text-gray-500">
+          {timeLeft > 0 ? (
+            <p>Resend available in <span className="font-semibold">{timeLeft}s</span></p>
+          ) : (
+            <Button
+              onClick={handleSend}
+              disabled={isResending}
+              variant="outline"
+              className="mt-2 rounded-2xl"
             >
-              Log in
-            </Link>
-          </p>
+              {isResending ? "Resending..." : "Resend OTP"}
+            </Button>
+          )}
         </div>
       </div>
     </div>

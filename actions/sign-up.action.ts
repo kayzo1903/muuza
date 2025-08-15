@@ -14,7 +14,10 @@ const signUpSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Password must contain at least one special character"
+    ),
 });
 
 export type SignUpInput = z.infer<typeof signUpSchema>;
@@ -33,16 +36,20 @@ export async function registerUser(data: SignUpInput) {
     if (!response) {
       throw new Error("Registration failed, please try again.");
     }
+    
+    return { success: true, message: "Please verify your account" };
 
-    return { success: true, message: "Account created successfully!" };
-  } catch (error : unknown | Error) {
+  } catch (error: unknown | Error) {
     console.error("SignUp Error:", error);
 
-    // Prevent leaking raw errors from server 
+    // Prevent leaking raw errors from server
     if (error === "ZodError") {
       return { success: false, message: "Invalid form input." };
     }
 
-    return { success: false, message: "Something went wrong, please try again later." };
+    return {
+      success: false,
+      message: "Something went wrong, please try again later.",
+    };
   }
 }

@@ -1,7 +1,6 @@
 "use server";
 
 import { signIn } from "@/lib/auth-client"; // or better-auth
-import { redirect } from "next/navigation";
 import z from "zod";
 
 const signInSchema = z.object({
@@ -15,8 +14,6 @@ export type SignUpInput = z.infer<typeof signInSchema>;
 export async function signInAction( data : SignUpInput) {
    const parsed = signInSchema.parse(data);
   
-   
-  
   try {
     const result = await signIn.email({
       email: parsed.email,
@@ -28,8 +25,6 @@ export async function signInAction( data : SignUpInput) {
       return { success: false, message: "Invalid credentials" };
     }
 
-    // Redirect after successful login (server-side, secure)
-    redirect("/");
   } catch (error) {
     console.error("[signInAction]", error);
     return { success: false, message: "Something went wrong" };

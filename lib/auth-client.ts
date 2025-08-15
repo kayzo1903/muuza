@@ -1,4 +1,5 @@
 import { createAuthClient } from "better-auth/react";
+import { emailOTPClient } from "better-auth/client/plugins"
 
 const baseURL =
   process.env.NODE_ENV === "production"
@@ -7,6 +8,9 @@ const baseURL =
 
 export const authClient = createAuthClient({
   baseURL,
+   plugins: [
+        emailOTPClient()
+    ]
 });
 
 export const { signIn, signUp, useSession , signOut} = authClient;
