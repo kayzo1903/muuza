@@ -13,16 +13,20 @@ export const auth = betterAuth({
   }),
   trustedOrigins: ["http://localhost:3000", "https://muuza.vercel.app"],
   session: {
-    expiresIn: 60 * 60 * 24, // session expires in 1 day
-    updateAge: 60 * 60 , // session is updated every 1 hr
+    expiresIn: 30 * 24 * 60 * 60,
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
   },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true, // require email verification for sign up    
+    requireEmailVerification: true, // require email verification for sign up
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
+    expiresIn: 60 * 60, // 1hr
   },
   socialProviders: {
     google: {

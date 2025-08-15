@@ -17,10 +17,10 @@ import { ModeToggle } from "../Mode-toggle";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
 import Addlocation from "../Addlocation/Addlocation";
 import { HeaderProps } from "@/lib/session-props";
-import { signOut } from "@/lib/auth-client"; // Better Auth logout
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { signOut } from "@/lib/auth-client";
 
 export default function ShopHeader({
   session,
@@ -31,6 +31,8 @@ export default function ShopHeader({
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const router = useRouter();
+
+
 
   useEffect(() => {
     const handleScroll = () => setSticky(window.scrollY > 0);

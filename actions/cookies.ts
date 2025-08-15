@@ -7,7 +7,7 @@ export async function setEmailCookie(email: string) {
     httpOnly: true, // cannot be accessed by JS
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24, // expires in 1 day
+    maxAge: 60 * 60, // expires in 1 hr
   });
 }
 

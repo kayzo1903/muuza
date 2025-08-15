@@ -78,7 +78,7 @@ export default function EmailVerification({ email }: EmailVerificationProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8">
       <div className="w-full max-w-md flex flex-col justify-center items-center shadow-lg rounded-2xl p-6 space-y-6 text-center bg-white dark:bg-gray-900">
         <h1 className="text-2xl font-bold text-[#00BF63]">Verify Your Email</h1>
         <p className="text-gray-600">

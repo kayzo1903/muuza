@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { signInAction } from "@/actions/sign-in.action";
 import { redirect } from "next/navigation";
 
+
 const signInSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -46,7 +47,7 @@ export default function SignIn() {
       } else {
         // Redirect handled in server action
         toast.success("Redirecting...");
-        redirect("/shop");
+        redirect("/shop")
       }
     });
   };

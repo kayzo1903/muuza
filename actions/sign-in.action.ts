@@ -17,22 +17,28 @@ const signInSchema = z.object({
 export type SignInInput = z.infer<typeof signInSchema>;
 
 export async function signInAction(data: SignInInput) {
+  const parsed = signInSchema.parse(data);
+
   try {
     await auth.api.signInEmail({
       headers: await headers(),
       body: {
-        email: data.email,
-        password: data.password,
+        email: parsed.email,
+        password: parsed.password,
       },
     });
-    return { success: true, message: "You have sucessfull sign-in" };
+    return {
+      success: true,
+      message: "You have sucessfull sign-in",
+      error: null,
+    };
   } catch (err) {
     if (err instanceof APIError) {
       const errCode = err.body ? err.body.code : "UNKNOWN";
       switch (errCode) {
         case "EMAIL_NOT_VERIFIED":
-          await setEmailCookie(data.email);
-          await sendVerificationOTP(data.email, "email-verification");
+          await setEmailCookie(parsed.email);
+          await sendVerificationOTP(parsed.email, "email-verification");
           redirect("/auth/email-verification");
         default:
           return { success: false, message: err.message };

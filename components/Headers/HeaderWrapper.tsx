@@ -1,12 +1,10 @@
 import Header from "./Header";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/actions/getsession";
 
 const HeaderWrapper = async () => {
-  const session = await auth.api.getSession({
-    headers: await headers()
-  });
 
+   const session = await getSession()
+  
   return <Header session={session} />;
 };
 
