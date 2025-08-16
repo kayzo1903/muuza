@@ -1,39 +1,33 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { Link, useRouter } from "@/i18n/routing";
-import logo from "@/public/logo/muuzalogo.png";
-import {
-  AlignLeft,
-  X,
-  User,
-  Heart,
-  ShoppingBag,
-  LogOut,
-  Store,
-} from "lucide-react";
-import { ModeToggle } from "../Mode-toggle";
-import LocaleSwitcher from "../(lang)/LocaleSwitcher";
-import Addlocation from "../Addlocation/Addlocation";
-import { HeaderProps } from "@/lib/session-props";
-import { Button } from "../ui/button";
+import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Menu, Heart, ShoppingBag, User, LogOut, Store, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { signOut } from "@/lib/auth-client";
+import LocaleSwitcher from "../(lang)/LocaleSwitcher";
+import { ModeToggle } from "../Mode-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { HeaderProps } from "@/lib/session-props";
 
-export default function ShopHeader({
-  session,
-}: {
-  session: HeaderProps["session"];
-}) {
+export default function ShopHeader({ session }: HeaderProps) {
+  const pathname = usePathname();
+  const [mobileMenu, setMobileMenu] = useState(false);
   const [isSticky, setSticky] = useState(false);
-  const [isMenuOpen, setMenuOpen] = useState(false);
   const [pending, setPending] = useState(false);
-  const router = useRouter();
 
+  const showSearch =
+    pathname.startsWith("/en/shop") || pathname.startsWith("/sw/shop");
 
-
+  // Sticky scroll effect
   useEffect(() => {
     const handleScroll = () => setSticky(window.scrollY > 0);
     window.addEventListener("scroll", handleScroll);
@@ -41,113 +35,168 @@ export default function ShopHeader({
   }, []);
 
   async function handleSignout() {
-    await signOut({
-      fetchOptions: {
-        onRequest: () => {
-          setPending(true);
-        },
-        onError: (ctx) => {
-          console.log(ctx.error.message);
-          toast.error("Failed to sign out , check your connection");
-        },
-        onSuccess: () => {
-          setPending(false);
-          router.push("/auth/sign-in");
-          toast.success("Signed out successfully");
-        },
-      },
-    });
+    setPending(true);
+    try {
+      // If you use next-auth, replace with `signOut()`
+      window.location.href = "/auth/sign-in";
+      toast.success("Signed out successfully");
+    } catch {
+      toast.error("Failed to sign out");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-shadow duration-300 ${
-        isSticky ? "bg-white dark:bg-gray-800 shadow-md" : "bg-transparent"
+      className={`fixed top-0 w-full z-50 transition-shadow duration-300 bg-green-600 h-24 lg:h-16 rounded-bl-4xl lg:rounded-none ${
+        isSticky ? "shadow-md" : "shadow-none"
       }`}
     >
-      <div className="w-full px-4 lg:px-20 py-3 space-y-3 lg:space-y-0">
-        {/* Large screen layout */}
-        <div className="hidden lg:flex items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setMenuOpen(true)}
-              className="text-gray-950 dark:text-gray-50"
-            >
-              <AlignLeft size={26} />
-            </button>
-            <Link href="/">
-              <Image
-                alt="Muuza Logo"
-                src={logo}
-                height={28}
-                width={112}
-                className="h-auto w-40"
-              />
-            </Link>
-          </div>
+      {/* Top Bar */}
+      <div className="flex items-center justify-between px-4 lg:px-8 py-3">
+        {/* Mobile: Navbar toggle */}
+        <div className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenu(true)}
+          >
+            <Menu
+              className={`h-6 w-6 ${isSticky ? "text-black" : "text-white"}`}
+            />
+          </Button>
+        </div>
 
-          <Addlocation />
+        {/* Logo */}
+        <Link href="/" className="flex text-3xl font-semibold text-white">
+          muuza
+        </Link>
+
+        {/* Desktop Search */}
+        {showSearch && (
+          <div className="hidden lg:block px-4 w-[480px] ">
+            <div className="relative w-full">
+              <Input
+                type="text"
+                placeholder="Search products..."
+                className="pr-20 rounded-xl shadow-md bg-gray-50 dark:bg-gray-100 text-gray-900"
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Right Icons (Desktop) */}
+        <div className="hidden lg:flex items-center gap-6 text-gray-50 font-medium">
+          <Link href="/orders">
+            <ShoppingBag className={`h-6 w-6 `} />
+          </Link>
+          <Link href="/favourites">
+            <Heart className={`h-6 w-6`} />
+          </Link>
 
           <LocaleSwitcher />
           <ModeToggle />
         </div>
 
-        {/* Small screen layout */}
-        <div className="lg:hidden flex items-center justify-between gap-4">
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="text-gray-950 dark:text-gray-50"
-          >
-            <AlignLeft size={26} />
-          </button>
-          <Link href="/">
-            <Image
-              alt="Muuza Logo"
-              src={logo}
-              height={28}
-              width={112}
-              className="h-auto w-32"
+        <div className="hidden lg:block">
+          {session?.user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="cursor-pointer">
+                  <AvatarImage src={session.user.image ?? ""} />
+                  <AvatarFallback>
+                    {session.user.name?.[0] ?? "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/logout">Logout</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex gap-2">
+              <Link href="/auth/sign-in">
+                <Button variant="outline" size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/auth/register">
+                <Button size="sm">Sign Up</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile: Profile / Auth */}
+        <div className="lg:hidden">
+          {session?.user ? (
+            <Link href="/profile">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={session.user.image ?? ""} />
+                <AvatarFallback>{session.user.name?.[0] ?? "U"}</AvatarFallback>
+              </Avatar>
+            </Link>
+          ) : (
+            <Link href="/auth/sign-in">
+              <User className={`h-8 w-8`} />
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Search (below header) */}
+      {showSearch && (
+        <div className="lg:hidden absolute left-1/2 -translate-x-1/2 w-[90%] -bottom-6 ">
+          <div className="relative ">
+            <Input
+              type="text"
+              placeholder="Search products..."
+              className="pr-20 rounded-xl shadow-md h-12 text-gray-900 bg-gray-50 dark:bg-gray-100"
             />
-          </Link>
-          <div className="flex items-center gap-4">
-            <LocaleSwitcher />
-            <ModeToggle />
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm"
+            >
+              Search
+            </button>
           </div>
         </div>
+      )}
 
-        <div className="lg:hidden flex items-center justify-between gap-4">
-          <Addlocation />
-        </div>
-      </div>
-
-      <div className="lg:hidden">
-        <input
-          type="text"
-          placeholder="Search for products, foods, etc."
-          className="w-full px-4 py-2 border border-border bg-background text-sm rounded-lg"
-        />
-      </div>
-
-      {/* Slide-in Sidebar Nav */}
+      {/* Mobile Slide-in Sidebar */}
       <div
         className={`fixed inset-0 z-40 transition-opacity duration-300 ${
-          isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          mobileMenu ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
       >
         <div
           className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-          onClick={() => setMenuOpen(false)}
+          onClick={() => setMobileMenu(false)}
         />
         <div
-          className={`absolute top-0 left-0 h-full w-full md:max-w-md bg-white dark:bg-gray-950 shadow-lg transform transition-transform duration-500 ease-in-out ${
-            isMenuOpen ? "translate-x-0" : "-translate-x-full"
+          className={`absolute top-0 left-0 h-full w-72 bg-white  dark:bg-gray-900 shadow-lg transform transition-transform duration-500 ease-in-out ${
+            mobileMenu ? "translate-x-0" : "-translate-x-full"
           }`}
-          onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <div className="flex justify-end p-4">
             <button
-              onClick={() => setMenuOpen(false)}
+              onClick={() => setMobileMenu(false)}
               className="text-gray-600 dark:text-white hover:text-black"
             >
               <X size={24} />
@@ -156,17 +205,15 @@ export default function ShopHeader({
 
           {/* User Info */}
           {session?.user ? (
-            <div className="flex flex-col items-center gap-2 p-4 border-b border-border">
-              <Avatar className="w-8 h-8">
+            <div className="flex flex-col items-center gap-2 p-4 border-b">
+              <Avatar className="w-10 h-10">
                 <AvatarImage src={session.user.image ?? ""} />
                 <AvatarFallback>{session.user.name?.[0] ?? ""}</AvatarFallback>
               </Avatar>
-              <p className="font-medium">
-                {session.user.name ?? "Unknown User"}
-              </p>
+              <p className="font-medium">{session.user.name}</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-4 px-4">
+            <div className="flex flex-col gap-3 px-4">
               <Link
                 href="/auth/sign-in"
                 className="bg-green-600 text-white hover:bg-green-700 flex items-center justify-center rounded-md px-4 py-2"
@@ -177,42 +224,47 @@ export default function ShopHeader({
                 href="/auth/register"
                 className="flex items-center justify-center rounded-md border px-4 py-2 hover:bg-gray-100"
               >
-                Sign up
+                Sign Up
               </Link>
             </div>
           )}
 
           {/* Nav Links */}
-          {session && (
+          {session?.user && (
             <nav className="flex flex-col p-4 gap-4">
               <Link
                 href="/profile"
-                className="flex items-center gap-3 hover:text-green-600"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-green-600"
               >
                 <User size={20} /> Profile
               </Link>
               <Link
-                href="/my-orders"
-                className="flex items-center gap-3 hover:text-green-600"
+                href="/orders"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-green-600"
               >
                 <ShoppingBag size={20} /> Orders
               </Link>
               <Link
-                href="/favorites"
-                className="flex items-center gap-3 hover:text-green-600"
+                href="/favourites"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-green-600"
               >
                 <Heart size={20} /> Favorites
               </Link>
               <Link
                 href="/get-store"
-                className="flex items-center gap-3 hover:text-green-600"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-green-600"
               >
-                <Store size={20} /> get your store
+                <Store size={20} /> Get your store
               </Link>
+              <div className="flex gap-4 items-center">
+                <LocaleSwitcher />
+                <ModeToggle />
+              </div>
+
               <Button
                 disabled={pending}
                 onClick={handleSignout}
-                className="flex items-center gap-3 bg-red-400"
+                className="flex items-center gap-3 bg-red-500 text-white"
               >
                 <LogOut size={20} /> Logout
               </Button>

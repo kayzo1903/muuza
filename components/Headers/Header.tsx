@@ -95,7 +95,6 @@ export default function Header({ session }: { session: HeaderProps["session"] })
                       <AvatarImage src={userImage} />
                       <AvatarFallback>{userName[0]}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium">{userName}</span>
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
