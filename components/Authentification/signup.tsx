@@ -68,8 +68,8 @@ export default function SignUp() {
 
       if (res?.success) {
         await setEmailCookie(data.email);
-        await sendVerificationOTP(data.email , "email-verification")
-        router.push("/auth/email-verification"); // Redirect to sign-in page after successful registration
+        await sendVerificationOTP(data.email, "email-verification");
+        router.push("/auth/email-verification?from=sign-up");
       } else {
         setError(res?.message || "something went wrong");
       }

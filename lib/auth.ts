@@ -6,6 +6,7 @@ import { sendEmailAction } from "@/actions/send-email.action";
 import { emailOTP } from "better-auth/plugins";
 import { myCustomDecryptor, myCustomEncryptor } from "@/actions/encryptor";
 import { nextCookies } from "better-auth/next-js";
+import { sendResetLink } from "@/actions/send-reset-link.action";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -23,6 +24,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true, // require email verification for sign up
+    sendResetPassword: async ({ user, url }) => {
+      await sendResetLink({
+        to: user.email,
+        subject: "Reset your password",
+        meta: {
+          description: "Please click the link below to reset your password.",
+          link: String(url),
+        },
+      });
+    },
   },
   emailVerification: {
     sendOnSignUp: true,

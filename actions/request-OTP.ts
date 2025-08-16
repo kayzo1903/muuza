@@ -1,10 +1,11 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { APIError } from "better-auth/api";
 
 // --- Send OTP ---
 export async function sendVerificationOTP(
-  userEmail: string ,
+  userEmail: string,
   method: "email-verification" | "sign-in" | "forget-password"
 ) {
   try {
@@ -15,21 +16,29 @@ export async function sendVerificationOTP(
       },
     });
 
-    // handle based on response structure
     if (!res) {
       throw new Error("Failed to send OTP");
     }
 
-    return { success: true, token: res.success, };
+    return { success: true };
   } catch (err) {
-    if (err === "MAX_ATTEMPTS_EXCEEDED") {
-      return { success: false, error: "Maximum OTP attempts exceeded. Please try again later." };
+    
+    if (err instanceof APIError) {
+      return {
+        success: false,
+        error: err.message ,
+      };
     }
-    return { success: false, error:  "Something went wrong" };
+
+    return {
+      success: false,
+      error:  "Something went wrong",
+    };
   }
 }
 
 // --- Verify OTP ---
+
 export async function verifyEmailOTP(userEmail: string, otp: string) {
   try {
     const res = await auth.api.verifyEmailOTP({
@@ -39,15 +48,24 @@ export async function verifyEmailOTP(userEmail: string, otp: string) {
       },
     });
 
-    if (!res.status) {
-      throw new Error("Invalid or expired OTP");
+    console.log("Verify OTP response:", res);
+
+    if (res?.status === true) {
+      return { success: true, token: res.token, user: res.user };
     }
 
-    return { success: true, token: res.token, user: res.user };
+    return {
+      success: false,
+      error: "Invalid or expired OTP",
+    };
   } catch (err) {
-    if (err === "MAX_ATTEMPTS_EXCEEDED") {
-      return { success: false, error: "Maximum OTP attempts exceeded. Please try again later." };
+    console.error("Verify OTP error:", err);
+
+    if (err instanceof APIError) {
+      return { success: false, error: err.message || "Invalid OTP. Please try again." };
     }
+
     return { success: false, error: "Something went wrong" };
   }
 }
+

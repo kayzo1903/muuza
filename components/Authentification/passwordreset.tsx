@@ -8,8 +8,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import { resetPassword } from "@/lib/auth-client";
 
-// 1️⃣ Zod schema
+// 1️⃣ Zod schema for strong password validation
 const newPasswordSchema = z
   .object({
     password: z
@@ -17,7 +19,8 @@ const newPasswordSchema = z
       .min(8, "Password must be at least 8 characters long")
       .regex(/[A-Z]/, "Must contain at least one uppercase letter")
       .regex(/[a-z]/, "Must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Must contain at least one number"),
+      .regex(/[0-9]/, "Must contain at least one number")
+      .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -25,9 +28,13 @@ const newPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+interface ResetPasswordFormProps {
+  token: string;
+}
+
 type NewPasswordFormData = z.infer<typeof newPasswordSchema>;
 
-export default function NewPasswordSetting() {
+export default function NewPasswordSetting({ token }: ResetPasswordFormProps) {
   const [pending, setPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -44,16 +51,27 @@ export default function NewPasswordSetting() {
 
   const onSubmit = async (data: NewPasswordFormData) => {
     setPending(true);
-    try {
-      console.log("New password:", data.password);
-      // await updatePassword(data.password)
-      setSuccess(true);
-      setTimeout(() => router.push("/auth/sign-in"), 2000);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setPending(false);
-    }
+
+    await resetPassword({
+      newPassword: data.password,
+      token,
+      fetchOptions: {
+        onRequest: () => {
+          setPending(true);
+        },
+        onResponse: () => {
+          setPending(false);
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+        onSuccess: () => {
+          setSuccess(true);
+          toast.success("Password reset successfully.");
+          setTimeout(() => router.push("/auth/login"), 2000);
+        },
+      },
+    });
   };
 
   return (
@@ -82,7 +100,9 @@ export default function NewPasswordSetting() {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
               {errors.password && (
-                <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 

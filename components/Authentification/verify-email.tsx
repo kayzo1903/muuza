@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   InputOTP,
@@ -9,7 +10,6 @@ import {
 } from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import { sendVerificationOTP, verifyEmailOTP } from "@/actions/request-OTP";
-import { redirect } from "next/navigation";
 import { clearEmailCookie } from "@/actions/cookies";
 
 interface EmailVerificationProps {
@@ -18,9 +18,11 @@ interface EmailVerificationProps {
 
 export default function EmailVerification({ email }: EmailVerificationProps) {
   const [otp, setOtp] = useState("");
-  const [timeLeft, setTimeLeft] = useState(0); // countdown in seconds
+  const [timeLeft, setTimeLeft] = useState(0);
   const [isResending, setIsResending] = useState(false);
   const [pending, setPending] = useState(false);
+
+  const router = useRouter();
 
   // Load expiry time from localStorage on mount
   useEffect(() => {
@@ -37,7 +39,7 @@ export default function EmailVerification({ email }: EmailVerificationProps) {
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          localStorage.removeItem("otpExpiry"); // clear when finished
+          localStorage.removeItem("otpExpiry");
           return 0;
         }
         return prev - 1;
@@ -49,12 +51,15 @@ export default function EmailVerification({ email }: EmailVerificationProps) {
   const handleVerify = async () => {
     setPending(true);
     const res = await verifyEmailOTP(email, otp);
+
     if (res.success) {
       toast.success("Your email was successfully verified ✅");
       setOtp("");
-      localStorage.removeItem("otpExpiry"); // clean up after success
-      clearEmailCookie(); //clear upcookies after sucessfull
-      redirect("/shop");
+      localStorage.removeItem("otpExpiry");
+      clearEmailCookie();
+
+      // ✅ Always redirect to shop after signup verification
+      router.push("/shop");
     } else {
       toast.error(res.error);
     }
@@ -62,13 +67,15 @@ export default function EmailVerification({ email }: EmailVerificationProps) {
   };
 
   const handleSend = async () => {
-    if (timeLeft > 0) return; // prevent spam
+    if (timeLeft > 0) return;
     setIsResending(true);
+
     const res = await sendVerificationOTP(email, "email-verification");
+
     if (res.success) {
       setOtp("");
       toast.success("OTP sent to your email");
-      const expiryTime = Date.now() + 120 * 1000; // 2 minutes
+      const expiryTime = Date.now() + 120 * 1000;
       localStorage.setItem("otpExpiry", expiryTime.toString());
       setTimeLeft(120);
     } else {
@@ -82,7 +89,7 @@ export default function EmailVerification({ email }: EmailVerificationProps) {
       <div className="w-full max-w-md flex flex-col justify-center items-center shadow-lg rounded-2xl p-6 space-y-6 text-center bg-white dark:bg-gray-900">
         <h1 className="text-2xl font-bold text-[#00BF63]">Verify Your Email</h1>
         <p className="text-gray-600">
-          Enter the 6-digit code we sent to your email:{" "}
+          Enter the 6-digit code we sent to:{" "}
           <span className="font-semibold">{email}</span>
         </p>
 
