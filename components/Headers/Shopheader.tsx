@@ -77,7 +77,7 @@ export default function ShopHeader({ session }: HeaderProps) {
         </div>
 
         {/* Logo */}
-        <Link href="/" className="flex text-3xl font-semibold text-white">
+        <Link href="/" className="text-3xl font-semibold text-white">
           muuza
         </Link>
 

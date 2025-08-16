@@ -106,7 +106,7 @@ const Userlocation: React.FC = () => {
         )}
         <button
           type="submit"
-          className="text-white w-1/2 bg-skin rounded-xl py-2 px-2 text-xl hover:text-skin transition-all duration-300"
+          className="text-white bg-green-600 w-1/2 bg-skin rounded-xl py-2 px-2 text-xl hover:text-skin transition-all duration-300"
         >
           {t("addlocation")}
         </button>

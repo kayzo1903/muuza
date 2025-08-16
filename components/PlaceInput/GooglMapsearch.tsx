@@ -110,7 +110,7 @@ const SearchFoods: React.FC = () => {
         )}
         <button
           type="submit"
-          className="h-16 capitalize text-white bg-gray-950 rounded-xl bg-skin rounded-x py-2 px-2 text-xl w-full md:w-1/2  transition-all duration-300 "
+          className="h-16 capitalize text-white bg-green-600  dark:bg-green-900 rounded-xl bg-skin rounded-x py-2 px-2 text-xl w-full md:w-1/2  transition-all duration-300 "
         >
           {t("ctaButton")}
         </button>

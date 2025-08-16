@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
-import logo from "@/public/logo/muuzalogo.png";
 import { AlignLeft, X } from "lucide-react";
 import { ModeToggle } from "../Mode-toggle";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
@@ -20,7 +18,11 @@ import { signOut } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { HeaderProps } from "@/lib/session-props";
 
-export default function Header({ session }: { session: HeaderProps["session"] }) {
+export default function Header({
+  session,
+}: {
+  session: HeaderProps["session"];
+}) {
   const [isSticky, setSticky] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -32,13 +34,13 @@ export default function Header({ session }: { session: HeaderProps["session"] })
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-    async function handleSignout() {
+  async function handleSignout() {
     await signOut({
       fetchOptions: {
         onRequest: () => {
-          setPending(true)
-        } ,
-        onError: (ctx) => {
+          setPending(true);
+        },
+        onError: () => {
           toast.error("Failed to sign out , check your connection");
         },
         onSuccess: () => {
@@ -56,30 +58,26 @@ export default function Header({ session }: { session: HeaderProps["session"] })
   return (
     <header
       className={clsx(
-        "fixed top-0 left-0 w-full z-50 transition-all duration-300",
-        isSticky ? "bg-white dark:bg-gray-900 shadow-md" : "bg-transparent"
+        "fixed top-0 left-0 w-full z-50 transition-all duration-300 rounded-bl-4xl lg:rounded-none",
+        isSticky ? "bg-green-600 dark:bg-green-900 shadow-md" : "bg-transparent"
       )}
     >
-      <div className="px-4 lg:px-20 h-20 flex items-center justify-between">
-        {/* Left: Logo + Menu button */}
-        <div className="flex items-center gap-4">
+      <div className="px-4 lg:px-20 h-20 flex items-center justify-between relative">
+        {/* Left: Menu button (only on mobile) */}
+        <div className="lg:hidden">
           <button
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
-            className="p-2 rounded-md lg:hidden hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             <AlignLeft size={26} className="text-gray-800 dark:text-gray-100" />
           </button>
+        </div>
 
-          <Link href="/" className="block">
-            <Image
-              alt="Muuza logo"
-              src={logo}
-              priority
-              height={28}
-              width={140}
-              className="h-auto w-auto"
-            />
+        {/* Center: Logo (centered on mobile, left-aligned on desktop) */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 lg:static lg:left-0 lg:transform-none">
+          <Link href="/" className="text-3xl font-semibold text-white">
+            muuza
           </Link>
         </div>
 
@@ -167,7 +165,11 @@ export default function Header({ session }: { session: HeaderProps["session"] })
                 <Button asChild variant="outline">
                   <Link href="/profile">Profile</Link>
                 </Button>
-                <Button variant="destructive" onClick={handleSignout} disabled={pending}>
+                <Button
+                  variant="destructive"
+                  onClick={handleSignout}
+                  disabled={pending}
+                >
                   Logout
                 </Button>
               </>
