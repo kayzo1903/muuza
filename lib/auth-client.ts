@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/react";
-import { emailOTPClient } from "better-auth/client/plugins"
+import { emailOTPClient } from "better-auth/client/plugins";
 
 const baseURL =
   process.env.NODE_ENV === "production"
@@ -8,9 +8,11 @@ const baseURL =
 
 export const authClient = createAuthClient({
   baseURL,
-   plugins: [
-        emailOTPClient()
-    ]
+  plugins: [emailOTPClient()],
+  trustedOrigins: ["http://localhost:3000", "https://muuza.vercel.app"],
+  fetchOptions: {
+    credentials: "include",
+  },
 });
 
-export const { signIn, signUp, useSession , signOut} = authClient;
+export const { signIn, signUp, useSession, signOut } = authClient;

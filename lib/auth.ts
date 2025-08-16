@@ -5,6 +5,7 @@ import * as schema from "@/db/schema";
 import { sendEmailAction } from "@/actions/send-email.action";
 import { emailOTP } from "better-auth/plugins";
 import { myCustomDecryptor, myCustomEncryptor } from "@/actions/encryptor";
+import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -39,6 +40,17 @@ export const auth = betterAuth({
       scope: ["email", "public_profile"], // make sure email is here
     },
   },
+  account: {
+    accountLinking: {
+      trustedProviders: ["google", "facebook"],
+    },
+  },
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: process.env.NODE_ENV === "production",
+      domain: ".muuza.vercel.app",
+    },
+  },
   plugins: [
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
@@ -60,5 +72,6 @@ export const auth = betterAuth({
         },
       },
     }),
+    nextCookies(),
   ],
 });

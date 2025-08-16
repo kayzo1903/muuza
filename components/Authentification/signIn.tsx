@@ -13,7 +13,7 @@ import { Eye, EyeOff } from "lucide-react";
 import SocialAuthButton from "../outh-sign-Btn";
 import { toast } from "sonner";
 import { signInAction } from "@/actions/sign-in.action";
-import { redirect } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 
 
 const signInSchema = z.object({
@@ -28,6 +28,8 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const route = useRouter()
 
   const {
     register,
@@ -47,7 +49,7 @@ export default function SignIn() {
       } else {
         // Redirect handled in server action
         toast.success("Redirecting...");
-        redirect("/shop")
+        route.push("/shop")
       }
     });
   };
