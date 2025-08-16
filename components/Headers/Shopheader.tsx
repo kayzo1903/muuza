@@ -17,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { HeaderProps } from "@/lib/session-props";
+import { signOut } from "@/lib/auth-client";
+import { useRouter } from "@/i18n/routing";
 
 export default function ShopHeader({ session }: HeaderProps) {
   const pathname = usePathname();
@@ -26,6 +28,7 @@ export default function ShopHeader({ session }: HeaderProps) {
 
   const showSearch =
     pathname.startsWith("/en/shop") || pathname.startsWith("/sw/shop");
+  const router = useRouter();
 
   // Sticky scroll effect
   useEffect(() => {
@@ -35,16 +38,21 @@ export default function ShopHeader({ session }: HeaderProps) {
   }, []);
 
   async function handleSignout() {
-    setPending(true);
-    try {
-      // If you use next-auth, replace with `signOut()`
-      window.location.href = "/auth/sign-in";
-      toast.success("Signed out successfully");
-    } catch {
-      toast.error("Failed to sign out");
-    } finally {
-      setPending(false);
-    }
+    await signOut({
+      fetchOptions: {
+        onRequest: () => {
+          setPending(true);
+        },
+        onError: () => {
+          toast.error("Failed to sign out , check your connection");
+        },
+        onSuccess: () => {
+          setPending(false);
+          router.push("/auth/sign-in");
+          toast.success("Signed out successfully");
+        },
+      },
+    });
   }
 
   return (

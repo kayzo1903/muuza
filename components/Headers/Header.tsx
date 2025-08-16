@@ -39,7 +39,6 @@ export default function Header({ session }: { session: HeaderProps["session"] })
           setPending(true)
         } ,
         onError: (ctx) => {
-          console.log(ctx.error.message);
           toast.error("Failed to sign out , check your connection");
         },
         onSuccess: () => {

@@ -8,7 +8,7 @@ import { ModeToggle } from "../Mode-toggle";
 
 export default function AuthHeader() {
   return (
-    <header className="w-full py-6 pr-4">
+    <header className="w-full py-6 pr-4 bg-green-600 dark:bg-green-900 rounded-bl-4xl">
       <div className="flex justify-between items-center">
         <Link href="/" className="block">
           <Image
