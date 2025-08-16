@@ -49,7 +49,7 @@ export default function ShopHeader({ session }: HeaderProps) {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-shadow duration-300 bg-green-600 h-24 lg:h-16 rounded-bl-4xl lg:rounded-none ${
+      className={`fixed top-0 w-full z-50 transition-shadow duration-300 bg-green-600 dark:bg-green-900 h-24 lg:h-16 rounded-bl-4xl lg:rounded-none ${
         isSticky ? "shadow-md" : "shadow-none"
       }`}
     >
@@ -124,7 +124,13 @@ export default function ShopHeader({ session }: HeaderProps) {
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/logout">Logout</Link>
+                  <Button
+                    disabled={pending}
+                    onClick={handleSignout}
+                    className="flex items-center gap-3 bg-red-500 text-white"
+                  >
+                    Log Out
+                  </Button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
