@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { resetPassword } from "@/lib/auth-client";
+import { useRouter } from "@/i18n/routing";
 
 // 1️⃣ Zod schema for strong password validation
 const newPasswordSchema = z
@@ -139,7 +139,7 @@ export default function NewPasswordSetting({ token }: ResetPasswordFormProps) {
             </Button>
           </form>
         ) : (
-          <p className="text-green-600 text-center text-sm pt-4">
+          <p className="text-green-600 text-center text-xl font-medium pt-4">
             ✅ Password updated successfully! Redirecting to sign in...
           </p>
         )}

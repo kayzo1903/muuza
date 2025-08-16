@@ -146,8 +146,8 @@ export default function ForgotPassword() {
             </Button>
           </form>
         ) : (
-          <p className="text-green-600 text-center text-sm pt-4">
-            ✅ If this email is registered, a reset link has been sent.
+          <p className="text-green-600 text-center text-xl font-medium pt-4">
+            If this email is registered, a reset link has been sent.
           </p>
         )}
 
