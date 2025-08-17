@@ -28,6 +28,7 @@ const categories = [
   { name: "Chocolate", icon: "🍫", href: "/foods/chocolate" },
   { name: "Coffee", icon: "☕", href: "/foods/coffee" },
   { name: "Soft Drinks", icon: "🥤", href: "/foods/drinks" },
+   { name: "Chefs", icon: "👨🏽‍🍳", href: "/service/chefs" }
 ];
 
 export default function EastAfricanFoods() {

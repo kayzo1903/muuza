@@ -5,32 +5,34 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-const businesses = [
-  { name: "Mama Ntilie", category: "Local Food", image: "/images/restaurant1.jpg" },
-  { name: "Kilimanjaro Restaurant", category: "Restaurant", image: "/images/restaurant2.jpg" },
-  { name: "Taste of Coast", category: "Swahili Dishes", image: "/images/restaurant3.jpg" },
-  { name: "Samaki Grill", category: "Seafood", image: "/images/restaurant4.jpg" },
-  { name: "Chips Duka", category: "Fast Food", image: "/images/restaurant5.jpg" },
-  { name: "Nyama Choma Base", category: "Barbecue", image: "/images/restaurant6.jpg" },
-  { name: "Urban Cafe", category: "Coffee Shop", image: "/images/restaurant7.jpg" },
-  { name: "Zanzibar Bites", category: "Swahili Snacks", image: "/images/restaurant8.jpg" },
-  { name: "Fresh Juice Hub", category: "Drinks", image: "/images/restaurant2.jpg" },
-  { name: "Golden Biryani", category: "Indian/East African", image: "/images/restaurant1.jpg" },
+const dishes = [
+  { name: "Ugali", category: "East African", image: "/foods/ugali.jpg" },
+  { name: "Pilau", category: "East African", image: "/foods/pilau.jpg" },
+  { name: "Nyama Choma", category: "East African", image: "/foods/nyama.jpg" },
+  { name: "Chapati", category: "East African", image: "/foods/chapati.jpg" },
+  { name: "Samaki", category: "Seafood", image: "/foods/samaki.jpg" },
+  { name: "Biriani", category: "East African", image: "/foods/biryani.jpg" },
+  { name: "Chips", category: "Fast Food", image: "/foods/chips.jpg" },
+  { name: "Pizza", category: "International", image: "/foods/pizza.jpg" },
+  { name: "Burgers", category: "International", image: "/foods/burger.jpg" },
+  { name: "Ice Cream", category: "Dessert", image: "/foods/icecream.jpg" },
 ];
 
-export default function NearbyBusinesses() {
+export default function PopularDishes() {
   return (
     <div className="w-full p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Nearby Businesses</h2>
-        <Link href="/businesses">
-          <Button variant="outline" size="sm">View All</Button>
+        <h2 className="text-xl font-bold">Popular Dishes</h2>
+        <Link href="/dishes">
+          <Button variant="outline" size="sm">
+            View All
+          </Button>
         </Link>
       </div>
 
       {/* Scrollable container on small screens */}
       <div className="flex overflow-x-auto gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:overflow-visible">
-        {businesses.map((biz, i) => (
+        {dishes.map((dish, i) => (
           <motion.div
             key={i}
             whileHover={{ scale: 1.03 }}
@@ -42,15 +44,15 @@ export default function NearbyBusinesses() {
                 {/* Image */}
                 <div className="h-40 w-full overflow-hidden rounded-t-2xl">
                   <img
-                    src={biz.image}
-                    alt={biz.name}
+                    src={dish.image}
+                    alt={dish.name}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 {/* Info */}
                 <div className="p-3 flex flex-col items-start">
-                  <h3 className="text-lg font-semibold">{biz.name}</h3>
-                  <p className="text-sm text-gray-500">{biz.category}</p>
+                  <h3 className="text-lg font-semibold">{dish.name}</h3>
+                  <p className="text-sm text-gray-500">{dish.category}</p>
                   <Button variant="outline" size="sm" className="mt-2">
                     More
                   </Button>

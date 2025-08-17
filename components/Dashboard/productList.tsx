@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 import ProductCard from "./productcard";
-import pizza from "@/public/foods/pizza.jpg";
-import bugger from "@/public/foods/bugger.jpg";
-import chicken from "@/public/foods/chicken.jpg";
 import ProductCardSkeleton from "./productcardskeleton";
 
 // Sample static data
@@ -14,21 +11,21 @@ const sampleProducts = [
     name: "Chicken Burger",
     description: "Juicy grilled chicken with fresh toppings",
     price: 8500,
-    image: `${bugger}`, // place image in public/images
+    image: "/foods/chicken.jpg", // place image in public/images
   },
   {
     id: "2",
     name: "Chips Kuku",
     description: "Classic combo served hot",
     price: 7000,
-    image: `${chicken}`,
+    image: "/foods/chips.jpg",
   },
   {
     id: "3",
     name: "Pizza Margherita",
     description: "Cheesy goodness with tomato sauce",
     price: 15000,
-    image: `${pizza}`,
+    image: "/foods/pizza.jpg",
   },
 ];
 
