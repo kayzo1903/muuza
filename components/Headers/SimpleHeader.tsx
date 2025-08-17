@@ -14,10 +14,6 @@ export default function AuthHeader() {
             muuza
           </Link>
         </div>
-        <div className="flex items-center gap-4">
-          <LocaleSwitcher />
-          <ModeToggle />
-        </div>
       </div>
     </header>
   );

@@ -119,8 +119,10 @@ export default function Header({
             )}
           </div>
 
-          <LocaleSwitcher />
-          <ModeToggle />
+          <div className="hidden lg:flex gap-4 items-center">
+            <LocaleSwitcher />
+            <ModeToggle />
+          </div>
         </div>
       </div>
 
@@ -162,6 +164,12 @@ export default function Header({
                   </Avatar>
                   <span className="font-medium">{userName}</span>
                 </div>
+
+                <div className="flex gap-4 items-center">
+                  <LocaleSwitcher />
+                  <ModeToggle />
+                </div>
+
                 <Button asChild variant="outline">
                   <Link href="/profile">Profile</Link>
                 </Button>
@@ -175,6 +183,10 @@ export default function Header({
               </>
             ) : (
               <>
+                <div className="flex gap-4 items-center">
+                  <LocaleSwitcher />
+                  <ModeToggle />
+                </div>
                 <Button asChild variant="outline">
                   <Link href="/auth/sign-in">Login</Link>
                 </Button>
