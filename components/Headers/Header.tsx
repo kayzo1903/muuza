@@ -182,7 +182,7 @@ export default function Header({
                 </Button>
               </>
             ) : (
-              <>
+              <div>
                 <div className="flex gap-4 items-center">
                   <LocaleSwitcher />
                   <ModeToggle />
@@ -193,7 +193,7 @@ export default function Header({
                 <Button asChild>
                   <Link href="/auth/register">Sign up</Link>
                 </Button>
-              </>
+              </div>
             )}
           </nav>
         </div>

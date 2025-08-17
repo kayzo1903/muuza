@@ -1,4 +1,5 @@
-import BrowsePage from "@/components/shop/Browsepage";
+import FoodCategories from "@/components/shop/categories";
+import NearbyBusinesses from "@/components/shop/nearby";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,8 +9,9 @@ export const metadata: Metadata = {
 
 export default function Shoppingpge() {
   return (
-    <section className="h-screen w-full pt-24 lg:pt-4">
-      <BrowsePage />
+    <section className="min-h-screen w-full pt-28  lg:scroll-pt-4">
+      <FoodCategories />
+      <NearbyBusinesses />
     </section>
   );
 }
