@@ -1,8 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import LocaleSwitcher from "../(lang)/LocaleSwitcher";
-import { ModeToggle } from "../Mode-toggle";
+
 
 export default function AuthHeader() {
   return (
