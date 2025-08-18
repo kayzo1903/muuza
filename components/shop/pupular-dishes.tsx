@@ -9,6 +9,7 @@ import Image from "next/image";
 
 const dishes = [
   {
+    id: 1,
     name: "Ugali",
     category: "East African",
     image: "/foods/ugali.jpg",
@@ -16,6 +17,7 @@ const dishes = [
     comments: 32,
   },
   {
+    id: 2,
     name: "Pilau",
     category: "East African",
     image: "/foods/pilau.jpg",
@@ -23,6 +25,7 @@ const dishes = [
     comments: 45,
   },
   {
+    id: 1,
     name: "Nyama Choma",
     category: "East African",
     image: "/foods/nyama.jpg",
@@ -30,6 +33,7 @@ const dishes = [
     comments: 58,
   },
   {
+    id: 2,
     name: "Chapati",
     category: "East African",
     image: "/foods/chapati.jpg",
@@ -37,6 +41,7 @@ const dishes = [
     comments: 22,
   },
   {
+    id: 1,
     name: "Samaki",
     category: "Seafood",
     image: "/foods/samaki.jpg",
@@ -44,6 +49,7 @@ const dishes = [
     comments: 14,
   },
   {
+    id: 2,
     name: "Biriani",
     category: "East African",
     image: "/foods/biryani.jpg",
@@ -51,6 +57,7 @@ const dishes = [
     comments: 39,
   },
   {
+    id: 1,
     name: "Chips",
     category: "Fast Food",
     image: "/foods/chips.jpg",
@@ -58,6 +65,7 @@ const dishes = [
     comments: 41,
   },
   {
+    id: 2,
     name: "Pizza",
     category: "International",
     image: "/foods/pizza.jpg",
@@ -65,6 +73,7 @@ const dishes = [
     comments: 77,
   },
   {
+    id: 1,
     name: "Burgers",
     category: "International",
     image: "/foods/burger.jpg",
@@ -72,6 +81,7 @@ const dishes = [
     comments: 65,
   },
   {
+    id: 2,
     name: "Ice Cream",
     category: "Dessert",
     image: "/foods/icecream.jpg",
@@ -96,7 +106,7 @@ export default function PopularDishes() {
       {/* Scrollable container on small screens */}
       <div className="flex overflow-x-auto gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:overflow-visible">
         {dishes.map((dish, i) => (
-          <Link href={`/shop/dishes/${i + 1}`} key={i}>
+          <Link href={`/shop/dishes/${dish.id}`} key={i}>
             <motion.div
               key={i}
               whileHover={{ scale: 1.03 }}
@@ -147,7 +157,7 @@ export default function PopularDishes() {
                     className="mt-3 bg-white/90 text-black hover:bg-white hover:shadow-md transition-all"
                     asChild
                   >
-                    <Link href={`/dishes/${dish.name}`}>View Details</Link>
+                    View Details
                   </Button>
                 </div>
               </Card>

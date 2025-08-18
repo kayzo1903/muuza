@@ -1,401 +1,205 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Star,
-  Heart,
-  Clock,
-  MapPin,
-  Phone,
-  Mail,
-  Globe,
-  MessageCircle,
-} from "lucide-react";
+import { Star, Heart, MessageCircle, MoreHorizontal, MapPin, Share2, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { motion } from "framer-motion";
 import Image from "next/image";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ChefProfile() {
-  // Chef data
   const chef = {
-    name: "Chef Amina Hassan",
+    name: "Chef Amina",
+    username: "@swahilichef",
     image: "/chefs/mwanaisha.jpg",
-    specialty: "Swahili & Coastal Cuisine",
-    rating: 4.8,
-    reviews: 142,
-    likes: 420,
-    experience: "15 years",
+    bio: "Award-winning Swahili cuisine specialist | Private chef & cooking classes | Mombasa, Kenya",
     location: "Mombasa, Kenya",
-    bio: "Award-winning chef specializing in authentic Swahili dishes with a modern twist. Trained in Zanzibar and worked in top restaurants across East Africa before starting my private catering service.",
-    contact: {
-      phone: "+254 712 345 678",
-      email: "amina@swahiliflavor.com",
-      website: "swahiliflavor.com",
-    },
-    availability: "Available for private events, cooking classes, and catering",
-    signatureDishes: ["Biryani ya Kuku", "Pilau ya Samaki", "Viazi Karai"],
+    posts: 142,
+    likes: "24.5k",
+    rating: 4.8,
   };
 
-  // Sample dishes
-  const dishes = [
-    {
-      name: "Ugali",
-      category: "East African",
-      image: "/foods/ugali.jpg",
-      likes: 240,
-      comments: 32,
-    },
-    {
-      name: "Pilau",
-      category: "East African",
-      image: "/foods/pilau.jpg",
-      likes: 320,
-      comments: 45,
-    },
-    {
-      name: "Nyama Choma",
-      category: "East African",
-      image: "/foods/nyama.jpg",
-      likes: 410,
-      comments: 58,
-    },
-    {
-      name: "Chapati",
-      category: "East African",
-      image: "/foods/chapati.jpg",
-      likes: 280,
-      comments: 22,
-    },
-    {
-      name: "Samaki",
-      category: "Seafood",
-      image: "/foods/samaki.jpg",
-      likes: 150,
-      comments: 14,
-    },
-    {
-      name: "Biriani",
-      category: "East African",
-      image: "/foods/biryani.jpg",
-      likes: 290,
-      comments: 39,
-    },
-    {
-      name: "Chips",
-      category: "Fast Food",
-      image: "/foods/chips.jpg",
-      likes: 360,
-      comments: 41,
-    },
+  const posts = [
+    { id: 1, image: "/foods/pilau.jpg", likes: 320, comments: 45 },
+    { id: 2, image: "/foods/nyama.jpg", likes: 410, comments: 58 },
+    { id: 3, image: "/foods/chapati.jpg", likes: 280, comments: 22 },
+    { id: 4, image: "/foods/samaki.jpg", likes: 150, comments: 14 },
+    { id: 5, image: "/foods/biryani.jpg", likes: 290, comments: 39 },
+    { id: 6, image: "/foods/chips.jpg", likes: 360, comments: 41 },
   ];
 
-  // Sample reviews
   const reviews = [
     {
-      user: "Fatima A.",
+      id: 1,
+      user: "Fatma",
+      text: "Best pilau I've ever had, authentic Swahili taste!",
       rating: 5,
-      date: "2 weeks ago",
-      comment:
-        "Chef Amina's biryani is out of this world! She catered my wedding and all 300 guests were impressed.",
     },
     {
-      user: "Raj P.",
+      id: 2,
+      user: "James",
+      text: "The chapatis were soft and delicious, highly recommend.",
       rating: 4,
-      date: "1 month ago",
-      comment:
-        "Excellent Swahili flavors. The pilau was perfectly spiced. Would have given 5 stars if the delivery was a bit faster.",
-    },
-    {
-      user: "James M.",
-      rating: 5,
-      date: "2 months ago",
-      comment:
-        "Took her cooking class and learned so much about coastal cuisine. Highly recommend!",
     },
   ];
 
+  const handleShareProfile = () => {
+    navigator.share({
+      title: `Check out ${chef.name}'s profile`,
+      text: chef.bio,
+      url: window.location.href,
+    }).catch(() => {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Profile link copied to clipboard!");
+    });
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Chef Header Section */}
-      <div className="flex flex-col md:flex-row gap-8 mb-8">
-        <div className="w-full md:w-1/3 lg:w-1/4">
-          <Avatar className="h-48 w-48 mx-auto md:mx-0">
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Profile Header - Instagram-style layout */}
+      <div className="flex flex-col md:flex-row gap-6 mb-8">
+        {/* Left Column - Avatar (Instagram position) */}
+        <div className="flex justify-center md:block md:w-1/4">
+          <Avatar className="h-28 w-28 sm:h-32 sm:w-32 border-2 border-white shadow-md">
             <AvatarImage src={chef.image} alt={chef.name} />
             <AvatarFallback>{chef.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </div>
 
-        <div className="w-full md:w-2/3 lg:w-3/4 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold">{chef.name}</h1>
-            <Button variant="outline" className="gap-2">
-              <Heart className="w-4 h-4" />
-              Follow
-            </Button>
+        {/* Right Column - Profile Info */}
+        <div className="md:w-3/4 space-y-4">
+          {/* Username and Actions - Top Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+            <h1 className="text-xl font-bold">{chef.username}</h1>
+            <div className="flex gap-2">
+              <Button variant="outline" className="rounded-lg gap-2 text-sm">
+                <MessageCircle className="w-4 h-4" /> Message
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="rounded-lg"
+                onClick={handleShareProfile}
+              >
+                <Share2 className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-lg">
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="gap-1">
-              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              {chef.rating} ({chef.reviews} reviews)
-            </Badge>
-            <Badge variant="outline" className="gap-1">
-              <Clock className="w-4 h-4" />
-              {chef.experience} experience
-            </Badge>
+          {/* Stats - Middle Row */}
+          <div className="flex gap-6 text-center mb-4">
+            <div>
+              <span className="font-bold block">{chef.posts}</span>
+              <span className="text-sm text-gray-500">Posts</span>
+            </div>
+            <div>
+              <span className="font-bold block">{chef.likes}</span>
+              <span className="text-sm text-gray-500">Likes</span>
+            </div>
           </div>
 
-          <h2 className="text-xl text-primary">{chef.specialty}</h2>
-
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="w-4 h-4" />
-            {chef.location}
-          </div>
-
-          <p className="text-gray-800 dark:text-gray-300">{chef.bio}</p>
-
-          <div className="flex flex-wrap gap-2">
-            {chef.signatureDishes.map((dish, i) => (
-              <Badge key={i} variant="outline">
-                {dish}
-              </Badge>
-            ))}
+          {/* Bio - Bottom Section */}
+          <div className="space-y-2">
+            <h2 className="font-bold">{chef.name}</h2>
+            <p className="text-gray-600">{chef.bio}</p>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="flex items-center gap-1 text-gray-600">
+                <MapPin className="w-4 h-4" /> {chef.location}
+              </span>
+              <span className="flex items-center gap-1 text-yellow-600">
+                <Star className="w-4 h-4 fill-yellow-400" /> {chef.rating}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      <Separator className="my-6" />
-
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="dishes" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          <TabsTrigger value="dishes">Dishes</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="about">About</TabsTrigger>
-          <TabsTrigger value="contact">Contact</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
+      {/* Tabs */}
+      <Tabs defaultValue="posts" className="w-full">
+        <TabsList className="w-full grid grid-cols-2 border-b">
+          <TabsTrigger value="posts" className="py-3">
+            <div className="flex items-center gap-1">
+              <span>Posts</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="reviews" className="py-3">
+            <div className="flex items-center gap-1">
+              <span>Reviews</span>
+            </div>
+          </TabsTrigger>
         </TabsList>
 
-        {/* Dishes Tab */}
-        <TabsContent value="dishes" className="py-6">
-          <div className="flex overflow-x-auto gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:overflow-visible">
-            {dishes.map((dish, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="min-w-[250px] sm:min-w-0 flex-shrink-0"
+        {/* Posts Grid - Instagram style */}
+        <TabsContent value="posts" className="py-4">
+          <div className="grid grid-cols-3 gap-1">
+            {posts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/p/${post.id}`}
+                className="group relative aspect-square"
               >
-                <Card className="relative rounded-2xl overflow-hidden shadow-md h-60 lg:h-72 group hover:shadow-lg transition-shadow duration-300">
-                  {/* Optimized background image */}
-                  <div className="absolute inset-0 w-full h-full">
-                    <Image
-                      src={dish.image}
-                      alt={`Image of ${dish.name}`}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "/chef/default-chef.jpg";
-                      }}
-                    />
+                <Image
+                  src={post.image}
+                  alt={`Post by ${chef.name}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 33vw, 250px"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="flex items-center gap-4 text-white">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-5 h-5" /> {post.likes}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="w-5 h-5" /> {post.comments}
+                    </span>
                   </div>
-
-                  {/* Enhanced gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-                  {/* Engagement metrics with subtle animation */}
-                  <motion.div
-                    className="absolute top-3 right-3 flex items-center gap-3 bg-black/50 px-3 py-1 rounded-full text-white text-xs backdrop-blur-sm"
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <div className="flex items-center gap-1 hover:text-red-400 transition-colors cursor-pointer">
-                      <Heart className="w-4 h-4 text-red-400" />
-                      <span>{dish.likes}</span>
-                    </div>
-                    <div className="flex items-center gap-1 hover:text-blue-400 transition-colors cursor-pointer">
-                      <MessageCircle className="w-4 h-4 text-blue-400" />
-                      <span>{dish.comments}</span>
-                    </div>
-                  </motion.div>
-
-                  {/* Info overlay with improved spacing */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <div className="mb-2">
-                      <h3 className="text-lg font-bold line-clamp-1">
-                        {dish.name}
-                      </h3>
-                      <p className="text-sm text-gray-300">{dish.category}</p>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="bg-white/90 text-black hover:bg-white hover:shadow-md transition-all"
-                      asChild
-                    >
-                      <Link href={`/dishes/${dish}/reviews`}>Review</Link>
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
+                </div>
+              </Link>
             ))}
           </div>
         </TabsContent>
 
-        {/* Reviews Tab */}
-        <TabsContent value="reviews" className="py-6">
-          <div className="space-y-6">
-            {reviews.map((review, i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{review.user}</CardTitle>
-                      <div className="flex items-center gap-1 mt-1">
-                        {[...Array(5)].map((_, star) => (
-                          <Star
-                            key={star}
-                            className={`w-4 h-4 ${
-                              star < review.rating
-                                ? "text-yellow-500 fill-yellow-500"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">{review.date}</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p>{review.comment}</p>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Reviews Section */}
+        <TabsContent value="reviews" className="py-6 space-y-6">
+          {/* Add Review Form */}
+          <div className="p-4 rounded-lg border">
+            <h3 className="font-medium mb-3">Add Your Review</h3>
+            <div className="flex items-center mb-3">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className="w-6 h-6 cursor-pointer text-yellow-400 fill-yellow-400"
+                />
+              ))}
+            </div>
+            <Textarea
+              placeholder="Share your experience with this chef..."
+              className="mb-3"
+            />
+            <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+              <Plus className="w-4 h-4 mr-2" /> Submit Review
+            </Button>
           </div>
-        </TabsContent>
 
-        {/* About Tab */}
-        <TabsContent value="about" className="py-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>About Chef {chef.name.split(" ")[1]}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-medium mb-2">Cooking Style</h3>
-                <p>
-                  Specializes in traditional Swahili cuisine with modern
-                  presentation techniques. Focuses on fresh coastal ingredients
-                  and authentic spice blends.
-                </p>
+          {/* Existing Reviews */}
+          {reviews.map((review) => (
+            <div key={review.id} className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-semibold">{review.user}</p>
+                <div className="flex items-center gap-1 text-yellow-600">
+                  {Array.from({ length: review.rating }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400" />
+                  ))}
+                </div>
               </div>
-
-              <div>
-                <h3 className="font-medium mb-2">Experience</h3>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Head Chef at Tamarind Mombasa (2015-2020)</li>
-                  <li>Sous Chef at Serena Beach Resort (2010-2015)</li>
-                  <li>Culinary training at Zanzibar Culinary Institute</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-medium mb-2">Availability</h3>
-                <p>{chef.availability}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Contact Tab */}
-        <TabsContent value="contact" className="py-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Chef {chef.name.split(" ")[1]}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-primary" />
-                <a
-                  href={`tel:${chef.contact.phone}`}
-                  className="hover:underline"
-                >
-                  {chef.contact.phone}
-                </a>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-primary" />
-                <a
-                  href={`mailto:${chef.contact.email}`}
-                  className="hover:underline"
-                >
-                  {chef.contact.email}
-                </a>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Globe className="w-5 h-5 text-primary" />
-                <a
-                  href={`https://${chef.contact.website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {chef.contact.website}
-                </a>
-              </div>
-
-              <div className="pt-4">
-                <Button className="w-full sm:w-auto">Send Message</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Events Tab */}
-        <TabsContent value="events" className="py-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Events</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium">Swahili Cooking Masterclass</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  June 15, 2023 · 10:00 AM - 2:00 PM
-                </p>
-                <p className="mt-2">
-                  Learn to make authentic biryani, pilau, and coconut fish curry
-                  in this hands-on class.
-                </p>
-                <Button variant="outline" size="sm" className="mt-3">
-                  Book Now
-                </Button>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium">Ramadan Iftar Pop-Up</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  April 5-15, 2023 · 6:00 PM Daily
-                </p>
-                <p className="mt-2">
-                  Special iftar menu featuring traditional Swahili Ramadan
-                  dishes.
-                </p>
-                <Button variant="outline" size="sm" className="mt-3">
-                  Reserve Table
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              <p className="text-sm text-gray-700">{review.text}</p>
+            </div>
+          ))}
         </TabsContent>
       </Tabs>
     </div>

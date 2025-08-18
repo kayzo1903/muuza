@@ -98,53 +98,55 @@ export default function NearbyBusinesses() {
         {businesses.map((biz, i) => {
           const rating = biz.rating < 2 ? 2.0 : biz.rating; // enforce min 2.0
           return (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="min-w-[250px] sm:min-w-0 flex-shrink-0"
-            >
-              <Card className="relative rounded-2xl shadow-md overflow-hidden h-48 lg:h-72">
-                {/* Image background using Next.js Image */}
-                <div className="absolute inset-0 h-full w-full">
-                  <Image
-                    src={biz.image}
-                    alt={biz.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/40" />
-
-                {/* Info */}
-                <div className="absolute inset-0 flex flex-col justify-end p-3 text-white">
-                  <div className="flex items-center gap-1">
-                    <h3 className="text-lg font-semibold">{biz.name}</h3>
-                    {biz.verified && (
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                    )}
-                  </div>
-                  <p className="text-sm opacity-90">{biz.category}</p>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-1 text-yellow-400 text-sm mt-1">
-                    <Star className="w-4 h-4 fill-yellow-400" />
-                    <span>{rating.toFixed(1)}</span>
+            <Link href={"/shop/restaurant"} key={i}>
+              <motion.div
+                key={i}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="min-w-[250px] sm:min-w-0 flex-shrink-0"
+              >
+                <Card className="relative rounded-2xl shadow-md overflow-hidden h-48 lg:h-72">
+                  {/* Image background using Next.js Image */}
+                  <div className="absolute inset-0 h-full w-full">
+                    <Image
+                      src={biz.image}
+                      alt={biz.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
                   </div>
 
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="mt-2 self-start"
-                  >
-                    More
-                  </Button>
-                </div>
-              </Card>{" "}
-            </motion.div>
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/40" />
+
+                  {/* Info */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-3 text-white">
+                    <div className="flex items-center gap-1">
+                      <h3 className="text-lg font-semibold">{biz.name}</h3>
+                      {biz.verified && (
+                        <CheckCircle className="w-4 h-4 text-green-400" />
+                      )}
+                    </div>
+                    <p className="text-sm opacity-90">{biz.category}</p>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 text-yellow-400 text-sm mt-1">
+                      <Star className="w-4 h-4 fill-yellow-400" />
+                      <span>{rating.toFixed(1)}</span>
+                    </div>
+
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="mt-2 self-start"
+                    >
+                      More
+                    </Button>
+                  </div>
+                </Card>{" "}
+              </motion.div>
+            </Link>
           );
         })}
       </div>

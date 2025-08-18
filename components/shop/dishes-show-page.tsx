@@ -50,7 +50,7 @@ const dishes: Dish[] = [
     description: "A traditional Tanzanian staple made from maize flour, usually served with sukuma wiki or nyama choma.",
     price: 3.5,
     rating: 4.6,
-    images: ["/foods/ugali.jpg", "/foods/ugali2.jpg"],
+    images: ["/foods/ugali.jpg", "/foods/mandazi.jpg"],
     likes: 240,
     dietaryTags: ["Vegetarian", "Gluten Free"],
     chef: {
