@@ -28,30 +28,33 @@ const categories = [
   { name: "Chocolate", icon: "🍫", href: "/foods/chocolate" },
   { name: "Coffee", icon: "☕", href: "/foods/coffee" },
   { name: "Soft Drinks", icon: "🥤", href: "/foods/drinks" },
-   { name: "Chefs", icon: "👨🏽‍🍳", href: "/service/chefs" }
+  { name: "Chefs", icon: "👨🏽‍🍳", href: "/service/chefs" }
 ];
 
 export default function EastAfricanFoods() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
-      {categories.map((cat) => (
-        <motion.div
-          key={cat.name}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Link href={cat.href}>
-            <Card className="flex flex-col items-center justify-center p-6 rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition">
-              <CardContent className="flex flex-col items-center">
-                <span className="text-4xl">{cat.icon}</span>
-                <span className="mt-2 text-sm font-medium text-center">
-                  {cat.name}
-                </span>
-              </CardContent>
-            </Card>
-          </Link>
-        </motion.div>
-      ))}
+    <div className="relative">
+      <div className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4 px-4">
+        {categories.map((cat) => (
+          <motion.div
+            key={cat.name}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex-shrink-0" // Prevent cards from shrinking
+          >
+            <Link href={cat.href}>
+              <Card className="w-32 h-32 flex flex-col items-center justify-center p-2 rounded-full shadow-md cursor-pointer hover:shadow-lg transition">
+                <CardContent className="flex flex-col items-center p-0">
+                  <span className="text-4xl">{cat.icon}</span>
+                  <span className="mt-2 text-sm font-medium text-center">
+                    {cat.name}
+                  </span>
+                </CardContent>
+              </Card>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 }

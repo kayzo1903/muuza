@@ -4,12 +4,37 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Heart, MessageCircle } from "lucide-react"; // Import the icons
 
 const trendingDishes = [
-  { name: "Mandazi", category: "Snack", image: "/foods/mandazi.jpg" },
-  { name: "Chips Mayai", category: "Street Food", image: "/foods/chips.jpg" },
-  { name: "Pilau", category: "East African", image: "/foods/pilau.jpg" },
-  { name: "Nyama Choma", category: "Grilled", image: "/foods/nyama.jpg" },
+  { 
+    name: "Mandazi", 
+    category: "Snack", 
+    image: "/foods/mandazi.jpg",
+    likes: 180,
+    comments: 24
+  },
+  { 
+    name: "Chips Mayai", 
+    category: "Street Food", 
+    image: "/foods/chips.jpg",
+    likes: 220,
+    comments: 35
+  },
+  { 
+    name: "Pilau", 
+    category: "East African", 
+    image: "/foods/pilau.jpg",
+    likes: 310,
+    comments: 42
+  },
+  { 
+    name: "Nyama Choma", 
+    category: "Grilled", 
+    image: "/foods/nyama.jpg",
+    likes: 390,
+    comments: 56
+  },
 ];
 
 export default function TrendingNow() {
@@ -49,6 +74,18 @@ export default function TrendingNow() {
               <span className="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow-md">
                 🔥 Trending
               </span>
+
+              {/* Likes + Comments badge (top-right) - Same style as PopularDishes */}
+              <div className="absolute top-3 right-3 flex items-center gap-3 bg-black/50 px-3 py-1 rounded-full text-white text-xs">
+                <div className="flex items-center gap-1">
+                  <Heart className="w-4 h-4 text-red-400" />
+                  <span>{dish.likes}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MessageCircle className="w-4 h-4 text-blue-400" />
+                  <span>{dish.comments}</span>
+                </div>
+              </div>
 
               {/* Info overlay */}
               <div className="absolute bottom-0 p-3 text-white">

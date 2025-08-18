@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function Shoppingpge() {
   return (
-    <section className="min-h-screen w-full pt-28  lg:scroll-pt-4">
+    <section className="min-h-screen w-full pt-32  lg:pt-24 lg:scroll-pt-4">
       <FoodCategories />
       <NearbyBusinesses />
       <PopularDishes />
