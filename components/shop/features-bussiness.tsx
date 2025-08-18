@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 const featuredBusinesses = [
   {
@@ -40,20 +41,37 @@ export default function FeaturedBusiness() {
 
   return (
     <section>
-      <div className="relative rounded-2xl overflow-hidden shadow-lg">
-        <img
-          src={business.image}
-          alt={business.name}
-          className="w-full h-56 object-cover transition-all duration-700"
-        />
+      <div className="relative rounded-2xl overflow-hidden shadow-lg h-56 lg:h-96">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={business.image}
+            src={business.image}
+            alt={business.name}
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          />
+        </AnimatePresence>
+
+        {/* Overlay */}
         <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-4 text-white">
-          <h2 className="text-2xl font-bold">{business.name}</h2>
-          <p className="text-sm">{business.desc}</p>
-          <Link href={business.link}>
-            <Button variant="secondary" size="sm" className="mt-2">
-              Visit Now
-            </Button>
-          </Link>
+          <motion.div
+            key={business.name}
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -30, opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-2xl font-bold">{business.name}</h2>
+            <p className="text-sm">{business.desc}</p>
+            <Link href={business.link}>
+              <Button variant="secondary" size="sm" className="mt-2">
+                Visit Now
+              </Button>
+            </Link>
+          </motion.div>
         </div>
 
         {/* Dots Indicator */}
@@ -61,7 +79,7 @@ export default function FeaturedBusiness() {
           {featuredBusinesses.map((_, i) => (
             <span
               key={i}
-              className={`h-2 w-2 rounded-full ${
+              className={`h-2 w-2 rounded-full transition-all ${
                 i === current ? "bg-white" : "bg-white/50"
               }`}
             />

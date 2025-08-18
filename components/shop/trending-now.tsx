@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -34,27 +34,36 @@ export default function TrendingNow() {
             whileTap={{ scale: 0.97 }}
             className="min-w-[250px] sm:min-w-0 flex-shrink-0"
           >
-            <Card className="rounded-2xl shadow-md">
-              <CardContent className="p-0">
-                {/* Image */}
-                <div className="h-40 w-full overflow-hidden rounded-t-2xl">
-                  <img
-                    src={dish.image}
-                    alt={dish.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                {/* Info */}
-                <div className="p-3 flex flex-col items-start">
-                  <h3 className="text-lg font-semibold">{dish.name}</h3>
-                  <p className="text-sm text-gray-500">
-                    {dish.category} · Trending this week
-                  </p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    More
-                  </Button>
-                </div>
-              </CardContent>
+            <Card className="relative rounded-2xl overflow-hidden shadow-md h-60 lg:h-72 border border-red-300">
+              {/* Background image */}
+              <img
+                src={dish.image}
+                alt={dish.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+              {/* Trending badge */}
+              <span className="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow-md">
+                🔥 Trending
+              </span>
+
+              {/* Info overlay */}
+              <div className="absolute bottom-0 p-3 text-white">
+                <h3 className="text-lg font-semibold">{dish.name}</h3>
+                <p className="text-sm text-gray-200">
+                  {dish.category} · Trending this week
+                </p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="mt-2 bg-white/90 text-black hover:bg-white"
+                >
+                  More
+                </Button>
+              </div>
             </Card>
           </motion.div>
         ))}
