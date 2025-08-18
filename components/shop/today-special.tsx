@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import { Heart, MessageCircle } from "lucide-react";
+import Image from "next/image";
 
 const specials = [
   { name: "Pilau + Soda", category: "East African", price: "TZS 6,000", image: "/foods/pilau.jpg" },
@@ -15,7 +16,6 @@ const specials = [
 ];
 
 export default function TodaysSpecial() {
-  // Manage likes and comments per dish
   const [likes, setLikes] = useState(Array(specials.length).fill(0));
   const [comments, setComments] = useState(Array(specials.length).fill(0));
 
@@ -35,7 +35,7 @@ export default function TodaysSpecial() {
     <div className="w-full p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Today’s Special</h2>
+        <h2 className="text-xl font-bold">Today&apos;s Special</h2>
         <Link href="/specials">
           <Button variant="outline" size="sm">View All</Button>
         </Link>
@@ -51,12 +51,19 @@ export default function TodaysSpecial() {
             className="min-w-[250px] sm:min-w-0 flex-shrink-0"
           >
             <Card className="relative rounded-2xl overflow-hidden shadow-md h-64 lg:h-72 border border-yellow-300">
-              {/* Background image */}
-              <img
-                src={dish.image}
-                alt={dish.name}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+              {/* Background image using Next.js Image */}
+              <div className="absolute inset-0 w-full h-full">
+                <Image
+                  src={dish.image}
+                  alt={dish.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/foods/default.jpg';
+                  }}
+                />
+              </div>
 
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />

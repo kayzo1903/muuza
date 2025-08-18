@@ -5,18 +5,79 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Star, CheckCircle } from "lucide-react"; // ⭐ ✅
+import Image from "next/image";
 
 const businesses = [
-  { name: "Mama Ntilie", category: "Local Food", image: "/images/restaurant1.jpg", rating: 4.2, verified: true },
-  { name: "Kilimanjaro Restaurant", category: "Restaurant", image: "/images/restaurant2.jpg", rating: 3.8, verified: true },
-  { name: "Taste of Coast", category: "Swahili Dishes", image: "/images/restaurant3.jpg", rating: 2.0, verified: false },
-  { name: "Samaki Grill", category: "Seafood", image: "/images/restaurant4.jpg", rating: 4.5, verified: true },
-  { name: "Chips Duka", category: "Fast Food", image: "/images/restaurant5.jpg", rating: 2.3, verified: false },
-  { name: "Nyama Choma Base", category: "Barbecue", image: "/images/restaurant6.jpg", rating: 3.1, verified: true },
-  { name: "Urban Cafe", category: "Coffee Shop", image: "/images/restaurant7.jpg", rating: 4.7, verified: true },
-  { name: "Zanzibar Bites", category: "Swahili Snacks", image: "/images/restaurant8.jpg", rating: 2.5, verified: false },
-  { name: "Fresh Juice Hub", category: "Drinks", image: "/images/restaurant2.jpg", rating: 3.9, verified: true },
-  { name: "Golden Biryani", category: "Indian/East African", image: "/images/restaurant1.jpg", rating: 4.8, verified: true },
+  {
+    name: "Mama Ntilie",
+    category: "Local Food",
+    image: "/images/restaurant1.jpg",
+    rating: 4.2,
+    verified: true,
+  },
+  {
+    name: "Kilimanjaro Restaurant",
+    category: "Restaurant",
+    image: "/images/restaurant2.jpg",
+    rating: 3.8,
+    verified: true,
+  },
+  {
+    name: "Taste of Coast",
+    category: "Swahili Dishes",
+    image: "/images/restaurant3.jpg",
+    rating: 2.0,
+    verified: false,
+  },
+  {
+    name: "Samaki Grill",
+    category: "Seafood",
+    image: "/images/restaurant4.jpg",
+    rating: 4.5,
+    verified: true,
+  },
+  {
+    name: "Chips Duka",
+    category: "Fast Food",
+    image: "/images/restaurant5.jpg",
+    rating: 2.3,
+    verified: false,
+  },
+  {
+    name: "Nyama Choma Base",
+    category: "Barbecue",
+    image: "/images/restaurant6.jpg",
+    rating: 3.1,
+    verified: true,
+  },
+  {
+    name: "Urban Cafe",
+    category: "Coffee Shop",
+    image: "/images/restaurant7.jpg",
+    rating: 4.7,
+    verified: true,
+  },
+  {
+    name: "Zanzibar Bites",
+    category: "Swahili Snacks",
+    image: "/images/restaurant8.jpg",
+    rating: 2.5,
+    verified: false,
+  },
+  {
+    name: "Fresh Juice Hub",
+    category: "Drinks",
+    image: "/images/restaurant2.jpg",
+    rating: 3.9,
+    verified: true,
+  },
+  {
+    name: "Golden Biryani",
+    category: "Indian/East African",
+    image: "/images/restaurant1.jpg",
+    rating: 4.8,
+    verified: true,
+  },
 ];
 
 export default function NearbyBusinesses() {
@@ -26,7 +87,9 @@ export default function NearbyBusinesses() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">Nearby Businesses</h2>
         <Link href="/businesses">
-          <Button variant="outline" size="sm">View All</Button>
+          <Button variant="outline" size="sm">
+            View All
+          </Button>
         </Link>
       </div>
 
@@ -42,14 +105,20 @@ export default function NearbyBusinesses() {
               className="min-w-[250px] sm:min-w-0 flex-shrink-0"
             >
               <Card className="relative rounded-2xl shadow-md overflow-hidden h-48 lg:h-72">
-                {/* Image background */}
-                <img
-                  src={biz.image}
-                  alt={biz.name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
+                {/* Image background using Next.js Image */}
+                <div className="absolute inset-0 h-full w-full">
+                  <Image
+                    src={biz.image}
+                    alt={biz.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black/40" />
+
                 {/* Info */}
                 <div className="absolute inset-0 flex flex-col justify-end p-3 text-white">
                   <div className="flex items-center gap-1">
@@ -66,11 +135,15 @@ export default function NearbyBusinesses() {
                     <span>{rating.toFixed(1)}</span>
                   </div>
 
-                  <Button variant="secondary" size="sm" className="mt-2 self-start">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="mt-2 self-start"
+                  >
                     More
                   </Button>
                 </div>
-              </Card>
+              </Card>{" "}
             </motion.div>
           );
         })}

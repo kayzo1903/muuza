@@ -1,19 +1,17 @@
 "use client";
 import { Sidebar } from "@/components/ui/sidebar";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import userAvatar from "@/public/others/user_avatar.png";
 import {
   LayoutDashboard,
   PlusCircle,
   Package,
   Store,
   LogOut,
-  ShoppingCart,
   HelpCircle,
+  ListOrdered // New icon for orders
 } from "lucide-react";
-import { cn } from "@/lib/utils"; // Optional: if you use a cn helper
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import LocaleSwitcher from "./(lang)/LocaleSwitcher";
 import { ModeToggle } from "./Mode-toggle";
@@ -22,8 +20,8 @@ const navLinks = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Add Product", href: "/dashboard/products/add", icon: PlusCircle },
   { title: "My Products", href: "/dashboard/products", icon: Package },
-  { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
-  { title: "My Store", href: "/dashboard/store", icon: Store }, // Replace 'my-store' dynamically later
+  { title: "Orders", href: "/dashboard/orders", icon: ListOrdered }, // Changed icon to ListOrdered
+  { title: "My Store", href: "/dashboard/store", icon: Store },
   { title: "Help", href: "/dashboard/help", icon: HelpCircle },
   { title: "Exit", href: "/shop", icon: LogOut },
 ];
@@ -36,7 +34,7 @@ export function AppSidebar() {
         <nav className="flex flex-col space-y-2 pl-3 mt-4">
           <div className="flex items-center space-x-4 mb-8">
             <Image
-              src={userAvatar}
+              src={"/avatar/default.png"}
               alt="User Avatar"
               width={68}
               height={68}
@@ -52,7 +50,8 @@ export function AppSidebar() {
             </div>
           </div>
           {navLinks.map(({ title, href, icon: Icon }) => {
-            const isActive = pathname === href;
+            const isActive = pathname === href || 
+                          (href === '/dashboard/orders' && pathname.startsWith('/dashboard/orders')); // Active for all order sub-paths
 
             return (
               <Link
