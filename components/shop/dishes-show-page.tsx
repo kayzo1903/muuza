@@ -56,13 +56,13 @@ const dishes: Dish[] = [
     chef: {
       id: 1,
       name: "Chef Amina",
-      avatar: "/avatars/amina.jpg",
+      avatar: "/avatar/default.jpg",
       online: true
     },
     comments: [
       {
         id: 1,
-        user: { name: "Amina Hassan", avatar: "/avatars/amina.jpg" },
+        user: { name: "Amina Hassan", avatar: "/avatar/default.jpg" },
         text: "Classic Tanzanian staple, love it with sukuma wiki 🍃",
         likes: 12,
         rating: 5,
@@ -70,7 +70,7 @@ const dishes: Dish[] = [
       },
       {
         id: 2,
-        user: { name: "John Doe", avatar: "/avatars/john.jpg" },
+        user: { name: "John Doe", avatar: "/avatar/default.jpg" },
         text: "Ugali reminds me of home 😍",
         likes: 5,
         rating: 4,
