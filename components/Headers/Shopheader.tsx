@@ -3,7 +3,16 @@
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, Heart, ShoppingBag, User, LogOut, Store, X, Loader2 } from "lucide-react";
+import {
+  Menu,
+  Heart,
+  ShoppingBag,
+  User,
+  LogOut,
+  Store,
+  X,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -79,8 +88,8 @@ export default function ShopHeader({ session }: HeaderProps) {
         </div>
 
         {/* Logo */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="text-2xl font-bold text-white hover:opacity-90 transition-opacity"
         >
           muuza
@@ -107,15 +116,15 @@ export default function ShopHeader({ session }: HeaderProps) {
 
         {/* Right Icons (Desktop) */}
         <div className="hidden lg:flex items-center gap-4 text-gray-50 font-medium">
-          <Link 
-            href="/orders" 
+          <Link
+            href="/orders"
             className="p-1 rounded-md hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-600 transition-colors"
             aria-label="Orders"
           >
             <ShoppingBag className="h-5 w-5 text-white" />
           </Link>
-          <Link 
-            href="/favourites" 
+          <Link
+            href="/favourites"
             className="p-1 rounded-md hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-600 transition-colors"
             aria-label="Favorites"
           >
@@ -137,16 +146,16 @@ export default function ShopHeader({ session }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-1">
                 <DropdownMenuItem asChild className="p-0">
-                  <Link 
-                    href="/profile" 
+                  <Link
+                    href="/profile"
                     className="px-2 py-1.5 w-full rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
                     Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="p-0">
-                  <Link 
-                    href="/settings" 
+                  <Link
+                    href="/settings"
                     className="px-2 py-1.5 w-full rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
                     Settings
@@ -160,7 +169,9 @@ export default function ShopHeader({ session }: HeaderProps) {
                     onClick={handleSignout}
                     className="w-full justify-start px-2 py-1.5 h-auto text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20 dark:text-red-400 dark:hover:text-red-300"
                   >
-                    {pending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    {pending && (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    )}
                     Log Out
                   </Button>
                 </DropdownMenuItem>
@@ -169,12 +180,19 @@ export default function ShopHeader({ session }: HeaderProps) {
           ) : (
             <div className="flex gap-2">
               <Link href="/auth/sign-in">
-                <Button variant="outline" size="sm" className="border-white text-white bg-transparent hover:bg-white/10">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-white text-white bg-transparent hover:bg-white/10"
+                >
                   Login
                 </Button>
               </Link>
               <Link href="/auth/register">
-                <Button size="sm" className="bg-white text-green-600 hover:bg-white/90">
+                <Button
+                  size="sm"
+                  className="bg-white text-green-600 hover:bg-white/90"
+                >
                   Sign Up
                 </Button>
               </Link>
@@ -192,8 +210,8 @@ export default function ShopHeader({ session }: HeaderProps) {
               </Avatar>
             </Link>
           ) : (
-            <Link 
-              href="/auth/sign-in" 
+            <Link
+              href="/auth/sign-in"
               className="p-1 rounded-md hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-600 transition-colors"
               aria-label="Sign in"
             >
@@ -256,10 +274,17 @@ export default function ShopHeader({ session }: HeaderProps) {
                 <AvatarFallback>{session.user.name?.[0] ?? ""}</AvatarFallback>
               </Avatar>
               <p className="font-medium text-lg">{session.user.name}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{session.user.email}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {session.user.email}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col gap-3 px-4 py-6">
+              <div className="flex gap-4 items-center px-4 py-3">
+                <LocaleSwitcher />
+                <ModeToggle />
+              </div>
+              <div className="border-t my-2 dark:border-gray-700"></div>
               <Link
                 href="/auth/sign-in"
                 className="bg-green-600 text-white hover:bg-green-700 flex items-center justify-center rounded-md px-4 py-3 font-medium transition-colors"
@@ -284,8 +309,9 @@ export default function ShopHeader({ session }: HeaderProps) {
                 href="/profile"
                 onClick={() => setMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-md ${
-                  isActive('/profile') ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100' : 
-                  'text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  isActive("/profile")
+                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100"
+                    : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                 } transition-colors`}
               >
                 <User size={20} /> Profile
@@ -294,8 +320,9 @@ export default function ShopHeader({ session }: HeaderProps) {
                 href="/orders"
                 onClick={() => setMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-md ${
-                  isActive('/orders') ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100' : 
-                  'text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  isActive("/orders")
+                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100"
+                    : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                 } transition-colors`}
               >
                 <ShoppingBag size={20} /> Orders
@@ -304,8 +331,9 @@ export default function ShopHeader({ session }: HeaderProps) {
                 href="/favourites"
                 onClick={() => setMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-md ${
-                  isActive('/favourites') ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100' : 
-                  'text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  isActive("/favourites")
+                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100"
+                    : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                 } transition-colors`}
               >
                 <Heart size={20} /> Favorites
@@ -314,15 +342,16 @@ export default function ShopHeader({ session }: HeaderProps) {
                 href="/get-store"
                 onClick={() => setMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-md ${
-                  isActive('/get-store') ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100' : 
-                  'text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  isActive("/get-store")
+                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100"
+                    : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                 } transition-colors`}
               >
                 <Store size={20} /> Get your store
               </Link>
-              
+
               <div className="border-t my-2 dark:border-gray-700"></div>
-              
+
               <div className="flex gap-4 items-center px-4 py-3">
                 <LocaleSwitcher />
                 <ModeToggle />
