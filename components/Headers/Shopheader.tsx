@@ -89,7 +89,7 @@ export default function ShopHeader({ session }: HeaderProps) {
 
         {/* Logo */}
         <Link
-          href="/"
+          href="/shop"
           className="text-2xl font-bold text-white hover:opacity-90 transition-opacity"
         >
           muuza
