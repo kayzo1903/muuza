@@ -7,23 +7,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 const featuredBusinesses = [
-  {
+  { id:1,
     name: "🍲 Zanzibar Bites",
     desc: "Famous for Pilau & Biriani",
     image: "/images/restaurant1.jpg",
-    link: "/businesses/zanzibar-bites",
+    link: "/shop/restaurant",
   },
-  {
+  { id:2 ,
     name: "🍗 Mama Ntilie",
     desc: "Best Nyama Choma in Town",
     image: "/images/restaurant2.jpg",
-    link: "/businesses/mama-ntilie",
+    link: "/shop/restaurant",
   },
-  {
+  { id:1 ,
     name: "🍕 Pizza Hub",
     desc: "Buy 1 Get 1 Free Pizza Fridays",
     image: "/images/restaurant3.jpg",
-    link: "/businesses/pizza-hub",
+    link: "/shop/restaurant",
   },
 ];
 
