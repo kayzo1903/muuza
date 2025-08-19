@@ -182,7 +182,7 @@ export default function Header({
                 </Button>
               </>
             ) : (
-              <div>
+              <div className="flex flex-col gap-4">
                 <div className="flex gap-4 items-center">
                   <LocaleSwitcher />
                   <ModeToggle />
