@@ -1,12 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, MapPin, Clock, Utensils, Share2, MessageCircle, Heart, ShoppingCart, X } from "lucide-react";
+import { Star, MapPin, Clock, Utensils, Share2, MessageCircle, Heart, ShoppingCart, X, Bell } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function RestaurantShowcasePage() {
   const [cart, setCart] = useState<{name: string; price: string; quantity: number}[]>([]);
@@ -18,6 +19,7 @@ export default function RestaurantShowcasePage() {
     quantity: number;
     specialInstructions: string;
   } | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const restaurant = {
     name: "Swahili Bites",
@@ -30,7 +32,6 @@ export default function RestaurantShowcasePage() {
     openingHours: "8:00 AM - 10:00 PM",
     cuisine: ["Swahili", "Seafood", "Grilled"],
     phone: "+254 712 345 678",
-    website: "https://swahilibites.co.ke",
     bio: "Family-owned restaurant serving authentic Swahili cuisine since 2010. Specializing in coastal flavors with fresh seafood and traditional spices."
   };
 
@@ -117,8 +118,17 @@ export default function RestaurantShowcasePage() {
     if (currentOrderItem) {
       addToCart(currentOrderItem.name, currentOrderItem.price);
       setShowOrderModal(false);
-      setShowCart(true); // Optionally open the cart after ordering
+      setShowCart(true);
     }
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsEnabled(!notificationsEnabled);
+    toast.success(
+      notificationsEnabled 
+        ? "Notifications disabled for this restaurant" 
+        : "Notifications enabled for this restaurant"
+    );
   };
 
   return (
@@ -158,12 +168,16 @@ export default function RestaurantShowcasePage() {
                 <span className="text-gray-500">({restaurant.reviewCount})</span>
               </div>
               
-              <Button size="sm">Follow</Button>
+              <Button 
+                size="sm" 
+                variant={notificationsEnabled ? "default" : "outline"}
+                onClick={toggleNotifications}
+              >
+                <Bell className="w-4 h-4 mr-2" />
+                {notificationsEnabled ? "Subscribed" : "Notify Me"}
+              </Button>
               <Button variant="outline" size="sm">
                 <MessageCircle className="w-4 h-4 mr-2" /> Message
-              </Button>
-              <Button className="hidden md:flex bg-green-600 hover:bg-green-700">
-                Reserve Table
               </Button>
             </div>
           </div>
@@ -198,14 +212,6 @@ export default function RestaurantShowcasePage() {
           </Button>
           <Button variant="outline" className="flex-1 md:flex-none">
             Call Restaurant
-          </Button>
-          <Link href={restaurant.website} className="flex-1 md:flex-none">
-            <Button variant="outline" className="w-full">
-              Visit Website
-            </Button>
-          </Link>
-          <Button className="flex-1 md:flex-none bg-green-600 hover:bg-green-700">
-            Reserve Table
           </Button>
         </div>
       </div>
@@ -470,7 +476,7 @@ export default function RestaurantShowcasePage() {
           )}
         </Button>
         <Button className="flex-1 bg-green-600 hover:bg-green-700">
-          Reserve Table
+          Place Order
         </Button>
       </div>
 
