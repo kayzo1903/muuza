@@ -11,7 +11,7 @@ export default async function FoodsPage(props : {params :Params }) {
   
 
   return (
-    <section className="w-full pt-24">
+    <section className="w-full pt-28 lg:pt-24">
       <FoodsStore params={params} />
     </section>
   )

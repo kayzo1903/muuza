@@ -25,10 +25,10 @@ const chapatiItems = [
       name: "Zanzibar Flavor",
       distance: 1.2, // km
       deliveryTime: "20-30 min",
-      rating: 4.8
+      rating: 4.8,
     },
     tags: ["Traditional", "Vegetarian"],
-    featured: true
+    featured: true,
   },
   {
     id: 2,
@@ -44,10 +44,10 @@ const chapatiItems = [
       name: "Jahazi Grill",
       distance: 0.3, // km (300m)
       deliveryTime: "15-25 min",
-      rating: 4.6
+      rating: 4.6,
     },
     tags: ["Coconut", "Special"],
-    featured: true
+    featured: true,
   },
   {
     id: 3,
@@ -63,10 +63,10 @@ const chapatiItems = [
       name: "Mama Asha's Kitchen",
       distance: 2.1, // km
       deliveryTime: "25-35 min",
-      rating: 4.3
+      rating: 4.3,
     },
     tags: ["Spicy", "Homemade"],
-    featured: false
+    featured: false,
   },
   {
     id: 4,
@@ -82,10 +82,10 @@ const chapatiItems = [
       name: "Coastal Delights",
       distance: 3.5, // km
       deliveryTime: "30-40 min",
-      rating: 4.5
+      rating: 4.5,
     },
     tags: ["Buttery", "Premium"],
-    featured: false
+    featured: false,
   },
   {
     id: 5,
@@ -101,10 +101,10 @@ const chapatiItems = [
       name: "Healthy Bites",
       distance: 4.2, // km
       deliveryTime: "35-45 min",
-      rating: 4.7
+      rating: 4.7,
     },
     tags: ["Healthy", "Whole Wheat"],
-    featured: false
+    featured: false,
   },
   {
     id: 6,
@@ -120,27 +120,28 @@ const chapatiItems = [
       name: "Street Food Hub",
       distance: 5.1, // km
       deliveryTime: "40-50 min",
-      rating: 4.0
+      rating: 4.0,
     },
     tags: ["Street Food", "Affordable"],
-    featured: false
-  }
+    featured: false,
+  },
 ];
 
 export default function FoodsStore({ params }: { params: { id: string } }) {
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const foodcategory = params.id;
-  const nearbyRef = useRef<HTMLDivElement>(null);
   console.log(userLocation);
-  
 
   // Filter items - nearby (within 3km) and discover (beyond 3km or popular)
   const nearbyItems = chapatiItems
-    .filter(item => item.restaurant.distance <= 3)
+    .filter((item) => item.restaurant.distance <= 3)
     .sort((a, b) => a.restaurant.distance - b.restaurant.distance);
 
   const discoverItems = chapatiItems
-    .filter(item => item.restaurant.distance > 3 || item.rating >= 4.5)
+    .filter((item) => item.restaurant.distance > 3 || item.rating >= 4.5)
     .sort((a, b) => b.rating - a.rating);
 
   useEffect(() => {
@@ -152,37 +153,17 @@ export default function FoodsStore({ params }: { params: { id: string } }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-scroll for nearby section
-  useEffect(() => {
-    if (nearbyRef.current) {
-      const scrollContainer = nearbyRef.current;
-      let scrollAmount = 0;
-      
-      const scrollInterval = setInterval(() => {
-        if (scrollContainer) {
-          scrollAmount += 1;
-          scrollContainer.scrollLeft = scrollAmount;
-          
-          if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
-            scrollAmount = 0;
-          }
-        }
-      }, 30);
-
-      return () => clearInterval(scrollInterval);
-    }
-  }, []);
-
   return (
     <section className="w-full p-4 min-h-screen">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold capitalize mb-2">
-            {foodcategory.replace(/-/g, ' ')}
+            {foodcategory.replace(/-/g, " ")}
           </h1>
           <p className="text-gray-600">
-            Discover the best {foodcategory.replace(/-/g, ' ')} from restaurants near you
+            Discover the best {foodcategory.replace(/-/g, " ")} from restaurants
+            near you
           </p>
         </div>
 
@@ -195,211 +176,169 @@ export default function FoodsStore({ params }: { params: { id: string } }) {
             </h2>
           </div>
 
-          <motion.div 
-            ref={nearbyRef}
-            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
+          {/* Horizontal scroll container for all screen sizes */}
+          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
             {nearbyItems.map((item) => (
-              <motion.div 
-                key={item.id} 
-                className="min-w-[320px] flex-shrink-0"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Card className="h-96 overflow-hidden group border-0 shadow-lg relative">
-                  {/* Food Image - Full Cover */}
-                  <div className="relative h-full w-full">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/foods/default.jpg';
-                      }}
-                    />
-                    
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    
-                    {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                      {/* Restaurant Info */}
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-sm bg-black/50 backdrop-blur-sm px-2 py-1 rounded">
-                            {item.restaurant.name}
-                          </span>
-                          <Badge variant="secondary" className="bg-white/20 backdrop-blur-sm text-white border-0">
-                            {item.restaurant.distance} km away
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs opacity-90">
-                          <Clock className="w-3 h-3" />
-                          <span>{item.restaurant.deliveryTime}</span>
-                          <span className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            {item.restaurant.rating}
-                          </span>
-                        </div>
-                      </div>
+              <Link href={`/shop/dishes/${item.id}`} key={item.id}>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] flex-shrink-0" // Responsive widths
+                >
+                  <Card className="relative rounded-2xl overflow-hidden shadow-md h-96 border border-yellow-300">
+                    {/* Background image using Next.js Image */}
+                    <div className="absolute inset-0 w-full h-full">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "/foods/default.jpg";
+                        }}
+                      />
+                    </div>
 
-                      {/* Food Info */}
-                      <div className="mb-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <Link 
-                            href={`/shop/dishes/${item.id}`}
-                            className="font-semibold text-lg line-clamp-1 hover:text-blue-300 transition-colors"
-                          >
-                            {item.name}
-                          </Link>
-                          <span className="font-bold text-green-300">{item.price}</span>
-                        </div>
-                        <p className="text-sm opacity-90 line-clamp-2">{item.description}</p>
-                      </div>
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                      {/* Engagement Stats & Action */}
+                    {/* Restaurant distance badge */}
+                    <span className="absolute top-3 left-3 bg-green-900 text-white text-xs px-2 py-1 rounded-full shadow-md">
+                      {item.restaurant.distance} km
+                    </span>
+
+                    {/* Info overlay */}
+                    <div className="absolute bottom-0 p-4 text-white w-full">
+                      <h3 className="text-lg font-semibold">{item.name}</h3>
+                      <p className="text-sm text-gray-200">
+                        {item.restaurant.name}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs opacity-90 mb-1 mt-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{item.restaurant.deliveryTime}</span>
+                        <span className="flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          {item.restaurant.rating}
+                        </span>
+                      </div>
+                      <p className="text-sm font-bold text-green-400 mb-2">
+                        {item.price}
+                      </p>
+                      <p className="text-xs text-gray-200 line-clamp-2 mb-3">
+                        {item.description}
+                      </p>
+
+                      {/* Buttons */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm opacity-90">
-                          <span className="flex items-center gap-1">
-                            <Heart className="w-4 h-4 text-red-300" />
-                            {item.likes}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageCircle className="w-4 h-4 text-blue-300" />
-                            {item.reviews}
-                          </span>
+                        <div className="flex gap-3">
+                          <button className="flex items-center gap-1 text-sm hover:text-red-400">
+                            <Heart className="w-4 h-4" /> {item.likes}
+                          </button>
+                          <button className="flex items-center gap-1 text-sm hover:text-blue-400">
+                            <MessageCircle className="w-4 h-4" /> {item.reviews}
+                          </button>
                         </div>
-                        
-                        <Link href={`/shop/dishes/${item.id}`}>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                            Order Now
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bg-white/90 text-black hover:bg-white"
+                        >
+                          Order Now
+                        </Button>
                       </div>
                     </div>
-
-                    {/* Like Button */}
-                    <div className="absolute top-3 right-3">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 bg-black/50 backdrop-blur-sm text-white hover:bg-black/70"
-                      >
-                        <Heart className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
+                  </Card>
+                </motion.div>
+              </Link>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         {/* Discover Section - Grid Layout */}
         <div>
           <h2 className="text-xl font-semibold mb-6">Discover</h2>
 
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             {discoverItems.map((item) => (
-              <motion.div 
+              <motion.div
                 key={item.id}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.03 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="overflow-hidden group border-0 shadow-lg relative h-96">
-                  {/* Food Image - Full Cover */}
-                  <div className="relative h-full w-full">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/foods/default.jpg';
-                      }}
-                    />
-                    
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    
-                    {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                      {/* Restaurant Info */}
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-sm bg-black/50 backdrop-blur-sm px-2 py-1 rounded">
-                            {item.restaurant.name}
-                          </span>
-                          <Badge variant="secondary" className="bg-white/20 backdrop-blur-sm text-white border-0">
-                            {item.restaurant.distance} km
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs opacity-90">
-                          <Clock className="w-3 h-3" />
-                          <span>{item.restaurant.deliveryTime}</span>
-                          <span className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            {item.restaurant.rating}
-                          </span>
-                        </div>
-                      </div>
+                <Link href={`/shop/dishes/${item.id}`}>
+                  <Card className="relative rounded-2xl overflow-hidden shadow-md h-96 border border-yellow-300">
+                    {/* Background image using Next.js Image */}
+                    <div className="absolute inset-0 w-full h-full">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "/foods/default.jpg";
+                        }}
+                      />
+                    </div>
 
-                      {/* Food Info */}
-                      <div className="mb-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <Link 
-                            href={`/shop/dishes/${item.id}`}
-                            className="font-semibold text-lg line-clamp-1 hover:text-blue-300 transition-colors"
-                          >
-                            {item.name}
-                          </Link>
-                          <span className="font-bold text-green-300">{item.price}</span>
-                        </div>
-                        <p className="text-sm opacity-90 line-clamp-2">{item.description}</p>
-                      </div>
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                      {/* Engagement Stats & Action */}
+                    {/* Restaurant distance badge */}
+                    <span className="absolute top-3 left-3 bg-green-900 text-white text-xs px-2 py-1 rounded-full shadow-md">
+                      {item.restaurant.distance} km
+                    </span>
+
+                    {/* Info overlay */}
+                    <div className="absolute bottom-0 p-4 text-white w-full">
+                      <h3 className="text-lg font-semibold">{item.name}</h3>
+                      <p className="text-sm text-gray-200">
+                        {item.restaurant.name}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs opacity-90 mb-1 mt-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{item.restaurant.deliveryTime}</span>
+                        <span className="flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          {item.restaurant.rating}
+                        </span>
+                      </div>
+                      <p className="text-sm font-bold text-green-400 mb-2">
+                        {item.price}
+                      </p>
+                      <p className="text-xs text-gray-200 line-clamp-2 mb-3">
+                        {item.description}
+                      </p>
+
+                      {/* Buttons */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm opacity-90">
-                          <span className="flex items-center gap-1">
-                            <Heart className="w-4 h-4 text-red-300" />
-                            {item.likes}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageCircle className="w-4 h-4 text-blue-300" />
-                            {item.reviews}
-                          </span>
+                        <div className="flex gap-3">
+                          <button className="flex items-center gap-1 text-sm hover:text-red-400">
+                            <Heart className="w-4 h-4" /> {item.likes}
+                          </button>
+                          <button className="flex items-center gap-1 text-sm hover:text-blue-400">
+                            <MessageCircle className="w-4 h-4" /> {item.reviews}
+                          </button>
                         </div>
-                        
-                        <Link href={`/shop/dishes/${item.id}`}>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                            Order Now
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bg-white/90 text-black hover:bg-white"
+                        >
+                          Order Now
+                        </Button>
                       </div>
                     </div>
-
-                    {/* Like Button */}
-                    <div className="absolute top-3 right-3">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 bg-black/50 backdrop-blur-sm text-white hover:bg-black/70"
-                      >
-                        <Heart className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               </motion.div>
             ))}
           </motion.div>
