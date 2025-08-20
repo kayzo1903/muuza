@@ -160,7 +160,7 @@ export default function FoodsStore({ params }: { params: { id: string } }) {
           <h1 className="text-3xl font-bold capitalize mb-2">
             {foodcategory.replace(/-/g, " ")}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm dark:text-gray-300 text-gray-600">
             Discover the best {foodcategory.replace(/-/g, " ")} from restaurants
             near you
           </p>
