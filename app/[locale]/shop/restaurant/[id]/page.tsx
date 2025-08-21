@@ -1,7 +1,9 @@
-export default async function RestaurandPage(){
-   return (
+import RestaurantShowcasePage from "@/components/shop/restaurant-show-page";
+
+export default async function RestaurandPage() {
+  return (
     <main>
-        restaurant page
+      <RestaurantShowcasePage />
     </main>
-   )
+  );
 }

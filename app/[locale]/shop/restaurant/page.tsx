@@ -1,9 +1,9 @@
-import RestaurantShowcasePage from "@/components/shop/restaurant-show-page";
+import RestaurantsCollection from "@/components/shop/restaurantsCollection";
 
 export default async function RestaurantPage(){
     return (
-        <main>
-            <RestaurantShowcasePage />
+        <main className="w-full pt-28 lg:pt-24">
+            <RestaurantsCollection />
         </main>
     )
 }
