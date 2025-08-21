@@ -157,7 +157,7 @@ export default function NearbyBusinesses() {
           Nearby Businesses 🏪
           <MapPin className="w-5 h-5 text-red-500" />
         </h2>
-        <Link href="/businesses">
+        <Link href="/shop/restaurant">
           <Button variant="outline" size="sm">
             View All
           </Button>
@@ -165,7 +165,7 @@ export default function NearbyBusinesses() {
       </div>
 
       {/* Scrollable container on small screens */}
-      <div className="flex overflow-x-auto pb-4 gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:overflow-visible sm:gap-6 sm:pb-0">
+      <div className="flex overflow-x-auto pb-4 gap-6 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:overflow-visible sm:gap-6 sm:pb-0">
         {businesses.map((biz, i) => {
           const distance = calculateDistance(i);
           const rating = biz.rating < 2 ? 2.0 : biz.rating; // enforce min 2.0

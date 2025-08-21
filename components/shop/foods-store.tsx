@@ -7,6 +7,7 @@ import { MapPin, Clock, Star, Heart, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import DistanceFilter from "../distance-filter";
 
 // Dummy data for chapati items from different restaurants
 const chapatiItems = [
@@ -131,12 +132,13 @@ export default function FoodsStore({ params }: { params: { id: string } }) {
     lat: number;
     lng: number;
   } | null>(null);
+  const [distanceFilter, setDistanceFilter] = useState(3); // Default to 3km
   const foodcategory = params.id;
   console.log(userLocation);
 
-  // Filter items - nearby (within 3km) and discover (beyond 3km or popular)
+  // Filter items based on selected distance
   const nearbyItems = chapatiItems
-    .filter((item) => item.restaurant.distance <= 3)
+    .filter((item) => item.restaurant.distance <= distanceFilter)
     .sort((a, b) => a.restaurant.distance - b.restaurant.distance);
 
   const discoverItems = chapatiItems
@@ -151,6 +153,10 @@ export default function FoodsStore({ params }: { params: { id: string } }) {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const handleDistanceChange = (distance: number) => {
+    setDistanceFilter(distance);
+  };
 
   return (
     <section className="w-full p-4 min-h-screen">
@@ -168,23 +174,36 @@ export default function FoodsStore({ params }: { params: { id: string } }) {
 
         {/* Nearby Section - Horizontal Scroll */}
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
               <MapPin className="w-5 h-5 text-red-500" />
               Nearby ({nearbyItems.length})
             </h2>
+            
+            {/* Distance filter component */}
+            <DistanceFilter 
+              onDistanceChange={handleDistanceChange} 
+              defaultDistance={3}
+              min={1}
+              max={5}
+            />
           </div>
 
           {/* Horizontal scroll container for all screen sizes */}
           <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
-            {nearbyItems.map((item) => (
-              <Link href={`/shop/dishes/${item.id}`} key={item.id}>
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] flex-shrink-0" // Responsive widths
-                >
-                  <Card className="relative rounded-2xl overflow-hidden shadow-md h-96 border border-yellow-300">
+            {nearbyItems.length === 0 ? (
+              <div className="w-full text-center py-8 text-gray-500">
+                No restaurants found within {distanceFilter}km. Try increasing your distance.
+              </div>
+            ) : (
+              nearbyItems.map((item) => (
+                <Link href={`/shop/dishes/${item.id}`} key={item.id}>
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] flex-shrink-0"
+                  >
+                    <Card className="relative rounded-2xl overflow-hidden shadow-md h-96 border border-yellow-300">
                     {/* Background image using Next.js Image */}
                     <div className="absolute inset-0 w-full h-full">
                       <Image
@@ -248,10 +267,11 @@ export default function FoodsStore({ params }: { params: { id: string } }) {
                         </Button>
                       </div>
                     </div>
-                  </Card>
-                </motion.div>
-              </Link>
-            ))}
+                    </Card>
+                  </motion.div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
 
