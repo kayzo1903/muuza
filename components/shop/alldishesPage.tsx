@@ -10,11 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Star, Heart, MessageCircle, Clock, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import DistanceFilter from "../distance-filter";
+import { Link } from "@/i18n/routing";
 
 // Mock function to calculate distance
 const calculateDistance = (index: number) => {
