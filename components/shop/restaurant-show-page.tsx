@@ -27,7 +27,7 @@ export default function RestaurantShowcasePage() {
     logo: "/images/restaurant1.jpg",
     rating: 4.8,
     reviewCount: 1243,
-    location: "Mombasa, Kenya",
+    location: "kunduchi, Dar es Salaam",
     openingHours: "8:00 AM - 10:00 PM",
     cuisine: ["Swahili", "Seafood", "Grilled"],
     phone: "+254 712 345 678",

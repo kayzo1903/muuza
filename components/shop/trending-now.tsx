@@ -89,7 +89,7 @@ export default function TrendingNow() {
           Trending Now Near You 🔥
           <MapPin className="w-5 h-5 text-red-500" />
         </h2>
-        <Link href="/trending">
+        <Link href="/shop/dishes">
           <Button variant="outline" size="sm">
             View All
           </Button>

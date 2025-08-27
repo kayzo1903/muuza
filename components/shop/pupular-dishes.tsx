@@ -157,7 +157,7 @@ export default function PopularDishes() {
           Popular Dishes Near You 🍽️
           <MapPin className="w-5 h-5 text-red-500" />
         </h2>
-        <Link href="/dishes">
+        <Link href="/shop/dishes">
           <Button variant="outline" size="sm">
             View All
           </Button>

@@ -115,7 +115,7 @@ export default function TodaysSpecial() {
           Today&apos;s Special Deals 🎯
           <MapPin className="w-5 h-5 text-red-500" />
         </h2>
-        <Link href="/specials">
+        <Link href="/shop/dishes">
           <Button variant="outline" size="sm">
             View All
           </Button>
