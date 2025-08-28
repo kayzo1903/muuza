@@ -6,11 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Heart , ChevronLeft, ChevronRight, ShoppingCart, Star, Loader2, MessageSquare } from "lucide-react";
+import {
+  Heart,
+  ShoppingCart,
+  Star,
+  Loader2,
+  MessageSquare,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
 import Link from "next/link";
-
+import { toast } from "sonner";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
 
 type Comment = {
   id: number;
@@ -47,7 +54,8 @@ const dishes: Dish[] = [
     id: 1,
     name: "Ugali",
     category: "East African",
-    description: "A traditional Tanzanian staple made from maize flour, usually served with sukuma wiki or nyama choma.",
+    description:
+      "A traditional Tanzanian staple made from maize flour, usually served with sukuma wiki or nyama choma.",
     price: 3.5,
     rating: 4.6,
     images: ["/foods/ugali.jpg", "/foods/mandazi.jpg"],
@@ -57,7 +65,7 @@ const dishes: Dish[] = [
       id: 1,
       name: "Chef Amina",
       avatar: "/avatar/default.jpg",
-      online: true
+      online: true,
     },
     comments: [
       {
@@ -66,7 +74,7 @@ const dishes: Dish[] = [
         text: "Classic Tanzanian staple, love it with sukuma wiki 🍃",
         likes: 12,
         rating: 5,
-        date: "2023-05-15"
+        date: "2023-05-15",
       },
       {
         id: 2,
@@ -74,7 +82,7 @@ const dishes: Dish[] = [
         text: "Ugali reminds me of home 😍",
         likes: 5,
         rating: 4,
-        date: "2023-04-22"
+        date: "2023-04-22",
       },
     ],
   },
@@ -82,7 +90,8 @@ const dishes: Dish[] = [
     id: 2,
     name: "Pilau",
     category: "East African",
-    description: "Spiced rice cooked with beef, chicken, or goat. A festive dish perfect for Eid and celebrations.",
+    description:
+      "Spiced rice cooked with beef, chicken, or goat. A festive dish perfect for Eid and celebrations.",
     price: 5.0,
     rating: 4.8,
     images: ["/foods/pilau.jpg", "/foods/biryani.jpg", "/foods/samaki.jpg"],
@@ -92,7 +101,7 @@ const dishes: Dish[] = [
       id: 2,
       name: "Chef Kamau",
       avatar: "/avatars/kamau.jpg",
-      online: false
+      online: false,
     },
     comments: [
       {
@@ -101,7 +110,7 @@ const dishes: Dish[] = [
         text: "Perfect for Eid celebrations ✨",
         likes: 20,
         rating: 5,
-        date: "2023-06-10"
+        date: "2023-06-10",
       },
     ],
   },
@@ -114,25 +123,31 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
   const [comments, setComments] = useState<Comment[]>(dish?.comments || []);
   const [newComment, setNewComment] = useState("");
   const [newCommentRating, setNewCommentRating] = useState<number | null>(null);
-  const [currentImage, setCurrentImage] = useState(0);
+  //const [currentImage, setCurrentImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [cartItems, setCartItems] = useState<{id: number, quantity: number}[]>([]);
+  const [cartItems, setCartItems] = useState<
+    { id: number; quantity: number }[]
+  >([]);
 
-  if (!dish) return (
-    <div className="flex flex-col items-center justify-center h-64">
-      <Loader2 className="w-8 h-8 animate-spin" />
-      <p className="mt-2">Dish not found</p>
-    </div>
-  );
+  if (!dish)
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        <p className="mt-2">Dish not found</p>
+      </div>
+    );
 
   const handleLikeDish = () => {
-    setLikes(prev => isLiked ? prev - 1 : prev + 1);
+    setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
     setIsLiked(!isLiked);
+    toast(isLiked ? "You unliked the dish 💔" : "You liked the dish ❤️");
   };
 
   const handleLikeComment = (id: number) => {
-    setComments(prev =>
-      prev.map((c) => (c.id === id ? { ...c, likes: c.likes + 1 } : c)))
+    setComments((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, likes: c.likes + 1 } : c))
+    );
+    toast("You liked a review ❤️");
   };
 
   const handleComment = () => {
@@ -143,42 +158,47 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
         text: newComment,
         likes: 0,
         rating: newCommentRating || 0,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split("T")[0],
       };
       setComments((prev) => [...prev, newC]);
       setNewComment("");
       setNewCommentRating(null);
+
+      toast("Review added 🎉", {
+        description: "Thank you for sharing your experience!",
+      });
     }
   };
 
   const handleAddToCart = () => {
-    setCartItems(prev => {
-      const existingItem = prev.find(item => item.id === dish.id);
+    setCartItems((prev) => {
+      const existingItem = prev.find((item) => item.id === dish.id);
       if (existingItem) {
-        return prev.map(item => 
-          item.id === dish.id 
-            ? {...item, quantity: item.quantity + quantity} 
+        return prev.map((item) =>
+          item.id === dish.id
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, {id: dish.id, quantity}];
+      return [...prev, { id: dish.id, quantity }];
     });
+    toast(`Added to cart 🛒`, {
+      description: `${quantity} x ${dish.name} added to your cart.`,
+    });
+    console.log(cartItems);
     setQuantity(1);
   };
 
   const handleOrderNow = () => {
     handleAddToCart();
-    // In a real app, this would navigate to checkout
-    window.location.href = "/checkout";
+    toast("Proceeding to Checkout ✅", {
+      description: "Redirecting you to checkout...",
+    });
+    setTimeout(() => {
+      window.location.href = "/checkout";
+    }, 1000);
   };
 
-  const nextImage = () =>
-    setCurrentImage((prev) => (prev + 1) % dish.images.length);
-
-  const prevImage = () =>
-    setCurrentImage((prev) =>
-      prev === 0 ? dish.images.length - 1 : prev - 1
-    );
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -193,14 +213,16 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
             <div>
               <p className="font-medium">{dish.chef.name}</p>
               <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <span className={`inline-block w-2 h-2 rounded-full ${
-                  dish.chef.online ? 'bg-green-500' : 'bg-gray-400'
-                }`}></span>
-                {dish.chef.online ? 'Online' : 'Offline'}
+                <span
+                  className={`inline-block w-2 h-2 rounded-full ${
+                    dish.chef.online ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                ></span>
+                {dish.chef.online ? "Online" : "Offline"}
               </p>
             </div>
           </div>
-          <Link 
+          <Link
             href={`/chat/${dish.chef.id}`}
             className="flex items-center gap-2 text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
@@ -211,51 +233,31 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
       </Card>
 
       {/* Dish Card with carousel */}
-      <div className="flex flex-col lg:flex-row gap-6 mb-8">
+      <div className="flex flex-col lg:flex-row gap-14 mb-8">
         <div className="lg:w-1/2">
-          <Card className="relative rounded-2xl overflow-hidden shadow-md aspect-square">
-            <Image
-              src={dish.images[currentImage]}
-              alt={dish.name}
-              fill
-              className="object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/foods/default.jpg';
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-            {/* Carousel controls */}
-            {dish.images.length > 1 && (
-              <>
-                <button
-                  aria-label="Previous image"
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 rounded-full p-2 text-white hover:bg-black/60 transition"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  aria-label="Next image"
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 rounded-full p-2 text-white hover:bg-black/60 transition"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
-                  {dish.images.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImage(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImage ? 'bg-white w-4' : 'bg-white/50'
-                      }`}
+          <Carousel className="w-full max-w-lg">
+            <CarouselContent>
+              {dish.images.map((img, index) => (
+                <CarouselItem key={index}>
+                  <Card className="relative rounded-2xl overflow-hidden shadow-md aspect-square">
+                    <Image
+                      src={img}
+                      alt={`${dish.name} ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          "/foods/default.jpg";
+                      }}
                     />
-                  ))}
-                </div>
-              </>
-            )}
-          </Card>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
 
         <div className="lg:w-1/2 space-y-4">
@@ -270,31 +272,35 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
 
           {dish.dietaryTags && (
             <div className="flex flex-wrap gap-1">
-              {dish.dietaryTags.map(tag => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
+              {dish.dietaryTags.map((tag) => (
+                <Badge key={tag} variant="outline">
+                  {tag}
+                </Badge>
               ))}
             </div>
           )}
 
-          <p className="text-gray-700">{dish.description}</p>
+          <p className="text-gray-700 dark:text-gray-300">{dish.description}</p>
 
           <div className="flex items-center gap-4">
-            <span className="text-xl font-bold text-green-600">${dish.price.toFixed(2)}</span>
-            
+            <span className="text-xl font-bold text-green-600">
+              ${dish.price.toFixed(2)}
+            </span>
+
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setQuantity(q => Math.max(1, q-1))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 disabled={quantity <= 1}
               >
                 -
               </Button>
               <span className="w-8 text-center">{quantity}</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setQuantity(q => q+1)}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setQuantity((q) => q + 1)}
               >
                 +
               </Button>
@@ -302,30 +308,30 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleLikeDish}
               className="flex items-center gap-1"
             >
               <motion.div
                 whileTap={{ scale: 0.9 }}
-                animate={{ color: isLiked ? '#ef4444' : '#000000' }}
+                animate={{ color: isLiked ? "#ef4444" : "#000000" }}
               >
-                <Heart className={`w-4 h-4 ${isLiked ? 'fill-red-500' : ''}`} />
+                <Heart className={`w-4 h-4 ${isLiked ? "fill-red-500" : ""}`} />
               </motion.div>
               {likes} Likes
             </Button>
 
             <div className="flex-1 flex gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
               </Button>
-              <Button 
+              <Button
                 className="flex-1 bg-green-600 hover:bg-green-700"
                 onClick={handleOrderNow}
               >
@@ -333,30 +339,26 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
               </Button>
             </div>
           </div>
-
-          {cartItems.some(item => item.id === dish.id) && (
-            <p className="text-sm text-green-600">
-              ✅ {cartItems.find(item => item.id === dish.id)?.quantity} item(s) in cart
-            </p>
-          )}
         </div>
       </div>
 
       {/* Comments Section */}
       <section aria-labelledby="reviews-heading" className="mt-8">
-        <h2 id="reviews-heading" className="text-xl font-semibold mb-4">Customer Reviews</h2>
+        <h2 id="reviews-heading" className="text-xl font-semibold mb-4">
+          Customer Reviews
+        </h2>
 
         {/* Add comment */}
         <Card className="p-4 mb-6">
           <h3 className="font-medium mb-3">Add your review</h3>
           <div className="flex items-center mb-3">
-            {[1,2,3,4,5].map((star) => (
+            {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
                 className={`w-5 h-5 cursor-pointer ${
-                  star <= (newCommentRating || 0) 
-                    ? 'text-yellow-400 fill-yellow-400' 
-                    : 'text-gray-300'
+                  star <= (newCommentRating || 0)
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-gray-300"
                 }`}
                 onClick={() => setNewCommentRating(star)}
               />
@@ -375,11 +377,16 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
 
         {/* List of comments */}
         {comments.length === 0 ? (
-          <p className="text-gray-500 text-center py-6">No reviews yet. Be the first!</p>
+          <p className="text-gray-500 text-center py-6">
+            No reviews yet. Be the first!
+          </p>
         ) : (
           <div className="space-y-4">
             {comments
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              )
               .map((c) => (
                 <motion.div
                   key={c.id}
@@ -423,24 +430,6 @@ export default function DishShowPage({ params }: { params: { id: string } }) {
           </div>
         )}
       </section>
-
-      {/* Mobile floating action buttons */}
-      <div className="fixed bottom-4 right-4 z-10 flex gap-2 sm:hidden">
-        <Button
-          size="icon"
-          className="rounded-full shadow-lg bg-red-500 hover:bg-red-600"
-          onClick={handleLikeDish}
-        >
-          <Heart className={`w-5 h-5 ${isLiked ? 'fill-white' : ''}`} />
-        </Button>
-        <Button
-          size="icon"
-          className="rounded-full shadow-lg bg-green-600 hover:bg-green-700"
-          onClick={handleOrderNow}
-        >
-          <ShoppingCart className="w-5 h-5" />
-        </Button>
-      </div>
     </div>
   );
 }
