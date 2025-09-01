@@ -116,7 +116,7 @@ const popularChefs = [
   },
 ];
 
-export default function PopularChefs() {
+export default function PopularChefsFilter() {
   // Properly type the state for user location
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -138,7 +138,7 @@ export default function PopularChefs() {
           Popular Chefs Near You 👨🏽‍🍳
           <MapPin className="w-5 h-5 text-red-500" />
         </h2>
-        <Link href="/chefs">
+        <Link href="/shop/chefs">
           <Button variant="outline" size="sm">
             View All
           </Button>

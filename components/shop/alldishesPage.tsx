@@ -10,11 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { Star, Heart, MessageCircle, Clock, SlidersHorizontal } from "lucide-react";
+import { Star, Heart, MessageCircle, Clock, SlidersHorizontal, MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import DistanceFilter from "../distance-filter";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 
 // Mock function to calculate distance
 const calculateDistance = (index: number) => {
@@ -116,6 +116,34 @@ const allDishes = [
     type: "trending",
   },
   // Add more dishes as needed...
+  {
+    id: 203,
+    name: "Samaki wa Kupaka",
+    category: "Seafood",
+    image: "/foods/samaki.jpg",
+    likes: 190,
+    comments: 28,
+    price: "TZS 8,500",
+    restaurant: "Coastal Delights",
+    rating: 4.9,
+    description: "Grilled fish in coconut sauce, a coastal specialty",
+    deliveryTime: "30-40 min",
+    type: "trending",
+  },
+  {
+    id: 204,
+    name: "Wali wa Nazi",
+    category: "Rice Dish",
+    image: "/foods/pilau.jpg",
+    likes: 150,
+    comments: 20,
+    price: "TZS 4,000",
+    restaurant: "Swahili Kitchen",
+    rating: 4.4,
+    description: "Coconut rice with traditional spices",
+    deliveryTime: "25-35 min",
+    type: "popular",
+  },
 ];
 
 export default function AllDishesPage() {
@@ -129,33 +157,23 @@ export default function AllDishesPage() {
     const mockLocation = { lat: -6.7924, lng: 39.2083 };
     setUserLocation(mockLocation);
   }, []);
- console.log(userLocation);
- 
+  console.log(userLocation);
+  
   // Calculate distances for all dishes
   const dishesWithDistance = allDishes.map((dish, i) => ({
     ...dish,
     distance: calculateDistance(i),
   }));
 
-  // Apply filters
-  const filteredDishes = dishesWithDistance
+  // Filter for nearby dishes
+  const nearbyDishes = dishesWithDistance
     .filter((dish) => dish.distance <= distanceFilter)
-    .filter((dish) => categoryFilter === "all" || dish.category === categoryFilter)
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "distance":
-          return a.distance - b.distance;
-        case "rating":
-          return b.rating - a.rating;
-        case "price":
-          return parseFloat(a.price.replace(/[^\d.]/g, '')) - parseFloat(b.price.replace(/[^\d.]/g, ''));
-        default:
-          return 0;
-      }
-    });
+    .sort((a, b) => a.distance - b.distance);
 
-  // Get unique categories for filter
-  const categories = ["all", ...new Set(allDishes.map((dish) => dish.category))];
+  // Filter for discover dishes (outside filter range or highly rated)
+  const discoverDishes = dishesWithDistance
+    .filter((dish) => dish.distance > distanceFilter || dish.rating >= 4.5)
+    .sort((a, b) => b.rating - a.rating);
 
   const handleDistanceChange = (distance: number) => {
     setDistanceFilter(distance);
@@ -166,7 +184,7 @@ export default function AllDishesPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">dishes</h1>
+          <h1 className="text-3xl font-bold mb-2">All Dishes</h1>
           <p className="text-sm dark:text-gray-300 text-gray-600">
             Discover all available dishes from restaurants near you
           </p>
@@ -203,11 +221,13 @@ export default function AllDishesPage() {
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category === "all" ? "All Categories" : category}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="East African">East African</SelectItem>
+                    <SelectItem value="Grilled Meat">Grilled Meat</SelectItem>
+                    <SelectItem value="Snack">Snack</SelectItem>
+                    <SelectItem value="Street Food">Street Food</SelectItem>
+                    <SelectItem value="Seafood">Seafood</SelectItem>
+                    <SelectItem value="Rice Dish">Rice Dish</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -221,30 +241,127 @@ export default function AllDishesPage() {
             max={15}
           />
         </div>
-        {/* Dishes Grid */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          {filteredDishes.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500">No dishes found matching your filters.</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => {
-                  setDistanceFilter(15);
-                  setCategoryFilter("all");
-                  setSortBy("distance");
-                }}
-              >
-                Reset Filters
-              </Button>
-            </div>
-          ) : (
-            filteredDishes.map((dish) => {
+
+        {/* Nearby Section - Horizontal Scroll */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-red-500" />
+              Nearby Dishes ({nearbyDishes.length})
+            </h2>
+          </div>
+
+          {/* Horizontal scroll container for all screen sizes */}
+          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
+            {nearbyDishes.length === 0 ? (
+              <div className="w-full text-center py-8 text-gray-500">
+                No dishes found within {distanceFilter}km. Try increasing your distance.
+              </div>
+            ) : (
+              nearbyDishes.map((dish) => {
+                const rating = dish.rating < 2 ? 2.0 : dish.rating;
+                
+                return (
+                  <Link href={`/shop/dishes/${dish.id}`} key={dish.id}>
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="min-w-[280px] md:min-w-[300px] lg:min-w-[320px] flex-shrink-0"
+                    >
+                      <Card className="relative rounded-2xl overflow-hidden shadow-md h-96 border border-yellow-300">
+                        {/* Background image */}
+                        <div className="absolute inset-0 w-full h-full">
+                          <Image
+                            src={dish.image}
+                            alt={dish.name}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/foods/default.jpg";
+                            }}
+                          />
+                        </div>
+
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                        {/* Distance badge */}
+                        <span className="absolute top-3 left-3 bg-green-900 text-white text-xs px-2 py-1 rounded-full shadow-md">
+                          {dish.distance} km
+                        </span>
+
+                        {/* Special badge if applicable */}
+                        {dish.type === "special" && (
+                          <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow-md">
+                            {dish.discount}
+                          </span>
+                        )}
+
+                        {/* Rating badge */}
+                        <div className="absolute top-12 right-3 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-full text-white text-xs">
+                          <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-yellow-400" />
+                          <span>{rating.toFixed(1)}</span>
+                        </div>
+
+                        {/* Info overlay */}
+                        <div className="absolute bottom-0 p-4 text-white w-full">
+                          <h3 className="text-lg font-semibold">{dish.name}</h3>
+                          <p className="text-sm text-gray-200">{dish.restaurant}</p>
+                          <div className="flex items-center gap-2 text-xs opacity-90 mb-1 mt-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{dish.deliveryTime}</span>
+                            <span className="flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                              {dish.rating}
+                            </span>
+                          </div>
+                          <p className="text-sm font-bold text-green-400 mb-2">
+                            {dish.price}
+                          </p>
+                          <p className="text-xs text-gray-200 line-clamp-2 mb-3">
+                            {dish.description}
+                          </p>
+
+                          {/* Buttons */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-3">
+                              <button className="flex items-center gap-1 text-sm hover:text-red-400">
+                                <Heart className="w-4 h-4" /> {dish.likes}
+                              </button>
+                              <button className="flex items-center gap-1 text-sm hover:text-blue-400">
+                                <MessageCircle className="w-4 h-4" /> {dish.comments}
+                              </button>
+                            </div>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="bg-white/90 text-black hover:bg-white"
+                            >
+                              Order Now
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  </Link>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Discover Section - Grid Layout */}
+        <div>
+          <h2 className="text-xl font-semibold mb-6">Discover More Dishes</h2>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {discoverDishes.map((dish) => {
               const rating = dish.rating < 2 ? 2.0 : dish.rating;
               
               return (
@@ -290,58 +407,51 @@ export default function AllDishesPage() {
                         <span>{rating.toFixed(1)}</span>
                       </div>
 
-                      {/* Engagement metrics */}
-                      <div className="absolute top-12 left-3 flex items-center gap-3 bg-black/70 px-2 py-1 rounded-full text-white text-xs backdrop-blur-sm">
-                        <div className="flex items-center gap-1 hover:text-red-400 transition-colors">
-                          <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
-                          <span>{dish.likes}</span>
-                        </div>
-                        <div className="flex items-center gap-1 hover:text-blue-400 transition-colors">
-                          <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
-                          <span>{dish.comments}</span>
-                        </div>
-                      </div>
-
                       {/* Info overlay */}
                       <div className="absolute bottom-0 p-4 text-white w-full">
-                        <div className="mb-2">
-                          <h3 className="text-lg font-semibold">{dish.name}</h3>
-                          <p className="text-sm text-gray-200 line-clamp-1">{dish.restaurant}</p>
-                          <p className="text-xs text-gray-300">{dish.category}</p>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-xs opacity-90 mb-1">
+                        <h3 className="text-lg font-semibold">{dish.name}</h3>
+                        <p className="text-sm text-gray-200">{dish.restaurant}</p>
+                        <div className="flex items-center gap-2 text-xs opacity-90 mb-1 mt-1">
                           <Clock className="w-3 h-3" />
                           <span>{dish.deliveryTime}</span>
+                          <span className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            {dish.rating}
+                          </span>
                         </div>
-                        
-                        {/* Price display with discount if applicable */}
-                        <div className="flex items-center gap-2 mb-2">
-                          <p className="text-sm font-bold text-green-400">{dish.price}</p>
-                          {dish.originalPrice && (
-                            <p className="text-xs text-gray-400 line-through">{dish.originalPrice}</p>
-                          )}
-                        </div>
-                        
+                        <p className="text-sm font-bold text-green-400 mb-2">
+                          {dish.price}
+                        </p>
                         <p className="text-xs text-gray-200 line-clamp-2 mb-3">
                           {dish.description}
                         </p>
 
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="w-full bg-white/90 text-black hover:bg-white text-xs sm:text-sm"
-                        >
-                          Order Now
-                        </Button>
+                        {/* Buttons */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-3">
+                            <button className="flex items-center gap-1 text-sm hover:text-red-400">
+                              <Heart className="w-4 h-4" /> {dish.likes}
+                            </button>
+                            <button className="flex items-center gap-1 text-sm hover:text-blue-400">
+                              <MessageCircle className="w-4 h-4" /> {dish.comments}
+                            </button>
+                          </div>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="bg-white/90 text-black hover:bg-white"
+                          >
+                            Order Now
+                          </Button>
+                        </div>
                       </div>
                     </Card>
                   </Link>
                 </motion.div>
               );
-            })
-          )}
-        </motion.div>
+            })}
+          </motion.div>
+        </div>
       </div>
     </section>
   );
