@@ -85,7 +85,7 @@ export default function TrendingNow() {
     <div className="w-full p-4">
       {/* Header with button */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold flex items-center gap-2">
+        <h2 className="text-md lg:text-xl font-bold flex items-center gap-2">
           Trending Now Near You 🔥
           <MapPin className="w-5 h-5 text-red-500" />
         </h2>
