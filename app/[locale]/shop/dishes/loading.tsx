@@ -26,7 +26,7 @@ function DishSkeleton() {
 
 export default function Loading() {
   return (
-    <section className="w-full p-4 min-h-screen">
+    <section className="w-full min-h-screen pt-24 lg:pt-12">
       <div className="max-w-6xl mx-auto">
         {/* Header Skeleton */}
         <div className="mb-8 text-center">

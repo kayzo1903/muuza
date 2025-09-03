@@ -2,7 +2,11 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-function RestaurantCardSkeleton({ horizontal = false }: { horizontal?: boolean }) {
+function RestaurantCardSkeleton({
+  horizontal = false,
+}: {
+  horizontal?: boolean;
+}) {
   return (
     <div
       className={`${
@@ -33,7 +37,7 @@ function RestaurantCardSkeleton({ horizontal = false }: { horizontal?: boolean }
 
 export default function Loading() {
   return (
-    <section className="w-full p-4 min-h-screen">
+    <section className="w-full pt-24 lg:pt-12 min-h-screen">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">

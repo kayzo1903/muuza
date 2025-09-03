@@ -2,7 +2,7 @@
 
 export default function FoodsSkeleton() {
   return (
-    <section className="w-full">
+    <section className="w-full pt-24 lg:pt-12">
       <div className="max-w-6xl mx-auto">
         <div className="animate-pulse">
           <div className="h-8 w-48 bg-gray-200 rounded mb-8"></div>
