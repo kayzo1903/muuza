@@ -4,14 +4,14 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { 
-  LogOut, 
-  ShoppingBag, 
-  Heart, 
-  Store, 
-  Settings, 
-  HelpCircle, 
-  MessageSquare, 
+import {
+  LogOut,
+  ShoppingBag,
+  Heart,
+  Store,
+  Settings,
+  HelpCircle,
+  MessageSquare,
   MapPin,
   Star,
   User,
@@ -19,44 +19,123 @@ import {
   Bell,
   CreditCard,
   Edit,
-  Plus
+  Plus,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserData } from "./interface";
+import { toast } from "sonner";
+import { signOut } from "@/lib/auth-client";
+import { useState } from "react";
+import { useRouter } from "@/i18n/routing";
 
 // Profile menu items configuration
 const menuItems = {
   account: [
-    { id: "orders", label: "My Orders", icon: ShoppingBag, color: "text-yellow-600", badge: true },
-    { id: "wishlist", label: "Wishlist", icon: Heart, color: "text-red-500", badge: true },
-    { id: "addresses", label: "Saved Addresses", icon: MapPin, color: "text-blue-500" },
-    { id: "payments", label: "Payment Methods", icon: CreditCard, color: "text-green-500" }
+    {
+      id: "orders",
+      label: "My Orders",
+      icon: ShoppingBag,
+      color: "text-yellow-600",
+      badge: true,
+    },
+    {
+      id: "wishlist",
+      label: "Wishlist",
+      icon: Heart,
+      color: "text-red-500",
+      badge: true,
+    },
+    {
+      id: "addresses",
+      label: "Saved Addresses",
+      icon: MapPin,
+      color: "text-blue-500",
+    },
+    {
+      id: "payments",
+      label: "Payment Methods",
+      icon: CreditCard,
+      color: "text-green-500",
+    },
   ],
   settings: [
-    { id: "profile", label: "Profile Settings", icon: User, color: "text-gray-600" },
-    { id: "notifications", label: "Notifications", icon: Bell, color: "text-blue-500" },
-    { id: "privacy", label: "Privacy & Security", icon: Shield, color: "text-purple-500" }
+    {
+      id: "profile",
+      label: "Profile Settings",
+      icon: User,
+      color: "text-gray-600",
+    },
+    {
+      id: "notifications",
+      label: "Notifications",
+      icon: Bell,
+      color: "text-blue-500",
+    },
+    {
+      id: "privacy",
+      label: "Privacy & Security",
+      icon: Shield,
+      color: "text-purple-500",
+    },
   ],
   support: [
-    { id: "help", label: "Help Center", icon: HelpCircle, color: "text-blue-500" },
-    { id: "contact", label: "Contact Support", icon: MessageSquare, color: "text-green-500" },
-    { id: "feedback", label: "Give Feedback", icon: MessageSquare, color: "text-yellow-500" }
-  ]
+    {
+      id: "help",
+      label: "Help Center",
+      icon: HelpCircle,
+      color: "text-blue-500",
+    },
+    {
+      id: "contact",
+      label: "Contact Support",
+      icon: MessageSquare,
+      color: "text-green-500",
+    },
+    {
+      id: "feedback",
+      label: "Give Feedback",
+      icon: MessageSquare,
+      color: "text-yellow-500",
+    },
+  ],
 };
 
 type ProfileMenuProps = {
   userData: UserData;
 };
 
-export default function ProfileMenu({ userData } : ProfileMenuProps) {
+export default function ProfileMenu({ userData }: ProfileMenuProps) {
   const hasStore = !!userData?.store;
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
+
+  async function handleSignout() {
+    await signOut({
+      fetchOptions: {
+        onRequest: () => {
+          setPending(true);
+        },
+        onError: () => {
+          toast.error("Failed to sign out, check your connection");
+        },
+        onSuccess: () => {
+          setPending(false);
+          router.push("/auth/sign-in");
+          toast.success("Signed out successfully");
+        },
+      },
+    });
+  }
 
   return (
     <div className="min-h-screen p-4 max-w-md mx-auto space-y-6">
       {/* Header */}
       <div className="text-center">
-        <p className="text-md text-gray-600 dark:text-gray-300">Manage your account and preferences</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+          Manage your account and preferences
+        </p>
       </div>
 
       {/* User Profile */}
@@ -68,17 +147,25 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
               {userData.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <Button 
-            size="icon" 
+          <Button
+            size="icon"
             className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-yellow-500 hover:bg-yellow-600"
             onClick={() => console.log("Edit profile picture")}
           >
             <Edit className="h-4 w-4" />
           </Button>
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{userData.name}</h2>
-        <p className="text-gray-600 dark:text-gray-300 text-sm">{userData.email}</p>
-        {userData.phone && <p className="text-gray-500 dark:text-gray-400 text-xs">{userData.phone}</p>}
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          {userData.name}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300 text-sm">
+          {userData.email}
+        </p>
+        {userData.phone && (
+          <p className="text-gray-500 dark:text-gray-400 text-xs">
+            {userData.phone}
+          </p>
+        )}
       </div>
 
       <Separator />
@@ -92,9 +179,9 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
           {menuItems.account.map((item) => {
             const IconComponent = item.icon;
             return (
-              <Link 
-                key={item.id} 
-                href={`/${item.id}`} 
+              <Link
+                key={item.id}
+                href={`/${item.id}`}
                 className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -102,12 +189,17 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
                   <span>{item.label}</span>
                 </div>
                 {item.badge && userData.stats && (
-                  <Badge variant="secondary" className={
-                    item.id === "orders" 
-                      ? "bg-yellow-100 text-yellow-800" 
-                      : "bg-red-100 text-red-800"
-                  }>
-                    {item.id === "orders" ? userData.stats.orders : userData.stats.wishlist}
+                  <Badge
+                    variant="secondary"
+                    className={
+                      item.id === "orders"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                    }
+                  >
+                    {item.id === "orders"
+                      ? userData.stats.orders
+                      : userData.stats.wishlist}
                   </Badge>
                 )}
               </Link>
@@ -124,7 +216,10 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
           <Store className="h-4 w-4 text-green-600" /> My Store
         </h3>
         {hasStore ? (
-          <Link href="/dashboard" className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors">
+          <Link
+            href="/dashboard"
+            className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
+          >
             <div className="flex items-center gap-3">
               <Store className="h-5 w-5 text-green-600" />
               <div>
@@ -136,11 +231,16 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
               </div>
             </div>
             {userData.store.pendingOrders > 0 && (
-              <Badge variant="destructive">{userData.store.pendingOrders}</Badge>
+              <Badge variant="destructive">
+                {userData.store.pendingOrders}
+              </Badge>
             )}
           </Link>
         ) : (
-          <Link href="/onboarding/create-store" className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
+          <Link
+            href="/onboarding/create-store"
+            className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+          >
             <Plus className="h-5 w-5" />
             <span>Create Your Store</span>
           </Link>
@@ -158,9 +258,9 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
           {menuItems.settings.map((item) => {
             const IconComponent = item.icon;
             return (
-              <Link 
-                key={item.id} 
-                href={`/${item.id}`} 
+              <Link
+                key={item.id}
+                href={`/${item.id}`}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <IconComponent className={`h-5 w-5 ${item.color}`} />
@@ -182,9 +282,9 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
           {menuItems.support.map((item) => {
             const IconComponent = item.icon;
             return (
-              <Link 
-                key={item.id} 
-                href={`/${item.id}`} 
+              <Link
+                key={item.id}
+                href={`/${item.id}`}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <IconComponent className={`h-5 w-5 ${item.color}`} />
@@ -198,14 +298,20 @@ export default function ProfileMenu({ userData } : ProfileMenuProps) {
       <Separator />
 
       {/* Logout */}
-      <Link href="/logout" className="flex items-center gap-3 p-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-        <LogOut className="h-5 w-5" />
-        <span>Logout</span>
-      </Link>
+      <Button
+        disabled={pending}
+        onClick={handleSignout}
+        className="w-full flex items-center gap-3 p-3 "
+      >
+        {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+        <LogOut size={20} /> Logout
+      </Button>
 
       {/* App Version */}
       <div className="text-center mt-6">
-        <p className="text-xs text-gray-500 dark:text-gray-400">App Version 1.0.0</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          App Version 1.0.0
+        </p>
       </div>
     </div>
   );
