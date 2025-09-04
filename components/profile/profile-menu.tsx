@@ -30,7 +30,7 @@ import { signOut } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter } from "@/i18n/routing";
 
-// Profile menu items configuration
+// Profile menu items configuration - Fixed links
 const menuItems = {
   account: [
     {
@@ -39,6 +39,7 @@ const menuItems = {
       icon: ShoppingBag,
       color: "text-yellow-600",
       badge: true,
+      link: "/profile/orders" // Fixed path
     },
     {
       id: "wishlist",
@@ -46,18 +47,21 @@ const menuItems = {
       icon: Heart,
       color: "text-red-500",
       badge: true,
+      link: "/profile/wishlist" // Fixed path
     },
     {
       id: "addresses",
       label: "Saved Addresses",
       icon: MapPin,
       color: "text-blue-500",
+      link: "/profile/addresses" // Fixed path
     },
     {
       id: "payments",
       label: "Payment Methods",
       icon: CreditCard,
       color: "text-green-500",
+      link: "/profile/payment-methods" // Fixed path
     },
   ],
   settings: [
@@ -66,18 +70,21 @@ const menuItems = {
       label: "Profile Settings",
       icon: User,
       color: "text-gray-600",
+      link: "/profile/settings" // Fixed path
     },
     {
       id: "notifications",
       label: "Notifications",
       icon: Bell,
       color: "text-blue-500",
+      link: "/profile/notifications" // Fixed path
     },
     {
       id: "privacy",
       label: "Privacy & Security",
       icon: Shield,
       color: "text-purple-500",
+      link: "/profile/privacy" // Fixed path
     },
   ],
   support: [
@@ -86,18 +93,21 @@ const menuItems = {
       label: "Help Center",
       icon: HelpCircle,
       color: "text-blue-500",
+      link: "/support/help" // Correct path
     },
     {
       id: "contact",
       label: "Contact Support",
       icon: MessageSquare,
       color: "text-green-500",
+      link: "/support/help" // Different path from help
     },
     {
       id: "feedback",
       label: "Give Feedback",
       icon: MessageSquare,
       color: "text-yellow-500",
+      link: "/support/feedback" // Different path
     },
   ],
 };
@@ -181,7 +191,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
             return (
               <Link
                 key={item.id}
-                href={`/${item.id}`}
+                href={item.link} // Use the correct link from config
                 className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -260,7 +270,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
             return (
               <Link
                 key={item.id}
-                href={`/${item.id}`}
+                href={item.link} // Use the correct link from config
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <IconComponent className={`h-5 w-5 ${item.color}`} />
@@ -284,7 +294,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
             return (
               <Link
                 key={item.id}
-                href={`/${item.id}`}
+                href={item.link} // Use the correct link from config
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <IconComponent className={`h-5 w-5 ${item.color}`} />

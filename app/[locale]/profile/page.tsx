@@ -1,7 +1,5 @@
 // app/manage-account/page.jsx
 import { Suspense } from "react";
-import Footer from "@/components/Footer/footer";
-import AuthHeader from "@/components/Headers/SimpleHeader";
 import ProfileLoading from "@/components/profile/profileloading";
 import ProfileMenu from "@/components/profile/profile-menu";
 
@@ -40,11 +38,9 @@ export default async function ManageAccountPage() {
 
   return (
     <main>
-      <AuthHeader />
       <Suspense fallback={<ProfileLoading />}>
         <ProfileMenu userData={userData} />
       </Suspense>
-      <Footer />
     </main>
   );
 }

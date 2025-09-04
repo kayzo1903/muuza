@@ -1,17 +1,11 @@
-import Help from "@/components/Dashboard/help";
 import Footer from "@/components/Footer/footer";
 import AuthHeader from "@/components/Headers/SimpleHeader";
-import { Metadata } from "next/types";
 
-export const metadata: Metadata = {
-    title: "support",
-  };
-
-export default function HelpPage() {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <main className="w-full">
       <AuthHeader />
-      <Help />
+      {children}
       <Footer />
     </main>
   );

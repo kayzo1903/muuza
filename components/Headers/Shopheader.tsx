@@ -25,9 +25,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { HeaderProps } from "@/lib/session-props";
-import { signOut } from "@/lib/auth-client";
+import { Session, signOut } from "@/lib/auth-client";
 import { useRouter } from "@/i18n/routing";
+
+interface HeaderProps {
+  session: Session | null;
+}
 
 export default function ShopHeader({ session }: HeaderProps) {
   const pathname = usePathname();

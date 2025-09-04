@@ -1,5 +1,5 @@
 
-import CustomerOrders from "@/components/customer/orders";
+import CustomerOrders from "@/components/profile/orders";
 import Footer from "@/components/Footer/footer";
 import AuthHeader from "@/components/Headers/SimpleHeader";
 import { Metadata } from "next";

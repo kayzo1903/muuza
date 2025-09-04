@@ -14,10 +14,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import clsx from "clsx";
-import { signOut } from "@/lib/auth-client";
+import { Session, signOut } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { HeaderProps } from "@/lib/session-props";
 import { usePathname } from "next/navigation";
+
+interface HeaderProps {
+  session: Session | null;
+}
 
 export default function Header({ session }: HeaderProps) {
   const [isSticky, setSticky] = useState(false);

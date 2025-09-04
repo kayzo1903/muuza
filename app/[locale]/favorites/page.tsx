@@ -1,4 +1,4 @@
-import FavouritePage from "@/components/customer/favorites";
+import FavouritePage from "@/components/profile/favorites";
 import Footer from "@/components/Footer/footer";
 import AuthHeader from "@/components/Headers/SimpleHeader";
 import { Metadata } from "next";

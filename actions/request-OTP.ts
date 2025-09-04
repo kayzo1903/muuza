@@ -47,9 +47,7 @@ export async function verifyEmailOTP(userEmail: string, otp: string) {
         otp,
       },
     });
-
-    console.log("Verify OTP response:", res);
-
+    
     if (res?.status === true) {
       return { success: true, token: res.token, user: res.user };
     }

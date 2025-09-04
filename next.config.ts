@@ -2,10 +2,6 @@ import { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-  // It's better to avoid experimental features unless absolutely necessary
-  // experimental: {
-  //   globalNotFound: true,
-  // },
   images: {
     remotePatterns: [
       {
