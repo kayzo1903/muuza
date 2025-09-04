@@ -8,7 +8,6 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-
 import {
   Card,
   CardHeader,
@@ -20,41 +19,59 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
 import { Eye, EyeOff, Camera } from "lucide-react";
 import { authClient, Session } from "@/lib/auth-client";
 
-// ---------------------------
-// ZOD SCHEMAS
-// ---------------------------
+/* ---------------------------
+   ZOD SCHEMAS
+--------------------------- */
+
+// Profile Schema
 const profileSchema = z.object({
-  fullName: z.string().min(3, "Full name must be at least 3 characters"),
-  phone: z.string().optional(),
-  address: z.string().optional(),
+  fullName: z
+    .string()
+    .min(3, "Full name must be at least 3 characters")
+    .regex(/^[A-Za-z\s]+$/, "Full name can only contain letters and spaces"),
+
+  phone: z
+    .string()
+    .regex(/^\+?[0-9]{10,15}$/, "Enter a valid phone number (e.g., +255712345678)")
+    .optional(),
+
+  address: z
+    .string()
+    .min(5, "Address must be at least 5 characters long")
+    .max(100, "Address must not exceed 100 characters"),
 });
 
-type ProfileFormValues = z.infer<typeof profileSchema>;
+// Password Schema
+const passwordSchem = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character");
 
 const passwordSchema = z
   .object({
-    current: z.string().min(6, "Current password is required"),
-    new: z.string().min(6, "New password must be at least 6 characters"),
-    confirm: z.string().min(6, "Please confirm your new password"),
+    current: passwordSchem,
+    new: passwordSchem,
+    confirm: passwordSchem,
   })
   .refine((data) => data.new === data.confirm, {
-    message: "New passwords don't match",
     path: ["confirm"],
+    message: "New password and confirmation do not match",
   });
 
+type ProfileFormValues = z.infer<typeof profileSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 type AccountSettingProps = {
   session: Session;
 };
 
-// ---------------------------
-// MAIN COMPONENT
-// ---------------------------
+/* ---------------------------
+   COMPONENT
+--------------------------- */
 export default function AccountSetting({ session }: AccountSettingProps) {
   const router = useRouter();
   const [profilePic, setProfilePic] = useState(session.user.image || "/default-avatar.png");
@@ -66,7 +83,9 @@ export default function AccountSetting({ session }: AccountSettingProps) {
     confirm: false,
   });
 
-  // Profile form
+  /* ---------------------------
+     FORMS
+  --------------------------- */
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -76,7 +95,6 @@ export default function AccountSetting({ session }: AccountSettingProps) {
     },
   });
 
-  // Password form
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
@@ -86,9 +104,9 @@ export default function AccountSetting({ session }: AccountSettingProps) {
     },
   });
 
-  // ---------------------------
-  // PROFILE HANDLERS
-  // ---------------------------
+  /* ---------------------------
+     PROFILE HANDLERS
+  --------------------------- */
   const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
@@ -110,9 +128,9 @@ export default function AccountSetting({ session }: AccountSettingProps) {
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
     try {
-      console.log("Saving profile:", data);
-
       // TODO: Call backend API
+      console.log(data);
+      
       toast.success("Profile updated", {
         description: "Your profile information has been saved successfully.",
       });
@@ -123,14 +141,14 @@ export default function AccountSetting({ session }: AccountSettingProps) {
     }
   };
 
-  // ---------------------------
-  // PASSWORD HANDLERS
-  // ---------------------------
+  /* ---------------------------
+     PASSWORD HANDLERS
+  --------------------------- */
   const handlePasswordUpdate = async (data: PasswordFormValues) => {
     try {
-      // TODO: API call to update password
-      console.log("Updating password:", data);
-
+      // TODO: Securely send password update to backend
+      console.log(data);
+      
       toast.success("Password updated", {
         description: "Your password has been changed successfully.",
       });
@@ -150,15 +168,16 @@ export default function AccountSetting({ session }: AccountSettingProps) {
 
   const handleLogout = async () => {
     await authClient.signOut();
-    router.push("/login");
+    router.push("/auth/sign-in");
   };
 
-  // ---------------------------
-  // RENDER
-  // ---------------------------
+  /* ---------------------------
+     RENDER
+  --------------------------- */
   return (
-    <div className="p-6 space-y-8 pt-24 lg:pt-8 max-w-4xl mx-auto">
-      <header>
+    <div className="p-6 space-y-10 pt-24 lg:pt-8 max-w-5xl mx-auto">
+      {/* Header */}
+      <header className="text-center lg:text-left">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           Account Settings
         </h1>
@@ -167,21 +186,21 @@ export default function AccountSetting({ session }: AccountSettingProps) {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Profile Picture Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Profile Picture */}
         <Card className="lg:col-span-1 shadow-md">
           <CardContent className="pt-6 text-center">
-            <div className="relative w-28 h-28 mx-auto mb-4">
+            <div className="relative w-32 h-32 mx-auto mb-4 group">
               <Image
                 src={profilePic}
                 alt="Profile"
-                width={112}
-                height={112}
-                className="w-28 h-28 rounded-full border-4 border-yellow-200 object-cover shadow-sm"
+                width={128}
+                height={128}
+                className="w-32 h-32 rounded-full border-4 border-yellow-200 object-cover shadow-sm transition-transform duration-200 group-hover:scale-105"
               />
               <label
                 htmlFor="profile-pic-upload"
-                className="absolute bottom-0 right-0 bg-yellow-500 p-2 rounded-full cursor-pointer hover:bg-yellow-600 transition-colors"
+                className="absolute bottom-0 right-0 bg-yellow-500 p-2 rounded-full cursor-pointer hover:bg-yellow-600 transition-colors shadow-lg"
               >
                 <Camera className="w-4 h-4 text-white" />
                 <input
@@ -214,27 +233,38 @@ export default function AccountSetting({ session }: AccountSettingProps) {
                   placeholder="Your full name"
                   className="mt-1"
                 />
+                {profileForm.formState.errors.fullName && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {profileForm.formState.errors.fullName.message}
+                  </p>
+                )}
               </div>
-
-              <Separator />
 
               {/* Phone */}
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input id="phone" {...profileForm.register("phone")} placeholder="+255712345678" />
+                {profileForm.formState.errors.phone && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {profileForm.formState.errors.phone.message}
+                  </p>
+                )}
               </div>
-
-              <Separator />
 
               {/* Address */}
               <div>
                 <Label htmlFor="address">Delivery Address</Label>
                 <Input id="address" {...profileForm.register("address")} placeholder="Street, City, Region" />
+                {profileForm.formState.errors.address && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {profileForm.formState.errors.address.message}
+                  </p>
+                )}
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white transition-colors duration-200"
                 disabled={profileForm.formState.isSubmitting}
               >
                 {profileForm.formState.isSubmitting ? "Saving..." : "Save Changes"}
@@ -244,7 +274,7 @@ export default function AccountSetting({ session }: AccountSettingProps) {
         </Card>
       </div>
 
-      {/* Password Management - only for email/password users */}
+      {/* Password Management */}
       {session.user.provider === "credentials" && (
         <Card className="shadow-md">
           <CardHeader>
@@ -276,14 +306,8 @@ export default function AccountSetting({ session }: AccountSettingProps) {
                     <div className="relative">
                       <Input
                         id={field}
-                        {...passwordForm.register(
-                          field as keyof PasswordFormValues
-                        )}
-                        type={
-                          showPassword[field as keyof typeof showPassword]
-                            ? "text"
-                            : "password"
-                        }
+                        {...passwordForm.register(field as keyof PasswordFormValues)}
+                        type={showPassword[field as keyof typeof showPassword] ? "text" : "password"}
                         placeholder={
                           field === "current"
                             ? "Enter current password"
@@ -342,7 +366,7 @@ export default function AccountSetting({ session }: AccountSettingProps) {
       <Separator />
 
       {/* Logout */}
-      <div className="space-y-4">
+      <div className="flex justify-center lg:justify-end">
         <Button
           variant="destructive"
           className="w-full sm:w-auto"

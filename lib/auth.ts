@@ -163,32 +163,8 @@ export const auth = betterAuth({
       },
     }),
 
-    // CUSTOM SESSION PAYLOAD
-    // customSession(async ({ user, session }) => {
-    //   return {
-    //     session: {
-    //       expiresAt: session.expiresAt,
-    //       token: session.token,
-    //       userAgent: session.userAgent,
-    //     },
-    //     user: {
-    //       id: user.id,
-    //       name: user.name,
-    //       email: user.email,
-    //       image: user.image,
-    //       createdAt: user.createdAt,
-    //       updatedAt: user.updatedAt,
-    //       provider: user.provider,
-    //       phone: user.phone_number, // renamed for cleaner frontend
-    //       address: user.address,
-    //       role: user.role,
-    //     },
-    //   };
-    // }),
-
     // NEXT.JS COOKIE HANDLING
     nextCookies(),
   ],
 });
 
-export type session = typeof auth.$Infer.Session;
