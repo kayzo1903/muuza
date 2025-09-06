@@ -5,10 +5,10 @@ const Footer = () => {
   const t = useTranslations("footer");
 
   const footerLinks = [
-    { path: "#", name: `${t("about")}` },
+    { path: "/about", name: `${t("about")}` },
     { path: "#", name: `${t("sell")}` },
-    { path: "#", name: `${t("help")}` },
-    { path: "/privacy-policy", name: `${"privacy policy"}` },
+    { path: "/support/help", name: `${t("help")}` },
+    { path: "/profile/privacy", name: `${"privacy policy"}` },
     { path: "/terms-of-service", name: `${"terms-of-service"}` },
     { path: "/blog", name: `${t("blog")}` },
   ];

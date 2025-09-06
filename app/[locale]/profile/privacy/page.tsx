@@ -1,5 +1,3 @@
-import Footer from "@/components/Footer/footer";
-import AuthHeader from "@/components/Headers/SimpleHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
@@ -11,7 +9,6 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <main className="w-full">
-      <AuthHeader />
       <section className="container max-w-4xl mx-auto py-12 px-4">
         <Card className="shadow-lg">
           <CardHeader>
@@ -104,7 +101,6 @@ export default function PrivacyPolicyPage() {
           </CardContent>
         </Card>
       </section>
-      <Footer />
     </main>
   );
 }
