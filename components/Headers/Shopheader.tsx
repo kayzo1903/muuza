@@ -320,7 +320,7 @@ export default function ShopHeader({ session }: HeaderProps) {
                 <User size={20} /> Profile
               </Link>
               <Link
-                href="/orders"
+                href="/shop/my-orders"
                 onClick={() => setMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-md ${
                   isActive("/orders")
@@ -331,7 +331,7 @@ export default function ShopHeader({ session }: HeaderProps) {
                 <ShoppingBag size={20} /> Orders
               </Link>
               <Link
-                href="/favourites"
+                href="/shop/wishlist"
                 onClick={() => setMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-md ${
                   isActive("/favourites")
@@ -342,7 +342,7 @@ export default function ShopHeader({ session }: HeaderProps) {
                 <Heart size={20} /> Favorites
               </Link>
               <Link
-                href="/get-store"
+                href="/profile/get-store"
                 onClick={() => setMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-md ${
                   isActive("/get-store")
