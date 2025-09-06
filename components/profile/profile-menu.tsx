@@ -39,7 +39,7 @@ const menuItems = {
       icon: ShoppingBag,
       color: "text-yellow-600",
       badge: true,
-      link: "/profile/orders" // Fixed path
+      link: "/shop/my-orders" // Fixed path
     },
     {
       id: "wishlist",
