@@ -142,7 +142,7 @@ export default function ShopHeader({ session }: HeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer w-8 h-8 hover:ring-2 hover:ring-white">
                   <AvatarImage src={session.user.image ?? ""} />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-gray-800">
                     {session.user.name?.[0] ?? "U"}
                   </AvatarFallback>
                 </Avatar>
