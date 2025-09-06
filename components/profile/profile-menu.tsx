@@ -47,7 +47,7 @@ const menuItems = {
       icon: Heart,
       color: "text-red-500",
       badge: true,
-      link: "/profile/wishlist" // Fixed path
+      link: "/shop/wishlist" // Fixed path
     },
     {
       id: "addresses",

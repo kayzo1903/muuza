@@ -120,14 +120,14 @@ export default function ShopHeader({ session }: HeaderProps) {
         {/* Right Icons (Desktop) */}
         <div className="hidden lg:flex items-center gap-4 text-gray-50 font-medium">
           <Link
-            href="/orders"
+            href="/shop/my-orders"
             className="p-1 rounded-md hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-600 transition-colors"
             aria-label="Orders"
           >
             <ShoppingBag className="h-5 w-5 text-white" />
           </Link>
           <Link
-            href="/favourites"
+            href="/shop/wishlist"
             className="p-1 rounded-md hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-600 transition-colors"
             aria-label="Favorites"
           >
@@ -158,7 +158,7 @@ export default function ShopHeader({ session }: HeaderProps) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="p-0">
                   <Link
-                    href="/settings"
+                    href="/profile/settings"
                     className="px-2 py-1.5 w-full rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
                     Settings
