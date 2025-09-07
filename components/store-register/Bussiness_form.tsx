@@ -26,6 +26,7 @@ import {
   Utensils,
   X,
   Building2,
+  User,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -61,7 +62,41 @@ const businessCategories = [
 ];
 
 /* ---------------------------------------
-   2. Zod Schema Definitions
+   2. Chef Category Options
+--------------------------------------- */
+const chefCategories = [
+  {
+    name: "Personal",
+    description: "Independent chefs offering services to individuals or small groups",
+    options: [
+      "Private Chef",
+      "Personal Chef",
+      "Freelance Cook",
+    ],
+  },
+  {
+    name: "Event",
+    description: "Chefs specializing in events and large gatherings",
+    options: [
+      "Catering",
+      "Wedding Chef",
+      "Corporate Event Chef",
+    ],
+  },
+  {
+    name: "Specialty",
+    description: "Chefs with unique culinary expertise",
+    options: [
+      "Pastry Chef",
+      "Grill Master",
+      "Vegan Chef",
+      "Sushi Chef",
+    ],
+  },
+];
+
+/* ---------------------------------------
+   3. Zod Schema Definitions
 --------------------------------------- */
 const basicInfoSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -81,8 +116,8 @@ const contactInfoSchema = z.object({
     .min(9, "Please enter a valid phone number")
     .regex(/^[0-9]{9,15}$/, "Please enter a valid phone number"),
   countryCode: z.string().min(1, "Please select a country code"),
-  openingTime: z.string().min(1, "Please select opening time"),
-  closingTime: z.string().min(1, "Please select closing time"),
+  openingTime: z.string().optional(),
+  closingTime: z.string().optional(),
 });
 
 const cuisineInfoSchema = z.object({
@@ -104,7 +139,7 @@ const restaurantSchema = basicInfoSchema
 type RestaurantFormData = z.infer<typeof restaurantSchema>;
 
 /* ---------------------------------------
-   3. Static Data
+   4. Static Data
 --------------------------------------- */
 const cuisineOptions = [
   "Swahili",
@@ -143,10 +178,11 @@ const generateTimeOptions = () => {
 const timeOptions = generateTimeOptions();
 
 /* ---------------------------------------
-   4. Main Component
+   5. Main Component
 --------------------------------------- */
 export default function SellerRegistration() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // Start with step 0 for registration type selection
+  const [registrationType, setRegistrationType] = useState<"restaurant" | "chef" | null>(null);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [formData, setFormData] = useState<Partial<RestaurantFormData>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -179,7 +215,6 @@ export default function SellerRegistration() {
   const countryCodeValue = watch("countryCode");
   const openingTimeValue = watch("openingTime");
   const closingTimeValue = watch("closingTime");
-
   const selectedBusinessCategory = watch("businessCategory");
 
   /* ----------------------------
@@ -225,18 +260,26 @@ export default function SellerRegistration() {
   const nextStep = async () => {
     let isValid = false;
 
-    if (step === 1) {
+    if (step === 0) {
+      if (!registrationType) return; // Can't proceed without selecting type
+      isValid = true;
+    } else if (step === 1) {
       isValid = await trigger(["name", "tagline", "bio"]);
     } else if (step === 2) {
       isValid = await trigger(["businessCategory", "subCategory"]);
     } else if (step === 3) {
-      isValid = await trigger([
-        "location",
-        "phone",
-        "countryCode",
-        "openingTime",
-        "closingTime",
-      ]);
+      // For chefs, location is optional, so we need custom validation
+      if (registrationType === "chef") {
+        isValid = await trigger(["phone", "countryCode"]);
+      } else {
+        isValid = await trigger([
+          "location",
+          "phone",
+          "countryCode",
+          "openingTime",
+          "closingTime",
+        ]);
+      }
     } else if (step === 4) {
       isValid = await trigger(["cuisine"]);
     } else if (step === 5) {
@@ -273,14 +316,18 @@ export default function SellerRegistration() {
             Registration Successful!
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Thank you for registering your restaurant. We&apos;ll review your
+            Thank you for registering your {registrationType}. We&apos;ll review your
             application and contact you within 24 hours.
           </p>
           <Button
-            onClick={() => setIsSubmitted(false)}
+            onClick={() => {
+              setIsSubmitted(false);
+              setStep(0);
+              setRegistrationType(null);
+            }}
             className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700"
           >
-            Submit Another Restaurant
+            Submit Another Registration
           </Button>
         </Card>
       </div>
@@ -296,7 +343,7 @@ export default function SellerRegistration() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Register Your Restaurant
+              Register Your {registrationType === "chef" ? "Chef Profile" : "Restaurant"}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
               Join our platform and start reaching thousands of food lovers in
@@ -308,24 +355,25 @@ export default function SellerRegistration() {
         {/* Progress Steps */}
         <div className="mb-10">
           <div className="flex justify-between relative">
-            {[1, 2, 3, 4, 5, 6].map((stepNumber) => (
+            {[0, 1, 2, 3, 4, 5, 6].map((stepNumber) => (
               <div key={stepNumber} className="flex flex-col items-center z-10">
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
                     stepNumber < step || completedSteps.includes(stepNumber)
                       ? "bg-yellow-500 border-yellow-500 text-white"
                       : stepNumber === step
-                      ? "border-yellow-500 bg-white dark:bg-gray-800 text-yellow-500 dark:text-yellow-400"
+                      ? "border-yellow-500 bg-green-500 dark:bg-green-800 text-gray-700 dark:text-yellow-400"
                       : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-400"
                   }`}
                 >
                   {stepNumber < step || completedSteps.includes(stepNumber) ? (
                     <CheckCircle className="w-5 h-5" />
                   ) : (
-                    stepNumber
+                    stepNumber === 0 ? "?" : stepNumber
                   )}
                 </div>
-                <div className="text-xs mt-2 text-center capitalize font-medium text-gray-700 dark:text-gray-300">
+                <div className="text-xs mt-2 text-center capitalize font-medium text-gray-700 dark:text-gray-300 max-w-16">
+                  {stepNumber === 0 && "Type"}
                   {stepNumber === 1 && "Basic Info"}
                   {stepNumber === 2 && "Category"}
                   {stepNumber === 3 && "Contact"}
@@ -338,13 +386,54 @@ export default function SellerRegistration() {
             <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 -z-10">
               <div
                 className="h-0.5 bg-yellow-500 transition-all duration-300"
-                style={{ width: `${((step - 1) / 5) * 100}%` }}
+                style={{ width: `${((step) / 6) * 100}%` }}
               ></div>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Step 0: Registration Type Selection */}
+          {step === 0 && (
+            <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">
+                  Choose Registration Type
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  Are you registering as a Restaurant or a Chef?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  className={`p-4 border rounded-lg cursor-pointer text-center transition ${
+                    registrationType === "restaurant"
+                      ? "bg-yellow-500 text-white border-yellow-500"
+                      : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  }`}
+                  onClick={() => setRegistrationType("restaurant")}
+                >
+                  <Building2 className="w-8 h-8 mx-auto mb-2" />
+                  <h3 className="text-lg font-bold">Restaurant</h3>
+                  <p className="text-sm mt-1">For restaurants and food businesses</p>
+                </div>
+
+                <div
+                  className={`p-4 border rounded-lg cursor-pointer text-center transition ${
+                    registrationType === "chef"
+                      ? "bg-yellow-500 text-white border-yellow-500"
+                      : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  }`}
+                  onClick={() => setRegistrationType("chef")}
+                >
+                  <User className="w-8 h-8 mx-auto mb-2" />
+                  <h3 className="text-lg font-bold">Chef</h3>
+                  <p className="text-sm mt-1">For independent or event chefs</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Step 1: Basic Information */}
           {step === 1 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
@@ -353,7 +442,7 @@ export default function SellerRegistration() {
                   Basic Information
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Tell us about your restaurant
+                  Tell us about your {registrationType === "chef" ? "chef profile" : "restaurant"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -362,12 +451,12 @@ export default function SellerRegistration() {
                     htmlFor="name"
                     className="text-gray-700 dark:text-gray-300"
                   >
-                    Restaurant Name *
+                    {registrationType === "chef" ? "Chef Name" : "Restaurant Name"} *
                   </Label>
                   <Input
                     id="name"
                     {...register("name")}
-                    placeholder="e.g. Swahili Bites"
+                    placeholder={registrationType === "chef" ? "e.g. Jamal Mwajuma" : "e.g. Swahili Bites"}
                     className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
                       errors.name ? "border-red-500 dark:border-red-400" : ""
                     }`}
@@ -389,7 +478,7 @@ export default function SellerRegistration() {
                   <Input
                     id="tagline"
                     {...register("tagline")}
-                    placeholder="e.g. Authentic Coastal Cuisine"
+                    placeholder={registrationType === "chef" ? "e.g. Expert in Coastal Cuisine" : "e.g. Authentic Coastal Cuisine"}
                     className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
                       errors.tagline ? "border-red-500 dark:border-red-400" : ""
                     }`}
@@ -411,7 +500,7 @@ export default function SellerRegistration() {
                   <Textarea
                     id="bio"
                     {...register("bio")}
-                    placeholder="Tell us about your restaurant..."
+                    placeholder={registrationType === "chef" ? "Tell us about your culinary expertise..." : "Tell us about your restaurant..."}
                     rows={4}
                     className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
                       errors.bio ? "border-red-500 dark:border-red-400" : ""
@@ -433,10 +522,10 @@ export default function SellerRegistration() {
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
                   <Building2 className="w-5 h-5" />
-                  Business Category
+                  {registrationType === "chef" ? "Chef Category" : "Business Category"}
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Choose the category that best describes your restaurant
+                  Choose the category that best describes your {registrationType === "chef" ? "chef services" : "restaurant"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -450,7 +539,7 @@ export default function SellerRegistration() {
                     className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 mt-1"
                   >
                     <option value="">Select Category</option>
-                    {businessCategories.map((cat) => (
+                    {(registrationType === "restaurant" ? businessCategories : chefCategories).map((cat) => (
                       <option key={cat.name} value={cat.name}>
                         {cat.name}
                       </option>
@@ -474,7 +563,7 @@ export default function SellerRegistration() {
                       className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 mt-1"
                     >
                       <option value="">Select Sub-Category</option>
-                      {businessCategories
+                      {(registrationType === "restaurant" ? businessCategories : chefCategories)
                         .find((cat) => cat.name === selectedBusinessCategory)
                         ?.options.map((option) => (
                           <option key={option} value={option}>
@@ -505,30 +594,32 @@ export default function SellerRegistration() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label
-                    htmlFor="location"
-                    className="text-gray-700 dark:text-gray-300"
-                  >
-                    <MapPin className="w-4 h-4 inline mr-2" />
-                    Address *
-                  </Label>
-                  <Input
-                    id="location"
-                    {...register("location")}
-                    placeholder="e.g. Kunduchi, Dar es Salaam"
-                    className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
-                      errors.location
-                        ? "border-red-500 dark:border-red-400"
-                        : ""
-                    }`}
-                  />
-                  {errors.location && (
-                    <p className="text-red-500 dark:text-red-400 text-sm mt-1">
-                      {errors.location.message}
-                    </p>
-                  )}
-                </div>
+                {registrationType === "restaurant" && (
+                  <div>
+                    <Label
+                      htmlFor="location"
+                      className="text-gray-700 dark:text-gray-300"
+                    >
+                      <MapPin className="w-4 h-4 inline mr-2" />
+                      Address *
+                    </Label>
+                    <Input
+                      id="location"
+                      {...register("location")}
+                      placeholder="e.g. Kunduchi, Dar es Salaam"
+                      className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+                        errors.location
+                          ? "border-red-500 dark:border-red-400"
+                          : ""
+                      }`}
+                    />
+                    {errors.location && (
+                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                        {errors.location.message}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <Label className="text-gray-700 dark:text-gray-300">
@@ -561,34 +652,36 @@ export default function SellerRegistration() {
                   )}
                 </div>
 
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">
-                    <Clock className="w-4 h-4 inline mr-2" />
-                    Opening Hours *
-                  </Label>
-                  <div className="flex space-x-2">
-                    <select
-                      {...register("openingTime")}
-                      className="flex-1 p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                    >
-                      {timeOptions.map((time) => (
-                        <option key={time} value={time}>
-                          {time}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      {...register("closingTime")}
-                      className="flex-1 p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                    >
-                      {timeOptions.map((time) => (
-                        <option key={time} value={time}>
-                          {time}
-                        </option>
-                      ))}
-                    </select>
+                {registrationType === "restaurant" && (
+                  <div>
+                    <Label className="text-gray-700 dark:text-gray-300">
+                      <Clock className="w-4 h-4 inline mr-2" />
+                      Opening Hours *
+                    </Label>
+                    <div className="flex space-x-2">
+                      <select
+                        {...register("openingTime")}
+                        className="flex-1 p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                      >
+                        {timeOptions.map((time) => (
+                          <option key={time} value={time}>
+                            {time}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        {...register("closingTime")}
+                        className="flex-1 p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                      >
+                        {timeOptions.map((time) => (
+                          <option key={time} value={time}>
+                            {time}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -602,7 +695,7 @@ export default function SellerRegistration() {
                   Cuisine Type
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Select all the cuisine types your restaurant offers
+                  Select all the cuisine types you {registrationType === "chef" ? "specialize in" : "offer"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -628,10 +721,10 @@ export default function SellerRegistration() {
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 dark:text-white">
-                  Upload Logo
+                  Upload {registrationType === "chef" ? "Profile Picture" : "Logo"}
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Add your restaurant&apos;s logo (optional)
+                  Add your {registrationType === "chef" ? "profile picture" : "restaurant's logo"} (optional)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -669,7 +762,7 @@ export default function SellerRegistration() {
                         className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600"
                       >
                         <Upload className="w-4 h-4" />
-                        Upload Logo
+                        Upload {registrationType === "chef" ? "Profile Picture" : "Logo"}
                       </Button>
                       {errors.logo && (
                         <p className="text-red-500 text-sm mt-1">
@@ -698,7 +791,7 @@ export default function SellerRegistration() {
                 <div className="space-y-4">
                   <div>
                     <h3 className="font-bold text-gray-700 dark:text-gray-300">
-                      Restaurant Name:
+                      {registrationType === "chef" ? "Chef Name" : "Restaurant Name"}:
                     </h3>
                     <p className="text-gray-900 dark:text-white">
                       {formData.name}
@@ -720,14 +813,16 @@ export default function SellerRegistration() {
                       {formData.bio}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
-                      Address:
-                    </h3>
-                    <p className="text-gray-900 dark:text-white">
-                      {formData.location}
-                    </p>
-                  </div>
+                  {registrationType === "restaurant" && formData.location && (
+                    <div>
+                      <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                        Address:
+                      </h3>
+                      <p className="text-gray-900 dark:text-white">
+                        {formData.location}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <h3 className="font-bold text-gray-700 dark:text-gray-300">
                       Phone:
@@ -736,14 +831,16 @@ export default function SellerRegistration() {
                       {countryCodeValue} {phoneValue}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
-                      Opening Hours:
-                    </h3>
-                    <p className="text-gray-900 dark:text-white">
-                      {openingTimeValue} - {closingTimeValue}
-                    </p>
-                  </div>
+                  {registrationType === "restaurant" && (
+                    <div>
+                      <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                        Opening Hours:
+                      </h3>
+                      <p className="text-gray-900 dark:text-white">
+                        {openingTimeValue} - {closingTimeValue}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <h3 className="font-bold text-gray-700 dark:text-gray-300">
                       Cuisine Types:
@@ -755,12 +852,12 @@ export default function SellerRegistration() {
                   {logoPreview && (
                     <div>
                       <h3 className="font-bold text-gray-700 dark:text-gray-300">
-                        Logo:
+                        {registrationType === "chef" ? "Profile Picture" : "Logo"}:
                       </h3>
                       <div className="mt-2">
                         <Image
                           src={logoPreview}
-                          alt="Restaurant Logo"
+                          alt={registrationType === "chef" ? "Profile Picture" : "Restaurant Logo"}
                           width={80}
                           height={80}
                           className="rounded-full object-cover"
@@ -775,7 +872,7 @@ export default function SellerRegistration() {
 
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-4">
-            {step > 1 && (
+            {step > 0 && (
               <Button
                 type="button"
                 onClick={prevStep}
@@ -789,7 +886,8 @@ export default function SellerRegistration() {
               <Button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 ml-auto"
+                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 ml-auto"
+                disabled={step === 0 && !registrationType}
               >
                 Next
                 <ChevronRight className="w-4 h-4" />
