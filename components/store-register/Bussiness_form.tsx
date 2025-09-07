@@ -5,7 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,13 +25,53 @@ import {
   Phone,
   Utensils,
   X,
+  Building2,
 } from "lucide-react";
+import Image from "next/image";
 
-// Zod schemas for each step
+/* ---------------------------------------
+   1. Business Category Options
+--------------------------------------- */
+const businessCategories = [
+  {
+    name: "Local",
+    description: "Small scale businesses serving local communities",
+    options: [
+      "Street Food Vendor",
+      "Food Cart",
+      "Local Eatery",
+      "Home Kitchen",
+    ],
+  },
+  {
+    name: "Regional",
+    description: "Restaurants with multiple branches within a region",
+    options: ["Casual Dining", "Family Restaurant", "Buffet", "Mid-size Chain"],
+  },
+  {
+    name: "National",
+    description: "Restaurants operating across the country",
+    options: ["Fine Dining", "National Chain", "Franchise"],
+  },
+  {
+    name: "International",
+    description: "Restaurants with global presence",
+    options: ["Global Chain", "High-End Franchise", "Luxury Dining"],
+  },
+];
+
+/* ---------------------------------------
+   2. Zod Schema Definitions
+--------------------------------------- */
 const basicInfoSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   tagline: z.string().min(5, "Tagline must be at least 5 characters"),
   bio: z.string().min(10, "Bio must be at least 10 characters"),
+});
+
+const businessCategorySchema = z.object({
+  businessCategory: z.string().min(1, "Please select a business category"),
+  subCategory: z.string().min(1, "Please select a sub-category"),
 });
 
 const contactInfoSchema = z.object({
@@ -39,26 +85,27 @@ const contactInfoSchema = z.object({
   closingTime: z.string().min(1, "Please select closing time"),
 });
 
-// Cuisine schema fix
 const cuisineInfoSchema = z.object({
   cuisine: z
     .array(z.string())
     .min(1, "Please select at least one cuisine type"),
 });
 
-// Logo schema fix
 const mediaSchema = z.object({
   logo: z.instanceof(File).optional().nullable(),
 });
 
-// Combined schema
 const restaurantSchema = basicInfoSchema
+  .merge(businessCategorySchema)
   .merge(contactInfoSchema)
   .merge(cuisineInfoSchema)
   .merge(mediaSchema);
 
 type RestaurantFormData = z.infer<typeof restaurantSchema>;
 
+/* ---------------------------------------
+   3. Static Data
+--------------------------------------- */
 const cuisineOptions = [
   "Swahili",
   "Seafood",
@@ -74,14 +121,12 @@ const cuisineOptions = [
   "Barbecue",
 ];
 
-// Country codes with flags
 const countryCodes = [
   { code: "+255", country: "Tanzania", flag: "🇹🇿" },
   { code: "+254", country: "Kenya", flag: "🇰🇪" },
   { code: "+256", country: "Uganda", flag: "🇺🇬" },
 ];
 
-// Generate time options for select
 const generateTimeOptions = () => {
   const times = [];
   for (let hour = 0; hour < 24; hour++) {
@@ -97,6 +142,9 @@ const generateTimeOptions = () => {
 
 const timeOptions = generateTimeOptions();
 
+/* ---------------------------------------
+   4. Main Component
+--------------------------------------- */
 export default function SellerRegistration() {
   const [step, setStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -118,18 +166,25 @@ export default function SellerRegistration() {
     defaultValues: {
       openingTime: "08:00",
       closingTime: "22:00",
-      countryCode: "+255", // Default to Tanzania
+      countryCode: "+255",
       ...formData,
     },
   });
 
+  /* ----------------------------
+     Watchers
+  ---------------------------- */
   const currentCuisines = watch("cuisine", []) || [];
   const phoneValue = watch("phone");
   const countryCodeValue = watch("countryCode");
   const openingTimeValue = watch("openingTime");
   const closingTimeValue = watch("closingTime");
 
-  // Toggle cuisine fix
+  const selectedBusinessCategory = watch("businessCategory");
+
+  /* ----------------------------
+     Functions
+  ---------------------------- */
   const toggleCuisine = (cuisine: string) => {
     const updatedCuisines: string[] = currentCuisines.includes(cuisine)
       ? currentCuisines.filter((c) => c !== cuisine)
@@ -138,7 +193,6 @@ export default function SellerRegistration() {
     setValue("cuisine", updatedCuisines as string[], { shouldValidate: true });
   };
 
-  // Logo upload fix
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -174,6 +228,8 @@ export default function SellerRegistration() {
     if (step === 1) {
       isValid = await trigger(["name", "tagline", "bio"]);
     } else if (step === 2) {
+      isValid = await trigger(["businessCategory", "subCategory"]);
+    } else if (step === 3) {
       isValid = await trigger([
         "location",
         "phone",
@@ -181,11 +237,10 @@ export default function SellerRegistration() {
         "openingTime",
         "closingTime",
       ]);
-    } else if (step === 3) {
-      isValid = await trigger(["cuisine"]);
     } else if (step === 4) {
-      // Logo is optional, so we don't need to validate it
-      isValid = true;
+      isValid = await trigger(["cuisine"]);
+    } else if (step === 5) {
+      isValid = true; // Logo optional
     }
 
     if (isValid) {
@@ -204,20 +259,27 @@ export default function SellerRegistration() {
     console.log("Form submitted:", data);
     setFormData(data);
     setIsSubmitted(true);
-    // Here you would typically send the data to your backend
   };
 
+  /* ---------------------------------------
+     Submission Success Message
+  --------------------------------------- */
   if (isSubmitted) {
     return (
-      <div className="container mx-auto p-4 min-h-screen flex items-center justify-center">
-        <Card className="p-8 max-w-md w-full text-center">
+      <div className="container mx-auto p-4 min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <Card className="p-8 max-w-md w-full text-center shadow-lg dark:bg-gray-800">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Registration Successful!</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold mb-2 dark:text-white">
+            Registration Successful!
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             Thank you for registering your restaurant. We&apos;ll review your
             application and contact you within 24 hours.
           </p>
-          <Button onClick={() => setIsSubmitted(false)} className="w-full">
+          <Button
+            onClick={() => setIsSubmitted(false)}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700"
+          >
             Submit Another Restaurant
           </Button>
         </Card>
@@ -225,113 +287,229 @@ export default function SellerRegistration() {
     );
   }
 
+  /* ---------------------------------------
+     Form Rendering
+  --------------------------------------- */
   return (
-    <div className="container mx-auto p-4 min-h-screen">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-2">Register Your Restaurant</h1>
-        <p className="text-gray-600 mb-8">
-          Join our platform and start reaching thousands of food lovers in East
-          Africa
-        </p>
+    <div className="min-h-screen transition-colors duration-300 py-8">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Register Your Restaurant
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Join our platform and start reaching thousands of food lovers in
+              East Africa
+            </p>
+          </div>
+        </div>
 
         {/* Progress Steps */}
-        <div className="flex justify-between mb-8 relative">
-          {[1, 2, 3, 4, 5].map((stepNumber) => (
-            <div key={stepNumber} className="flex flex-col items-center z-10">
+        <div className="mb-10">
+          <div className="flex justify-between relative">
+            {[1, 2, 3, 4, 5, 6].map((stepNumber) => (
+              <div key={stepNumber} className="flex flex-col items-center z-10">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    stepNumber < step || completedSteps.includes(stepNumber)
+                      ? "bg-yellow-500 border-yellow-500 text-white"
+                      : stepNumber === step
+                      ? "border-yellow-500 bg-white dark:bg-gray-800 text-yellow-500 dark:text-yellow-400"
+                      : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-400"
+                  }`}
+                >
+                  {stepNumber < step || completedSteps.includes(stepNumber) ? (
+                    <CheckCircle className="w-5 h-5" />
+                  ) : (
+                    stepNumber
+                  )}
+                </div>
+                <div className="text-xs mt-2 text-center capitalize font-medium text-gray-700 dark:text-gray-300">
+                  {stepNumber === 1 && "Basic Info"}
+                  {stepNumber === 2 && "Category"}
+                  {stepNumber === 3 && "Contact"}
+                  {stepNumber === 4 && "Cuisine"}
+                  {stepNumber === 5 && "Logo"}
+                  {stepNumber === 6 && "Review"}
+                </div>
+              </div>
+            ))}
+            <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 -z-10">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  stepNumber < step || completedSteps.includes(stepNumber)
-                    ? "bg-yellow-500 text-white"
-                    : "bg-gray-200 text-gray-500"
-                }`}
-              >
-                {stepNumber < step || completedSteps.includes(stepNumber) ? (
-                  <CheckCircle className="w-5 h-5" />
-                ) : (
-                  stepNumber
-                )}
-              </div>
-              <div className="text-xs mt-2 text-center capitalize">
-                {stepNumber === 1 && "Basic Info"}
-                {stepNumber === 2 && "Contact"}
-                {stepNumber === 3 && "Cuisine"}
-                {stepNumber === 4 && "Logo"}
-                {stepNumber === 5 && "Review"}
-              </div>
+                className="h-0.5 bg-yellow-500 transition-all duration-300"
+                style={{ width: `${((step - 1) / 5) * 100}%` }}
+              ></div>
             </div>
-          ))}
-          <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10">
-            <div
-              className="h-0.5 bg-yellow-500 transition-all duration-300"
-              style={{ width: `${((step - 1) / 4) * 100}%` }}
-            ></div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Step 1: Basic Information */}
           {step === 1 && (
-            <Card className="p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">Basic Information</h2>
-              <div className="space-y-4">
+            <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">
+                  Basic Information
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  Tell us about your restaurant
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Restaurant Name *</Label>
+                  <Label
+                    htmlFor="name"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    Restaurant Name *
+                  </Label>
                   <Input
                     id="name"
                     {...register("name")}
                     placeholder="e.g. Swahili Bites"
-                    className={errors.name ? "border-red-500" : ""}
+                    className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+                      errors.name ? "border-red-500 dark:border-red-400" : ""
+                    }`}
                   />
                   {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                       {errors.name.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="tagline">Tagline *</Label>
+                  <Label
+                    htmlFor="tagline"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    Tagline *
+                  </Label>
                   <Input
                     id="tagline"
                     {...register("tagline")}
                     placeholder="e.g. Authentic Coastal Cuisine"
-                    className={errors.tagline ? "border-red-500" : ""}
+                    className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+                      errors.tagline ? "border-red-500 dark:border-red-400" : ""
+                    }`}
                   />
                   {errors.tagline && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                       {errors.tagline.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="bio">Description *</Label>
+                  <Label
+                    htmlFor="bio"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    Description *
+                  </Label>
                   <Textarea
                     id="bio"
                     {...register("bio")}
                     placeholder="Tell us about your restaurant..."
                     rows={4}
-                    className={errors.bio ? "border-red-500" : ""}
+                    className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+                      errors.bio ? "border-red-500 dark:border-red-400" : ""
+                    }`}
                   />
                   {errors.bio && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                       {errors.bio.message}
                     </p>
                   )}
                 </div>
-              </div>
+              </CardContent>
             </Card>
           )}
 
-          {/* Step 2: Contact Information */}
+          {/* Step 2: Business Category */}
           {step === 2 && (
-            <Card className="p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">
-                Contact Information
-              </h2>
-              <div className="space-y-4">
+            <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
+                  <Building2 className="w-5 h-5" />
+                  Business Category
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  Choose the category that best describes your restaurant
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Main Category */}
                 <div>
-                  <Label htmlFor="location">
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Main Category *
+                  </Label>
+                  <select
+                    {...register("businessCategory")}
+                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 mt-1"
+                  >
+                    <option value="">Select Category</option>
+                    {businessCategories.map((cat) => (
+                      <option key={cat.name} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.businessCategory && (
+                    <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                      {errors.businessCategory.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Sub Category */}
+                {selectedBusinessCategory && (
+                  <div>
+                    <Label className="text-gray-700 dark:text-gray-300">
+                      Sub-Category *
+                    </Label>
+                    <select
+                      {...register("subCategory")}
+                      className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 mt-1"
+                    >
+                      <option value="">Select Sub-Category</option>
+                      {businessCategories
+                        .find((cat) => cat.name === selectedBusinessCategory)
+                        ?.options.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                    </select>
+                    {errors.subCategory && (
+                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                        {errors.subCategory.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 3: Contact Information */}
+          {step === 3 && (
+            <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">
+                  Contact Information
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  How can customers reach you?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label
+                    htmlFor="location"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
                     <MapPin className="w-4 h-4 inline mr-2" />
                     Address *
                   </Label>
@@ -339,318 +517,290 @@ export default function SellerRegistration() {
                     id="location"
                     {...register("location")}
                     placeholder="e.g. Kunduchi, Dar es Salaam"
-                    className={errors.location ? "border-red-500" : ""}
+                    className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+                      errors.location
+                        ? "border-red-500 dark:border-red-400"
+                        : ""
+                    }`}
                   />
                   {errors.location && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                       {errors.location.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">
+                  <Label className="text-gray-700 dark:text-gray-300">
                     <Phone className="w-4 h-4 inline mr-2" />
                     Phone Number *
                   </Label>
-                  <div className="flex gap-2">
-                    <div className="w-1/3">
-                      <select
-                        {...register("countryCode")}
-                        className="w-full p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 h-10"
-                      >
-                        {countryCodes.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.flag} {country.code}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="w-2/3">
-                      <Input
-                        id="phone"
-                        {...register("phone")}
-                        placeholder="712345678"
-                        className={errors.phone ? "border-red-500" : ""}
-                      />
-                    </div>
+                  <div className="flex space-x-2">
+                    <select
+                      {...register("countryCode")}
+                      className="w-24 p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    >
+                      {countryCodes.map((code) => (
+                        <option key={code.code} value={code.code}>
+                          {code.flag} {code.code}
+                        </option>
+                      ))}
+                    </select>
+                    <Input
+                      {...register("phone")}
+                      placeholder="712345678"
+                      className={`flex-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+                        errors.phone ? "border-red-500 dark:border-red-400" : ""
+                      }`}
+                    />
                   </div>
                   {errors.phone && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                       {errors.phone.message}
                     </p>
                   )}
-                  <p className="text-sm text-gray-500 mt-1">
-                    Your number: {countryCodeValue} {phoneValue || "XXXXXXX"}
-                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="openingTime">
-                      <Clock className="w-4 h-4 inline mr-2" />
-                      Opening Time *
-                    </Label>
-                    <select
-                      id="openingTime"
-                      {...register("openingTime")}
-                      className="w-full p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 h-10"
-                    >
-                      {timeOptions.map((time) => (
-                        <option key={time} value={time}>
-                          {time}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.openingTime && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.openingTime.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="closingTime">
-                      <Clock className="w-4 h-4 inline mr-2" />
-                      Closing Time *
-                    </Label>
-                    <select
-                      id="closingTime"
-                      {...register("closingTime")}
-                      className="w-full p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 h-10"
-                    >
-                      {timeOptions.map((time) => (
-                        <option key={time} value={time}>
-                          {time}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.closingTime && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.closingTime.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 p-3 rounded-md">
-                  <p className="text-sm text-blue-700">
-                    <strong>Opening Hours:</strong> {openingTimeValue} -{" "}
-                    {closingTimeValue}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Step 3: Cuisine Type */}
-          {step === 3 && (
-            <Card className="p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">
-                <Utensils className="w-5 h-5 inline mr-2" />
-                Cuisine Types *
-              </h2>
-              <div>
-                <Label>Select the cuisine types you serve</Label>
-                {errors.cuisine && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.cuisine.message}
-                  </p>
-                )}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                  {cuisineOptions.map((cuisine) => (
-                    <div
-                      key={cuisine}
-                      onClick={() => toggleCuisine(cuisine)}
-                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        currentCuisines.includes(cuisine)
-                          ? "border-yellow-500 bg-yellow-50"
-                          : "border-gray-200 hover:border-yellow-300"
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        <div
-                          className={`w-5 h-5 rounded-full border mr-3 flex items-center justify-center ${
-                            currentCuisines.includes(cuisine)
-                              ? "bg-yellow-500 border-yellow-500"
-                              : "border-gray-300"
-                          }`}
-                        >
-                          {currentCuisines.includes(cuisine) && (
-                            <CheckCircle className="w-3 h-3 text-white" />
-                          )}
-                        </div>
-                        <span>{cuisine}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Step 4: Logo Upload */}
-          {step === 4 && (
-            <Card className="p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">Restaurant Logo</h2>
-              <div className="space-y-6">
                 <div>
-                  <Label htmlFor="logo">Upload Logo (Optional)</Label>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Add your restaurant logo. You can add a cover image later in
-                    your dashboard.
-                  </p>
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    <Clock className="w-4 h-4 inline mr-2" />
+                    Opening Hours *
+                  </Label>
+                  <div className="flex space-x-2">
+                    <select
+                      {...register("openingTime")}
+                      className="flex-1 p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    >
+                      {timeOptions.map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      {...register("closingTime")}
+                      className="flex-1 p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    >
+                      {timeOptions.map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-                  <input
-                    type="file"
-                    id="logo"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    ref={fileInputRef}
-                    className="hidden"
-                  />
+          {/* Step 4: Cuisine Selection */}
+          {step === 4 && (
+            <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
+                  <Utensils className="w-5 h-5" />
+                  Cuisine Type
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  Select all the cuisine types your restaurant offers
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {cuisineOptions.map((cuisine) => (
+                  <div
+                    key={cuisine}
+                    className={`border rounded-lg p-3 cursor-pointer text-center transition-colors ${
+                      currentCuisines.includes(cuisine)
+                        ? "bg-yellow-500 text-white border-yellow-500"
+                        : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    }`}
+                    onClick={() => toggleCuisine(cuisine)}
+                  >
+                    {cuisine}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
+          {/* Step 5: Logo Upload */}
+          {step === 5 && (
+            <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">
+                  Upload Logo
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  Add your restaurant&apos;s logo (optional)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-4">
                   {logoPreview ? (
-                    <div className="mt-4">
-                      <div className="relative inline-block">
-                        <img
-                          src={logoPreview}
-                          alt="Logo preview"
-                          className="w-32 h-32 object-cover rounded-lg border"
-                        />
-                        <button
-                          type="button"
-                          onClick={removeLogo}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
+                    <div className="relative">
+                      <Image
+                        src={logoPreview}
+                        alt="Logo Preview"
+                        width={96}
+                        height={96}
+                        className="rounded-full object-cover border dark:border-gray-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeLogo}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                        aria-label="Remove logo"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                   ) : (
-                    <label
-                      htmlFor="logo"
-                      className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-yellow-500 transition-colors"
-                    >
-                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">
-                        Click to upload logo
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        PNG, JPG up to 2MB
-                      </p>
-                    </label>
-                  )}
-
-                  {errors.logo && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.logo.message}
-                    </p>
+                    <div className="flex-1">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Upload Logo
+                      </Button>
+                      {errors.logo && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.logo.message}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
-              </div>
+              </CardContent>
             </Card>
           )}
 
-          {/* Step 5: Review */}
-          {step === 5 && (
-            <Card className="p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-6">
-                Review Your Information
-              </h2>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-medium text-gray-700 mb-2">
-                    Basic Information
-                  </h3>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="font-semibold">{watch("name")}</p>
-                    <p className="text-gray-600">{watch("tagline")}</p>
-                    <p className="mt-2 text-sm">{watch("bio")}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium text-gray-700 mb-2">
-                    Contact Information
-                  </h3>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      {watch("location")}
-                    </p>
-                    <p className="flex items-center gap-2 mt-2">
-                      <Phone className="w-4 h-4" />
-                      {countryCodeValue} {watch("phone")}
-                    </p>
-                    <p className="flex items-center gap-2 mt-2">
-                      <Clock className="w-4 h-4" />
-                      {watch("openingTime")} - {watch("closingTime")}
+          {/* Step 6: Review & Submit */}
+          {step === 6 && (
+            <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">
+                  Review & Submit
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  Confirm your details before submission
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Restaurant Name:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {formData.name}
                     </p>
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium text-gray-700 mb-2">
-                    Cuisine Types
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {watch("cuisine")?.map((cuisine) => (
-                      <span
-                        key={cuisine}
-                        className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm"
-                      >
-                        {cuisine}
-                      </span>
-                    ))}
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Tagline:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {formData.tagline}
+                    </p>
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium text-gray-700 mb-2">Logo</h3>
-                  <div className="bg-gray-50 p-4 rounded-lg flex justify-center">
-                    {logoPreview ? (
-                      <img
-                        src={logoPreview}
-                        alt="Logo preview"
-                        className="w-32 h-32 object-contain rounded-lg"
-                      />
-                    ) : (
-                      <div className="text-gray-400 text-sm">
-                        No logo uploaded (you can add one later)
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Description:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {formData.bio}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Address:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {formData.location}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Phone:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {countryCodeValue} {phoneValue}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Opening Hours:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {openingTimeValue} - {closingTimeValue}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Cuisine Types:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {currentCuisines.join(", ")}
+                    </p>
+                  </div>
+                  {logoPreview && (
+                    <div>
+                      <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                        Logo:
+                      </h3>
+                      <div className="mt-2">
+                        <Image
+                          src={logoPreview}
+                          alt="Restaurant Logo"
+                          width={80}
+                          height={80}
+                          className="rounded-full object-cover"
+                        />
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              </CardContent>
             </Card>
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={prevStep}
-              disabled={step === 1}
-              className="flex items-center gap-2"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Previous
-            </Button>
-
-            {step < 5 ? (
+          <div className="flex justify-between mt-4">
+            {step > 1 && (
+              <Button
+                type="button"
+                onClick={prevStep}
+                className="flex items-center gap-2 bg-gray-300 text-gray-800 hover:bg-gray-400 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </Button>
+            )}
+            {step < 6 && (
               <Button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600"
+                className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 ml-auto"
               >
                 Next
                 <ChevronRight className="w-4 h-4" />
               </Button>
-            ) : (
-              <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                Submit Registration
+            )}
+            {step === 6 && (
+              <Button
+                type="submit"
+                className="ml-auto bg-green-500 hover:bg-green-600"
+              >
+                Submit
               </Button>
             )}
           </div>
