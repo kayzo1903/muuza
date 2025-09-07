@@ -54,7 +54,7 @@ export function Wishlist() {
 
   if (isEmpty) {
     return (
-      <div className="container mx-auto p-4 min-h-screen">
+      <div className="container mx-auto px-4 min-h-screen">
         {/* Enhanced Breadcrumb Navigation */}
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
@@ -109,7 +109,7 @@ export function Wishlist() {
   }
 
   return (
-    <div className="container mx-auto p-4 min-h-screen">
+    <div className="container mx-auto px-4 min-h-screen">
       {/* Enhanced Breadcrumb Navigation */}
       <nav className="flex mb-6" aria-label="Breadcrumb">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">

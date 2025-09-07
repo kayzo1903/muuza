@@ -143,7 +143,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
     <div className="min-h-screen p-4 max-w-md mx-auto space-y-6">
       {/* Header */}
       <div className="text-center">
-        <p className="text-xs text-gray-600 dark:text-gray-400">
+        <p className="lg:text-xl text-gray-600 dark:text-gray-400">
           Manage your account and preferences
         </p>
       </div>
