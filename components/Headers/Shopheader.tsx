@@ -319,39 +319,6 @@ export default function ShopHeader({ session }: HeaderProps) {
               >
                 <User size={20} /> Profile
               </Link>
-              <Link
-                href="/shop/my-orders"
-                onClick={() => setMobileMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-md ${
-                  isActive("/orders")
-                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100"
-                    : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-                } transition-colors`}
-              >
-                <ShoppingBag size={20} /> Orders
-              </Link>
-              <Link
-                href="/shop/wishlist"
-                onClick={() => setMobileMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-md ${
-                  isActive("/favourites")
-                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100"
-                    : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-                } transition-colors`}
-              >
-                <Heart size={20} /> Favorites
-              </Link>
-              <Link
-                href="/profile/get-store"
-                onClick={() => setMobileMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-md ${
-                  isActive("/get-store")
-                    ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-100"
-                    : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-                } transition-colors`}
-              >
-                <Store size={20} /> Get your store
-              </Link>
 
               <div className="border-t my-2 dark:border-gray-700"></div>
 
