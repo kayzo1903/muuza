@@ -75,6 +75,11 @@ export const verification = pgTable("verification", {
 });
 
 // BUSINESS TABLE
+export const businessTypeEnum = pgEnum("business_category_enum", [
+  "restaurant",
+  "chef",
+]);
+
 export const business = pgTable("business", {
   id: text("id").primaryKey(),
 
@@ -86,8 +91,7 @@ export const business = pgTable("business", {
   name: text("name").notNull(),
   username: text("username").unique().notNull(), // @swahilichef
 
-  businessType: text("business_type").notNull(), 
-  // Values: "restaurant", "chef"
+  businessType: businessTypeEnum("businessType").notNull(),
 
   tagline: text("tagline"),
   bio: text("bio"),
@@ -97,6 +101,11 @@ export const business = pgTable("business", {
   // Customization
   logo: text("logo"),
   coverImage: text("cover_image"),
+
+  //business_verification
+  business_verification: boolean("business_verification")
+    .default(false)
+    .notNull(),
 
   // Cuisine tags
   cuisine: jsonb("cuisine").$type<string[]>(),
@@ -109,8 +118,12 @@ export const business = pgTable("business", {
   isOpen: boolean("is_open").default(true),
 
   // Opening hours stored as JSON
-  openingHours: jsonb("opening_hours").$type<Record<string, string>>(), 
+  openingHours: jsonb("openingHours").$type<Record<string, string>>(),
   // Example: { "mon": "08:00-22:00", "tue": "08:00-22:00" }
+
+  businessCategory: text(),
+  subCategory: text(),
+  countryCode: text(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -167,10 +180,10 @@ export const menuItemImage = pgTable("menu_item_image", {
 
   altText: text("alt_text"), // Accessibility and SEO
 
-  isPrimary: boolean("is_primary").default(false), 
+  isPrimary: boolean("is_primary").default(false),
   // True = main display image
 
-  sortOrder: integer("sort_order").default(0), 
+  sortOrder: integer("sort_order").default(0),
   // For ordering gallery images
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -218,8 +231,9 @@ export const review = pgTable("review", {
   businessId: text("business_id")
     .notNull()
     .references(() => business.id, { onDelete: "cascade" }),
-  menuItemId: text("menu_item_id")
-    .references(() => menuItem.id, { onDelete: "cascade" }),
+  menuItemId: text("menu_item_id").references(() => menuItem.id, {
+    onDelete: "cascade",
+  }),
   rating: integer("rating").notNull(), // 1-5 stars
   comment: text("comment"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -244,7 +258,6 @@ export const reviewReply = pgTable("review_reply", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-
 //FAVORITES TABLE
 export const favorite = pgTable("favorite", {
   id: text("id").primaryKey(),
@@ -253,8 +266,12 @@ export const favorite = pgTable("favorite", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
 
-  businessId: text("business_id").references(() => business.id, { onDelete: "cascade" }),
-  menuItemId: text("menu_item_id").references(() => menuItem.id, { onDelete: "cascade" }),
+  businessId: text("business_id").references(() => business.id, {
+    onDelete: "cascade",
+  }),
+  menuItemId: text("menu_item_id").references(() => menuItem.id, {
+    onDelete: "cascade",
+  }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -268,7 +285,7 @@ export const notification = pgTable("notification", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
 
-  type: text("type").notNull(), 
+  type: text("type").notNull(),
   // Example: "order_update", "review_reply", "new_review"
 
   message: text("message").notNull(),
@@ -287,7 +304,7 @@ export const auditActionEnum = pgEnum("audit_action", [
   "business_create",
   "business_update",
   "business_delete",
-  "menu_item_create", 
+  "menu_item_create",
   "menu_item_update",
   "menu_item_delete",
   "order_create",
@@ -296,7 +313,7 @@ export const auditActionEnum = pgEnum("audit_action", [
   "payment_process",
   "review_create",
   "review_update",
-  "review_delete"
+  "review_delete",
 ]);
 
 export const auditEntityEnum = pgEnum("audit_entity", [
@@ -306,7 +323,7 @@ export const auditEntityEnum = pgEnum("audit_entity", [
   "menu_item",
   "order",
   "payment",
-  "review"
+  "review",
 ]);
 
 // AUDIT LOG TABLE with enums
@@ -314,7 +331,7 @@ export const auditLog = pgTable("audit_log", {
   id: text("id").primaryKey(),
 
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
-  
+
   action: auditActionEnum("action").notNull(),
 
   entityType: auditEntityEnum("entity_type"),

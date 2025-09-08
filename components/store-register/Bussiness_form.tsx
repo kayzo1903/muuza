@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react"; // Added useEffect
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,9 +26,11 @@ import {
   Utensils,
   X,
   Building2,
-  User,
+  User, // Added User icon
 } from "lucide-react";
 import Image from "next/image";
+import { convertFileToBase64 } from "@/lib/convertfile";
+import { toast } from "sonner";
 
 /* ---------------------------------------
    1. Business Category Options
@@ -67,31 +69,19 @@ const businessCategories = [
 const chefCategories = [
   {
     name: "Personal",
-    description: "Independent chefs offering services to individuals or small groups",
-    options: [
-      "Private Chef",
-      "Personal Chef",
-      "Freelance Cook",
-    ],
+    description:
+      "Independent chefs offering services to individuals or small groups",
+    options: ["Private Chef", "Personal Chef", "Freelance Cook"],
   },
   {
     name: "Event",
     description: "Chefs specializing in events and large gatherings",
-    options: [
-      "Catering",
-      "Wedding Chef",
-      "Corporate Event Chef",
-    ],
+    options: ["Catering", "Wedding Chef", "Corporate Event Chef"],
   },
   {
     name: "Specialty",
     description: "Chefs with unique culinary expertise",
-    options: [
-      "Pastry Chef",
-      "Grill Master",
-      "Vegan Chef",
-      "Sushi Chef",
-    ],
+    options: ["Pastry Chef", "Grill Master", "Vegan Chef", "Sushi Chef"],
   },
 ];
 
@@ -130,11 +120,15 @@ const mediaSchema = z.object({
   logo: z.instanceof(File).optional().nullable(),
 });
 
+// Update your restaurantSchema to include all fields
 const restaurantSchema = basicInfoSchema
   .merge(businessCategorySchema)
   .merge(contactInfoSchema)
   .merge(cuisineInfoSchema)
-  .merge(mediaSchema);
+  .merge(mediaSchema)
+  .extend({
+    businessType: z.enum(["restaurant", "chef"]), // Add this field
+  });
 
 type RestaurantFormData = z.infer<typeof restaurantSchema>;
 
@@ -180,11 +174,13 @@ const timeOptions = generateTimeOptions();
 /* ---------------------------------------
    5. Main Component
 --------------------------------------- */
+
 export default function SellerRegistration() {
-  const [step, setStep] = useState(0); // Start with step 0 for registration type selection
-  const [registrationType, setRegistrationType] = useState<"restaurant" | "chef" | null>(null);
+  const [step, setStep] = useState(0);
+  const [registrationType, setRegistrationType] = useState<
+    "restaurant" | "chef" | null
+  >(null);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-  const [formData, setFormData] = useState<Partial<RestaurantFormData>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -197,24 +193,29 @@ export default function SellerRegistration() {
     setValue,
     trigger,
     setError,
+    reset,
   } = useForm<RestaurantFormData>({
     resolver: zodResolver(restaurantSchema),
     defaultValues: {
       openingTime: "08:00",
       closingTime: "22:00",
       countryCode: "+255",
-      ...formData,
+      businessType: undefined, // Initialize as undefined
     },
   });
+
+  // Update form value when registrationType changes
+  useEffect(() => {
+    if (registrationType) {
+      setValue("businessType", registrationType);
+    }
+  }, [registrationType, setValue]);
 
   /* ----------------------------
      Watchers
   ---------------------------- */
-  const currentCuisines = watch("cuisine", []) || [];
-  const phoneValue = watch("phone");
-  const countryCodeValue = watch("countryCode");
-  const openingTimeValue = watch("openingTime");
-  const closingTimeValue = watch("closingTime");
+  const watchedValues = watch();
+  const currentCuisines = watchedValues.cuisine || [];
   const selectedBusinessCategory = watch("businessCategory");
 
   /* ----------------------------
@@ -299,9 +300,75 @@ export default function SellerRegistration() {
   };
 
   const onSubmit = async (data: RestaurantFormData) => {
-    console.log("Form submitted:", data);
-    setFormData(data);
-    setIsSubmitted(true);
+    try {
+      if (!registrationType) {
+        toast.error("Please select a registration type");
+        return;
+      }
+
+      // Convert logo to base64 if exists
+      let logoBase64 = null;
+      if (data.logo) {
+        logoBase64 = await convertFileToBase64(data.logo, {
+          maxSizeMB: 2,
+          allowedTypes: ["image/jpeg", "image/png", "image/gif"],
+        });
+      }
+
+      // Prepare COMPLETE data for API
+      const apiData = {
+        name: data.name,
+        username: data.name.toLowerCase().replace(/\s+/g, "-"),
+        businessType: registrationType,
+        tagline: data.tagline,
+        bio: data.bio,
+        location: data.location,
+        phone: `${data.countryCode}${data.phone}`,
+        logo: logoBase64,
+        cuisine: data.cuisine,
+
+        // Add all the new fields
+        businessCategory: data.businessCategory,
+        subCategory: data.subCategory,
+        countryCode: data.countryCode,
+        openingTime: data.openingTime,
+        closingTime: data.closingTime,
+
+        // Structured opening hours for restaurants
+        openingHours:
+          registrationType === "restaurant"
+            ? {
+                mon: `${data.openingTime}-${data.closingTime}`,
+                tue: `${data.openingTime}-${data.closingTime}`,
+                wed: `${data.openingTime}-${data.closingTime}`,
+                thu: `${data.openingTime}-${data.closingTime}`,
+                fri: `${data.openingTime}-${data.closingTime}`,
+                sat: `${data.openingTime}-${data.closingTime}`,
+                sun: `${data.openingTime}-${data.closingTime}`,
+              }
+            : {},
+      };
+
+      const response = await fetch("/api/business/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setIsSubmitted(true);
+      } else {
+        console.error("Registration failed:", result.error);
+        toast.error(result.error || "Registration failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error("An error occurred. Please try again.");
+    }
   };
 
   /* ---------------------------------------
@@ -313,22 +380,32 @@ export default function SellerRegistration() {
         <Card className="p-8 max-w-md w-full text-center shadow-lg dark:bg-gray-800">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2 dark:text-white">
-            Registration Successful!
+            Business Registered Successfully!
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Thank you for registering your {registrationType}. We&apos;ll review your
-            application and contact you within 24 hours.
+            Your {registrationType} has been registered successfully. You can
+            now add more businesses or manage your existing ones.
           </p>
-          <Button
-            onClick={() => {
-              setIsSubmitted(false);
-              setStep(0);
-              setRegistrationType(null);
-            }}
-            className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700"
-          >
-            Submit Another Registration
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={() => {
+                setIsSubmitted(false);
+                setStep(0);
+                setRegistrationType(null);
+                reset(); // Reset the form
+              }}
+              className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700"
+            >
+              Register Another Business
+            </Button>
+            <Button
+              onClick={() => (window.location.href = "/dashboard")}
+              variant="outline"
+              className="w-full"
+            >
+              Go to Dashboard
+            </Button>
+          </div>
         </Card>
       </div>
     );
@@ -343,7 +420,8 @@ export default function SellerRegistration() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Register Your {registrationType === "chef" ? "Chef Profile" : "Restaurant"}
+              Register Your{" "}
+              {registrationType === "chef" ? "Chef Profile" : "Restaurant"}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
               Join our platform and start reaching thousands of food lovers in
@@ -368,8 +446,10 @@ export default function SellerRegistration() {
                 >
                   {stepNumber < step || completedSteps.includes(stepNumber) ? (
                     <CheckCircle className="w-5 h-5" />
+                  ) : stepNumber === 0 ? (
+                    "?"
                   ) : (
-                    stepNumber === 0 ? "?" : stepNumber
+                    stepNumber
                   )}
                 </div>
                 <div className="text-xs mt-2 text-center capitalize font-medium text-gray-700 dark:text-gray-300 max-w-16">
@@ -386,14 +466,14 @@ export default function SellerRegistration() {
             <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 -z-10">
               <div
                 className="h-0.5 bg-yellow-500 transition-all duration-300"
-                style={{ width: `${((step) / 6) * 100}%` }}
+                style={{ width: `${(step / 6) * 100}%` }}
               ></div>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Step 0: Registration Type Selection */}
+          {/* Step 0: Registration Type Selection - FIXED: This was missing */}
           {step === 0 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
               <CardHeader>
@@ -408,20 +488,22 @@ export default function SellerRegistration() {
                 <div
                   className={`p-4 border rounded-lg cursor-pointer text-center transition ${
                     registrationType === "restaurant"
-                      ? "bg-yellow-500 text-white border-yellow-500"
+                      ? "bg-green-800 text-white border-yellow-500"
                       : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
                   }`}
                   onClick={() => setRegistrationType("restaurant")}
                 >
                   <Building2 className="w-8 h-8 mx-auto mb-2" />
                   <h3 className="text-lg font-bold">Restaurant</h3>
-                  <p className="text-sm mt-1">For restaurants and food businesses</p>
+                  <p className="text-sm mt-1">
+                    For restaurants and food businesses
+                  </p>
                 </div>
 
                 <div
                   className={`p-4 border rounded-lg cursor-pointer text-center transition ${
                     registrationType === "chef"
-                      ? "bg-yellow-500 text-white border-yellow-500"
+                      ? "bg-green-800 text-white border-yellow-500"
                       : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
                   }`}
                   onClick={() => setRegistrationType("chef")}
@@ -442,7 +524,8 @@ export default function SellerRegistration() {
                   Basic Information
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Tell us about your {registrationType === "chef" ? "chef profile" : "restaurant"}
+                  Tell us about your{" "}
+                  {registrationType === "chef" ? "chef profile" : "restaurant"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -451,12 +534,19 @@ export default function SellerRegistration() {
                     htmlFor="name"
                     className="text-gray-700 dark:text-gray-300"
                   >
-                    {registrationType === "chef" ? "Chef Name" : "Restaurant Name"} *
+                    {registrationType === "chef"
+                      ? "Chef Name"
+                      : "Restaurant Name"}{" "}
+                    *
                   </Label>
                   <Input
                     id="name"
                     {...register("name")}
-                    placeholder={registrationType === "chef" ? "e.g. Jamal Mwajuma" : "e.g. Swahili Bites"}
+                    placeholder={
+                      registrationType === "chef"
+                        ? "e.g. Jamal Mwajuma"
+                        : "e.g. Swahili Bites"
+                    }
                     className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
                       errors.name ? "border-red-500 dark:border-red-400" : ""
                     }`}
@@ -478,7 +568,11 @@ export default function SellerRegistration() {
                   <Input
                     id="tagline"
                     {...register("tagline")}
-                    placeholder={registrationType === "chef" ? "e.g. Expert in Coastal Cuisine" : "e.g. Authentic Coastal Cuisine"}
+                    placeholder={
+                      registrationType === "chef"
+                        ? "e.g. Expert in Coastal Cuisine"
+                        : "e.g. Authentic Coastal Cuisine"
+                    }
                     className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
                       errors.tagline ? "border-red-500 dark:border-red-400" : ""
                     }`}
@@ -500,7 +594,11 @@ export default function SellerRegistration() {
                   <Textarea
                     id="bio"
                     {...register("bio")}
-                    placeholder={registrationType === "chef" ? "Tell us about your culinary expertise..." : "Tell us about your restaurant..."}
+                    placeholder={
+                      registrationType === "chef"
+                        ? "Tell us about your culinary expertise..."
+                        : "Tell us about your restaurant..."
+                    }
                     rows={4}
                     className={`mt-1 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
                       errors.bio ? "border-red-500 dark:border-red-400" : ""
@@ -522,10 +620,13 @@ export default function SellerRegistration() {
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
                   <Building2 className="w-5 h-5" />
-                  {registrationType === "chef" ? "Chef Category" : "Business Category"}
+                  {registrationType === "chef"
+                    ? "Chef Category"
+                    : "Business Category"}
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Choose the category that best describes your {registrationType === "chef" ? "chef services" : "restaurant"}
+                  Choose the category that best describes your{" "}
+                  {registrationType === "chef" ? "chef services" : "restaurant"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -539,7 +640,10 @@ export default function SellerRegistration() {
                     className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 mt-1"
                   >
                     <option value="">Select Category</option>
-                    {(registrationType === "restaurant" ? businessCategories : chefCategories).map((cat) => (
+                    {(registrationType === "restaurant"
+                      ? businessCategories
+                      : chefCategories
+                    ).map((cat) => (
                       <option key={cat.name} value={cat.name}>
                         {cat.name}
                       </option>
@@ -563,7 +667,10 @@ export default function SellerRegistration() {
                       className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 mt-1"
                     >
                       <option value="">Select Sub-Category</option>
-                      {(registrationType === "restaurant" ? businessCategories : chefCategories)
+                      {(registrationType === "restaurant"
+                        ? businessCategories
+                        : chefCategories
+                      )
                         .find((cat) => cat.name === selectedBusinessCategory)
                         ?.options.map((option) => (
                           <option key={option} value={option}>
@@ -695,7 +802,8 @@ export default function SellerRegistration() {
                   Cuisine Type
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Select all the cuisine types you {registrationType === "chef" ? "specialize in" : "offer"}
+                  Select all the cuisine types you{" "}
+                  {registrationType === "chef" ? "specialize in" : "offer"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -721,10 +829,15 @@ export default function SellerRegistration() {
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 dark:text-white">
-                  Upload {registrationType === "chef" ? "Profile Picture" : "Logo"}
+                  Upload{" "}
+                  {registrationType === "chef" ? "Profile Picture" : "Logo"}
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Add your {registrationType === "chef" ? "profile picture" : "restaurant's logo"} (optional)
+                  Add your{" "}
+                  {registrationType === "chef"
+                    ? "profile picture"
+                    : "restaurant's logo"}{" "}
+                  (optional)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -762,7 +875,10 @@ export default function SellerRegistration() {
                         className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600"
                       >
                         <Upload className="w-4 h-4" />
-                        Upload {registrationType === "chef" ? "Profile Picture" : "Logo"}
+                        Upload{" "}
+                        {registrationType === "chef"
+                          ? "Profile Picture"
+                          : "Logo"}
                       </Button>
                       {errors.logo && (
                         <p className="text-red-500 text-sm mt-1">
@@ -791,10 +907,37 @@ export default function SellerRegistration() {
                 <div className="space-y-4">
                   <div>
                     <h3 className="font-bold text-gray-700 dark:text-gray-300">
-                      {registrationType === "chef" ? "Chef Name" : "Restaurant Name"}:
+                      Registration Type:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white capitalize">
+                      {registrationType}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Business Category:
                     </h3>
                     <p className="text-gray-900 dark:text-white">
-                      {formData.name}
+                      {watchedValues.businessCategory}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      Sub-Category:
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {watchedValues.subCategory}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                      {registrationType === "chef"
+                        ? "Chef Name"
+                        : "Restaurant Name"}
+                      :
+                    </h3>
+                    <p className="text-gray-900 dark:text-white">
+                      {watchedValues.name}
                     </p>
                   </div>
                   <div>
@@ -802,7 +945,7 @@ export default function SellerRegistration() {
                       Tagline:
                     </h3>
                     <p className="text-gray-900 dark:text-white">
-                      {formData.tagline}
+                      {watchedValues.tagline}
                     </p>
                   </div>
                   <div>
@@ -810,25 +953,26 @@ export default function SellerRegistration() {
                       Description:
                     </h3>
                     <p className="text-gray-900 dark:text-white">
-                      {formData.bio}
+                      {watchedValues.bio}
                     </p>
                   </div>
-                  {registrationType === "restaurant" && formData.location && (
-                    <div>
-                      <h3 className="font-bold text-gray-700 dark:text-gray-300">
-                        Address:
-                      </h3>
-                      <p className="text-gray-900 dark:text-white">
-                        {formData.location}
-                      </p>
-                    </div>
-                  )}
+                  {registrationType === "restaurant" &&
+                    watchedValues.location && (
+                      <div>
+                        <h3 className="font-bold text-gray-700 dark:text-gray-300">
+                          Address:
+                        </h3>
+                        <p className="text-gray-900 dark:text-white">
+                          {watchedValues.location}
+                        </p>
+                      </div>
+                    )}
                   <div>
                     <h3 className="font-bold text-gray-700 dark:text-gray-300">
                       Phone:
                     </h3>
                     <p className="text-gray-900 dark:text-white">
-                      {countryCodeValue} {phoneValue}
+                      {watchedValues.countryCode} {watchedValues.phone}
                     </p>
                   </div>
                   {registrationType === "restaurant" && (
@@ -837,7 +981,8 @@ export default function SellerRegistration() {
                         Opening Hours:
                       </h3>
                       <p className="text-gray-900 dark:text-white">
-                        {openingTimeValue} - {closingTimeValue}
+                        {watchedValues.openingTime} -{" "}
+                        {watchedValues.closingTime}
                       </p>
                     </div>
                   )}
@@ -852,12 +997,19 @@ export default function SellerRegistration() {
                   {logoPreview && (
                     <div>
                       <h3 className="font-bold text-gray-700 dark:text-gray-300">
-                        {registrationType === "chef" ? "Profile Picture" : "Logo"}:
+                        {registrationType === "chef"
+                          ? "Profile Picture"
+                          : "Logo"}
+                        :
                       </h3>
                       <div className="mt-2">
                         <Image
                           src={logoPreview}
-                          alt={registrationType === "chef" ? "Profile Picture" : "Restaurant Logo"}
+                          alt={
+                            registrationType === "chef"
+                              ? "Profile Picture"
+                              : "Restaurant Logo"
+                          }
                           width={80}
                           height={80}
                           className="rounded-full object-cover"
