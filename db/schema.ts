@@ -80,6 +80,14 @@ export const businessTypeEnum = pgEnum("business_category_enum", [
   "chef",
 ]);
 
+
+export const businessStatusEnum = pgEnum("business_status", [
+  "open",
+  "closed", 
+  "temporarily_closed",
+  "coming_soon"
+]);
+
 export const business = pgTable("business", {
   id: text("id").primaryKey(),
 
@@ -102,7 +110,7 @@ export const business = pgTable("business", {
   logo: text("logo"),
   coverImage: text("cover_image"),
 
-  //business_verification
+  // Business verification
   business_verification: boolean("business_verification")
     .default(false)
     .notNull(),
@@ -114,7 +122,10 @@ export const business = pgTable("business", {
   rating: integer("rating").default(0),
   reviewCount: integer("review_count").default(0),
 
-  // Business status
+  // Business status - enhanced with enum
+  status: businessStatusEnum("status").default("open").notNull(),
+  
+  // Legacy boolean flag for backward compatibility
   isOpen: boolean("is_open").default(true),
 
   // Opening hours stored as JSON
@@ -125,9 +136,20 @@ export const business = pgTable("business", {
   subCategory: text(),
   countryCode: text(),
 
+  // Additional status-related fields
+  temporaryClosureReason: text("temporary_closure_reason"),
+  temporaryClosureEndDate: timestamp("temporary_closure_end_date"),
+  
+  // Online ordering availability
+  acceptsOnlineOrders: boolean("accepts_online_orders").default(false),
+  isDeliveryAvailable: boolean("is_delivery_available").default(false),
+  isPickupAvailable: boolean("is_pickup_available").default(false),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+
 
 // MENU TABLE (ADDED THIS MISSING TABLE)
 export const menu = pgTable("menu", {
