@@ -394,7 +394,7 @@ export default function SellerRegistration() {
           </p>
           <Button
             onClick={() => (window.location.href = "/dashboard")}
-            className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700"
+            className="w-full bg-green-600 hover:bg-green-700"
           >
             Go to Dashboard
           </Button>
@@ -800,7 +800,7 @@ export default function SellerRegistration() {
                     key={cuisine}
                     className={`border rounded-lg p-3 cursor-pointer text-center transition-colors ${
                       currentCuisines.includes(cuisine)
-                        ? "bg-yellow-500 text-white border-yellow-500"
+                        ? "bg-green-800 text-white border-yellow-500"
                         : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
                     }`}
                     onClick={() => toggleCuisine(cuisine)}
@@ -859,7 +859,7 @@ export default function SellerRegistration() {
                       <Button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600"
+                        className="w-full flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800"
                       >
                         <Upload className="w-4 h-4" />
                         Upload{" "}
