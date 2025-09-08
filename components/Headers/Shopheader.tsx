@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   User,
   LogOut,
-  Store,
   X,
   Loader2,
 } from "lucide-react";
