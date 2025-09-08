@@ -248,7 +248,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
           </Link>
         ) : (
           <Link
-            href="/onboarding/create-store"
+            href="/profile/get-store"
             className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
           >
             <Plus className="h-5 w-5" />
