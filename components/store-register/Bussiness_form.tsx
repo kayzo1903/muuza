@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react"; // Added useEffect
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,7 +26,8 @@ import {
   Utensils,
   X,
   Building2,
-  User, // Added User icon
+  User,
+  Loader2, // Added loading spinner icon
 } from "lucide-react";
 import Image from "next/image";
 import { convertFileToBase64 } from "@/lib/convertfile";
@@ -182,6 +183,7 @@ export default function SellerRegistration() {
   >(null);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Added loading state
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -193,7 +195,6 @@ export default function SellerRegistration() {
     setValue,
     trigger,
     setError,
-    reset,
   } = useForm<RestaurantFormData>({
     resolver: zodResolver(restaurantSchema),
     defaultValues: {
@@ -301,8 +302,11 @@ export default function SellerRegistration() {
 
   const onSubmit = async (data: RestaurantFormData) => {
     try {
+      setIsSubmitting(true); // Start loading
+
       if (!registrationType) {
         toast.error("Please select a registration type");
+        setIsSubmitting(false);
         return;
       }
 
@@ -368,11 +372,13 @@ export default function SellerRegistration() {
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false); // Stop loading regardless of outcome
     }
   };
 
   /* ---------------------------------------
-     Submission Success Message
+     Submission Success Message - UPDATED
   --------------------------------------- */
   if (isSubmitted) {
     return (
@@ -384,28 +390,14 @@ export default function SellerRegistration() {
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
             Your {registrationType} has been registered successfully. You can
-            now add more businesses or manage your existing ones.
+            now manage it from your dashboard.
           </p>
-          <div className="space-y-3">
-            <Button
-              onClick={() => {
-                setIsSubmitted(false);
-                setStep(0);
-                setRegistrationType(null);
-                reset(); // Reset the form
-              }}
-              className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700"
-            >
-              Register Another Business
-            </Button>
-            <Button
-              onClick={() => (window.location.href = "/dashboard")}
-              variant="outline"
-              className="w-full"
-            >
-              Go to Dashboard
-            </Button>
-          </div>
+          <Button
+            onClick={() => (window.location.href = "/dashboard")}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700"
+          >
+            Go to Dashboard
+          </Button>
         </Card>
       </div>
     );
@@ -515,7 +507,6 @@ export default function SellerRegistration() {
               </CardContent>
             </Card>
           )}
-
           {/* Step 1: Basic Information */}
           {step === 1 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
@@ -613,7 +604,6 @@ export default function SellerRegistration() {
               </CardContent>
             </Card>
           )}
-
           {/* Step 2: Business Category */}
           {step === 2 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
@@ -688,7 +678,6 @@ export default function SellerRegistration() {
               </CardContent>
             </Card>
           )}
-
           {/* Step 3: Contact Information */}
           {step === 3 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
@@ -792,7 +781,6 @@ export default function SellerRegistration() {
               </CardContent>
             </Card>
           )}
-
           {/* Step 4: Cuisine Selection */}
           {step === 4 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
@@ -823,7 +811,6 @@ export default function SellerRegistration() {
               </CardContent>
             </Card>
           )}
-
           {/* Step 5: Logo Upload */}
           {step === 5 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
@@ -891,7 +878,6 @@ export default function SellerRegistration() {
               </CardContent>
             </Card>
           )}
-
           {/* Step 6: Review & Submit */}
           {step === 6 && (
             <Card className="mb-6 border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800">
@@ -1021,7 +1007,6 @@ export default function SellerRegistration() {
               </CardContent>
             </Card>
           )}
-
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-4">
             {step > 0 && (
@@ -1029,6 +1014,7 @@ export default function SellerRegistration() {
                 type="button"
                 onClick={prevStep}
                 className="flex items-center gap-2 bg-gray-300 text-gray-800 hover:bg-gray-400 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                disabled={isSubmitting} // Disable during submission
               >
                 <ChevronLeft className="w-4 h-4" />
                 Previous
@@ -1039,7 +1025,7 @@ export default function SellerRegistration() {
                 type="button"
                 onClick={nextStep}
                 className="flex items-center gap-2 bg-green-500 hover:bg-green-600 ml-auto"
-                disabled={step === 0 && !registrationType}
+                disabled={(step === 0 && !registrationType) || isSubmitting} // Disable during submission
               >
                 Next
                 <ChevronRight className="w-4 h-4" />
@@ -1049,8 +1035,16 @@ export default function SellerRegistration() {
               <Button
                 type="submit"
                 className="ml-auto bg-green-500 hover:bg-green-600"
+                disabled={isSubmitting} // Disable during submission
               >
-                Submit
+                {isSubmitting ? ( // Show loading spinner when submitting
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit"
+                )}
               </Button>
             )}
           </div>
