@@ -39,7 +39,7 @@ const menuItems = {
       icon: ShoppingBag,
       color: "text-yellow-600",
       badge: true,
-      link: "/shop/my-orders" // Fixed path
+      link: "/shop/my-orders"
     },
     {
       id: "wishlist",
@@ -47,21 +47,21 @@ const menuItems = {
       icon: Heart,
       color: "text-red-500",
       badge: true,
-      link: "/shop/wishlist" // Fixed path
+      link: "/shop/wishlist"
     },
     {
       id: "addresses",
       label: "Saved Addresses",
       icon: MapPin,
       color: "text-blue-500",
-      link: "/profile/addresses" // Fixed path
+      link: "/profile/addresses"
     },
     {
       id: "payments",
       label: "Payment Methods",
       icon: CreditCard,
       color: "text-green-500",
-      link: "/profile/payment-methods" // Fixed path
+      link: "/profile/payment-methods"
     },
   ],
   settings: [
@@ -70,21 +70,21 @@ const menuItems = {
       label: "Profile Settings",
       icon: User,
       color: "text-gray-600",
-      link: "/profile/settings" // Fixed path
+      link: "/profile/settings"
     },
     {
       id: "notifications",
       label: "Notifications",
       icon: Bell,
       color: "text-blue-500",
-      link: "/profile/notifications" // Fixed path
+      link: "/profile/notifications"
     },
     {
       id: "privacy",
       label: "Privacy & Security",
       icon: Shield,
       color: "text-purple-500",
-      link: "/profile/privacy" // Fixed path
+      link: "/profile/privacy"
     },
   ],
   support: [
@@ -93,21 +93,21 @@ const menuItems = {
       label: "Help Center",
       icon: HelpCircle,
       color: "text-blue-500",
-      link: "/support/help" // Correct path
+      link: "/support/help"
     },
     {
       id: "contact",
       label: "Contact Support",
       icon: MessageSquare,
       color: "text-green-500",
-      link: "/support/help" // Different path from help
+      link: "/support/contact"
     },
     {
       id: "feedback",
       label: "Give Feedback",
       icon: MessageSquare,
       color: "text-yellow-500",
-      link: "/support/feedback" // Different path
+      link: "/support/feedback"
     },
   ],
 };
@@ -191,7 +191,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
             return (
               <Link
                 key={item.id}
-                href={item.link} // Use the correct link from config
+                href={item.link}
                 className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -233,16 +233,16 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
             <div className="flex items-center gap-3">
               <Store className="h-5 w-5 text-green-600" />
               <div>
-                <div>{userData.store.name}</div>
+                <div>{userData.store!.name}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                  {userData.store.rating} • {userData.store.totalSales} sales
+                  {userData.store!.rating} • {userData.store!.totalSales} sales
                 </div>
               </div>
             </div>
-            {userData.store.pendingOrders > 0 && (
+            {userData.store!.pendingOrders > 0 && (
               <Badge variant="destructive">
-                {userData.store.pendingOrders}
+                {userData.store!.pendingOrders}
               </Badge>
             )}
           </Link>
@@ -270,7 +270,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
             return (
               <Link
                 key={item.id}
-                href={item.link} // Use the correct link from config
+                href={item.link}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <IconComponent className={`h-5 w-5 ${item.color}`} />
@@ -294,7 +294,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
             return (
               <Link
                 key={item.id}
-                href={item.link} // Use the correct link from config
+                href={item.link}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <IconComponent className={`h-5 w-5 ${item.color}`} />

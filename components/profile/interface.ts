@@ -21,5 +21,5 @@ export interface UserData {
   avatarUrl: string;
   phone: string;
   stats: UserStats;
-  store: UserStore;
+  store: UserStore | null; // Allow store to be null
 }
