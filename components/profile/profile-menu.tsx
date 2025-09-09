@@ -227,7 +227,7 @@ export default function ProfileMenu({ userData }: ProfileMenuProps) {
         </h3>
         {hasStore ? (
           <Link
-            href="/dashboard"
+            href={`/dashboard/${userData.id}`}
             className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors"
           >
             <div className="flex items-center gap-3">

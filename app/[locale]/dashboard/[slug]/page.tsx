@@ -7,7 +7,14 @@ export const metadata: Metadata = {
   title: "dashboard",
 };
 
-export default function ManagementProductPage() {
+type Params = Promise<{ slug: string }>
+
+export default async function ManagementProductPage(props : { params: Params }) {
+   const params = await props.params
+   const slug = params.slug
+   console.log(slug);
+   
+   
   return (
     <main className="w-full px-6">
       <Suspense fallback={<DashboardSkeleton />}>
