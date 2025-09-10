@@ -2,7 +2,7 @@
 "use client";
 import { Sidebar } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -17,49 +17,13 @@ import {
   BarChart3,
   Users,
   Building,
+  MessageSquare, // Added message icon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import LocaleSwitcher from "../(lang)/LocaleSwitcher";
 import { ModeToggle } from "../Mode-toggle";
 import { useState } from "react";
-
-// Main navigation links
-const mainNavLinks = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Orders", href: "/dashboard/orders", icon: ListOrdered },
-  { title: "Products", href: "/dashboard/products", icon: Package },
-  { title: "My Store", href: "/dashboard/store", icon: Store },
-];
-
-// Additional navigation sections (collapsible)
-const additionalSections = [
-  {
-    title: "Analytics",
-    icon: BarChart3,
-    links: [
-      { title: "Sales Report", href: "/dashboard/analytics/sales" },
-      { title: "Customer Insights", href: "/dashboard/analytics/customers" },
-      { title: "Product Performance", href: "/dashboard/analytics/products" },
-    ]
-  },
-  {
-    title: "Customer Management",
-    icon: Users,
-    links: [
-      { title: "All Customers", href: "/dashboard/customers" },
-      { title: "Reviews", href: "/dashboard/customers/reviews" },
-      { title: "Messages", href: "/dashboard/customers/messages" },
-    ]
-  }
-];
-
-// Bottom navigation links
-const bottomNavLinks = [
-  { title: "Settings", href: "/dashboard/settings", icon: Settings },
-  { title: "Help Center", href: "/dashboard/help", icon: HelpCircle },
-  { title: "Back to Shop", href: "/shop", icon: LogOut },
-];
 
 interface Business {
   id: string;
@@ -80,22 +44,81 @@ interface AppSidebarProps {
   userData: UserData | null;
   businesses: Business[];
   pendingOrdersCount: number;
+  unreadMessagesCount?: number; // Added prop for unread messages count
 }
 
-export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSidebarProps) {
+export function AppSidebar({
+  userData,
+  businesses,
+  pendingOrdersCount,
+  unreadMessagesCount = 0, // Default to 0
+}: AppSidebarProps) {
   const pathname = usePathname();
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [expandedSections, setExpandedSections] = useState<
+    Record<string, boolean>
+  >({});
   const [businessSelectorOpen, setBusinessSelectorOpen] = useState(false);
-  
+  const params = useParams();
+  const businessId = params.slug as string;
+
+  // Helper function to generate business-specific URLs
+  const getBusinessUrl = (path: string) => {
+    return `/dashboard/${businessId}${path}`;
+  };
+
+  // Main navigation links - Added Messages to main nav
+  const mainNavLinks = [
+    { title: "Dashboard", href: getBusinessUrl("/"), icon: LayoutDashboard },
+    { title: "Orders", href: getBusinessUrl("/orders"), icon: ListOrdered },
+    { title: "Products", href: getBusinessUrl("/products"), icon: Package },
+    { title: "Messages", href: getBusinessUrl("/messages"), icon: MessageSquare }, // Added Messages
+    { title: "My Store", href: getBusinessUrl("/store"), icon: Store },
+  ];
+
+  // Additional navigation sections - Removed Messages from Customer Management
+  const additionalSections = [
+    {
+      title: "Analytics",
+      icon: BarChart3,
+      links: [
+        { title: "Sales Report", href: getBusinessUrl("/analytics/sales") },
+        {
+          title: "Customer Insights",
+          href: getBusinessUrl("/analytics/customers"),
+        },
+        {
+          title: "Product Performance",
+          href: getBusinessUrl("/analytics/products"),
+        },
+      ],
+    },
+    {
+      title: "Customer Management",
+      icon: Users,
+      links: [
+        { title: "All Customers", href: getBusinessUrl("/customers") },
+        { title: "Reviews", href: getBusinessUrl("/customers/reviews") },
+        // Removed Messages from here
+      ],
+    },
+  ];
+
+  // Bottom navigation links
+  const bottomNavLinks = [
+    { title: "Settings", href: "/profile/settings", icon: Settings },
+    { title: "Help Center", href: "support/help", icon: HelpCircle },
+    { title: "Back to Shop", href: "/shop", icon: LogOut },
+  ];
+
   const toggleSection = (sectionTitle: string) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [sectionTitle]: !prev[sectionTitle]
+      [sectionTitle]: !prev[sectionTitle],
     }));
   };
 
   const toggleBusinessSelector = () => {
-    setBusinessSelectorOpen(prev => !prev);
+    setBusinessSelectorOpen((prev) => !prev);
   };
 
   return (
@@ -116,7 +139,9 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
                 {userData?.name || "User"}
               </p>
               <p className="text-sm text-muted-foreground truncate">
-                {userData?.role === "seller" ? "Seller Account" : "Buyer Account"}
+                {userData?.role === "seller"
+                  ? "Seller Account"
+                  : "Buyer Account"}
               </p>
             </div>
           </div>
@@ -164,7 +189,7 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
                     </Link>
                   ))}
                   <Link
-                    href="/dashboard/business/create"
+                    href="/profile/get-store"
                     className="flex items-center gap-2 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <PlusCircle className="h-4 w-4" />
@@ -180,18 +205,22 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
         <nav className="flex-1 overflow-y-auto py-4 px-2">
           <div className="space-y-1">
             {mainNavLinks.map(({ title, href, icon: Icon }) => {
-              const isActive = pathname === href || 
-                (href === '/dashboard/orders' && pathname.startsWith('/dashboard/orders')) ||
-                (href === '/dashboard/products' && pathname.startsWith('/dashboard/products'));
-                
+              const isActive =
+                pathname === href ||
+                (href === getBusinessUrl("/orders") &&
+                  pathname.startsWith(getBusinessUrl("/orders"))) ||
+                (href === getBusinessUrl("/products") &&
+                  pathname.startsWith(getBusinessUrl("/products"))) ||
+                (href === getBusinessUrl("/messages") &&
+                  pathname.startsWith(getBusinessUrl("/messages")));
               return (
                 <Link
                   key={href}
                   href={href}
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground group",
-                    isActive 
-                      ? "bg-primary/10 text-primary border-r-2 border-primary" 
+                    isActive
+                      ? "bg-primary/10 text-primary border-r-2 border-primary"
                       : "text-muted-foreground"
                   )}
                 >
@@ -202,14 +231,19 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
                       {pendingOrdersCount}
                     </span>
                   )}
+                  {title === "Messages" && unreadMessagesCount > 0 && (
+                    <span className="bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {unreadMessagesCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
-            
+
             {/* Quick Action Button - Only show for sellers */}
             {userData?.role === "seller" && businesses.length > 0 && (
               <Link
-                href="/dashboard/products/add"
+                href={getBusinessUrl("/products/add")}
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mt-4"
               >
                 <PlusCircle className="h-5 w-5" />
@@ -223,17 +257,20 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
             <div className="mt-6 space-y-1">
               {additionalSections.map((section) => {
                 const isExpanded = expandedSections[section.title];
-                const hasActiveChild = section.links.some(link => 
-                  pathname === link.href || pathname.startsWith(link.href)
+                const hasActiveChild = section.links.some(
+                  (link) =>
+                    pathname === link.href || pathname.startsWith(link.href)
                 );
-                
+
                 return (
                   <div key={section.title}>
                     <button
                       onClick={() => toggleSection(section.title)}
                       className={cn(
                         "flex items-center justify-between w-full rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                        hasActiveChild ? "text-primary" : "text-muted-foreground"
+                        hasActiveChild
+                          ? "text-primary"
+                          : "text-muted-foreground"
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -246,20 +283,22 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
                         <ChevronRight className="h-4 w-4" />
                       )}
                     </button>
-                    
+
                     {isExpanded && (
                       <div className="ml-8 mt-1 space-y-1">
                         {section.links.map((link) => {
-                          const isActive = pathname === link.href || pathname.startsWith(link.href);
-                          
+                          const isActive =
+                            pathname === link.href ||
+                            pathname.startsWith(link.href);
+
                           return (
                             <Link
                               key={link.href}
                               href={link.href}
                               className={cn(
                                 "block rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                                isActive 
-                                  ? "text-primary font-medium" 
+                                isActive
+                                  ? "text-primary font-medium"
                                   : "text-muted-foreground"
                               )}
                             >
@@ -281,16 +320,14 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
           <div className="space-y-1">
             {bottomNavLinks.map(({ title, href, icon: Icon }) => {
               const isActive = pathname === href;
-              
+
               return (
                 <Link
                   key={href}
                   href={href}
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                    isActive 
-                      ? "text-primary" 
-                      : "text-muted-foreground"
+                    isActive ? "text-primary" : "text-muted-foreground"
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -299,13 +336,13 @@ export function AppSidebar({ userData, businesses, pendingOrdersCount }: AppSide
               );
             })}
           </div>
-          
+
           {/* Theme and Language Switchers */}
           <div className="flex items-center justify-between mt-4 px-1">
             <LocaleSwitcher />
             <ModeToggle />
           </div>
-          
+
           {/* Status Indicator */}
           <div className="flex items-center mt-4 text-xs text-muted-foreground">
             <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
