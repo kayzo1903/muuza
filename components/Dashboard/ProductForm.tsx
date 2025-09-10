@@ -7,11 +7,7 @@ import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { Plus, X, Utensils, ChefHat, Clock, Info } from "lucide-react";
 
-import {
-  ProductFormData,
-  ProductFormInput,
-  productFormSchema,
-} from "@/lib/validation/product";
+import { ProductFormData, productFormSchema } from "@/lib/validation/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,11 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-interface Menu {
-  id: string;
-  name: string;
-}
+import { foodCategories } from "@/lib/data/food-categories";
 
 // Define the dietary options type
 type DietaryOptionValue =
@@ -64,21 +56,24 @@ export default function NewProductPage() {
   const params = useParams();
   const businessId = params?.slug as string | undefined;
 
-  const [menus, setMenus] = useState<Menu[]>([]);
   const [previews, setPreviews] = useState<{ url: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ingredientInput, setIngredientInput] = useState("");
 
-  // Update the form initialization
+  const [availableSubcategories, setAvailableSubcategories] = useState<
+    { id: string; label: string }[]
+  >([]);
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      menuId: "",
       name: "",
       price: 0,
       description: "",
-      isAvailable: true, // This is now required
+      category: "",
+      subcategory: "",
+      isAvailable: true,
       images: [],
       ingredients: [],
       dietaryInfo: [],
@@ -86,29 +81,32 @@ export default function NewProductPage() {
     },
   });
 
-  // Mock menus data instead of fetching from API
+  // Watch category changes to update subcategories
+  const selectedCategory = form.watch("category");
+
   useEffect(() => {
-    if (!businessId) return;
+    if (selectedCategory) {
+      const category = foodCategories.find(
+        (cat) => cat.id === selectedCategory
+      );
+      setAvailableSubcategories(
+        category?.subcategories
+          ? category.subcategories.map((sub) => ({ ...sub }))
+          : []
+      );
+      form.setValue("subcategory", "");
+    } else {
+      setAvailableSubcategories([]);
+    }
+  }, [selectedCategory, form]);
 
-    // Simulate menu data
-    const mockMenus: Menu[] = [
-      { id: "1", name: "Main Menu" },
-      { id: "2", name: "Breakfast Menu" },
-      { id: "3", name: "Lunch Specials" },
-      { id: "4", name: "Dinner Menu" },
-    ];
-
-    setMenus(mockMenus);
-  }, [businessId]);
-
-  // cleanup preview URLs on unmount
+  // Cleanup preview URLs
   useEffect(() => {
     return () => {
       previews.forEach((preview) => {
         try {
           URL.revokeObjectURL(preview.url);
         } catch (e) {
-          // ignore
           console.debug("Failed to revoke URL during cleanup:", e);
         }
       });
@@ -135,8 +133,6 @@ export default function NewProductPage() {
     form.setValue("images", [...currentFiles, ...files], {
       shouldValidate: true,
     });
-
-    // reset file input value so the same file can be chosen again
     e.currentTarget.value = "";
   };
 
@@ -147,7 +143,6 @@ export default function NewProductPage() {
         try {
           URL.revokeObjectURL(previewToRemove.url);
         } catch (e) {
-          // ignore
           console.debug("Failed to revoke URL:", e);
         }
       }
@@ -166,13 +161,10 @@ export default function NewProductPage() {
     const value = ingredientInput.trim();
     if (!value) return;
     const current = form.getValues("ingredients") || [];
-
-    // Check for duplicates (case-insensitive)
     if (current.some((c) => c.toLowerCase() === value.toLowerCase())) {
       setError("This ingredient is already added");
       return;
     }
-
     form.setValue("ingredients", [...current, value], { shouldValidate: true });
     setIngredientInput("");
     setError(null);
@@ -202,26 +194,65 @@ export default function NewProductPage() {
     }
   };
 
-  const onSubmit = async (data: ProductFormInput) => {
+  const onSubmit = async (data: ProductFormData) => {
     setLoading(true);
     setError(null);
-
     try {
-      // Basic client-side validation
-      if (!data.menuId) {
-        throw new Error("Please select a menu");
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description || "");
+      formData.append("price", data.price.toString());
+      formData.append("category", data.category);
+      formData.append("subcategory", data.subcategory);
+      formData.append("isAvailable", data.isAvailable.toString());
+      formData.append(
+        "preparationTime",
+        data.preparationTime?.toString() || "0"
+      );
+
+      if (data.ingredients?.length) {
+        formData.append("ingredients", JSON.stringify(data.ingredients));
+      }
+      if (data.dietaryInfo?.length) {
+        formData.append("dietaryInfo", JSON.stringify(data.dietaryInfo));
       }
 
-      // Simulate form data processing instead of API call
-      console.log("Form data:", data);
+      // Image validation and appending
+      const maxFileSize = 5 * 1024 * 1024;
+      const validTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+      if (data.images?.length) {
+        data.images.forEach((file) => {
+          if (file instanceof File) {
+            if (!validTypes.includes(file.type))
+              throw new Error(`Invalid file type: ${file.name}`);
+            if (file.size > maxFileSize)
+              throw new Error(`File too large: ${file.name}`);
+            formData.append("images", file);
+          }
+        });
+      }
 
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(`/api/product/${businessId}/add-product`, {
+        method: "POST",
+        body: formData,
+      });
 
-      // Simulate success response
-      console.log("Product created successfully");
+      const responseData = await response.json();
+      if (!response.ok) {
+        if (responseData.fieldErrors) {
+          Object.entries(responseData.fieldErrors).forEach(
+            ([field, message]) => {
+              form.setError(field as keyof ProductFormData, {
+                type: "server",
+                message: Array.isArray(message) ? message[0] : String(message),
+              });
+            }
+          );
+          throw new Error("Validation errors occurred");
+        }
+        throw new Error(responseData.error || "Failed to create product");
+      }
 
-      // Redirect to products page
       router.push(`/dashboard/${businessId}/products`);
     } catch (err) {
       console.error("Submission error:", err);
@@ -330,43 +361,94 @@ export default function NewProductPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="menuId">Menu *</Label>
-                <Controller
-                  control={form.control}
-                  name="menuId"
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger
-                        className={
-                          form.formState.errors.menuId
-                            ? "border-destructive"
-                            : ""
-                        }
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category *</Label>
+                  <Controller
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
                       >
-                        <SelectValue placeholder="Select a menu" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {menus.length === 0 ? (
-                          <SelectItem value="" disabled>
-                            No menus available
-                          </SelectItem>
-                        ) : (
-                          menus.map((menu) => (
-                            <SelectItem key={menu.id} value={menu.id}>
-                              {menu.name}
+                        <SelectTrigger
+                          className={
+                            form.formState.errors.category
+                              ? "border-destructive"
+                              : ""
+                          }
+                        >
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {foodCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.label}
                             </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {form.formState.errors.category && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.category.message}
+                    </p>
                   )}
-                />
-                {form.formState.errors.menuId && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.menuId.message}
-                  </p>
-                )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subcategory">Subcategory *</Label>
+                  <Controller
+                    control={form.control}
+                    name="subcategory"
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={!selectedCategory}
+                      >
+                        <SelectTrigger
+                          className={
+                            form.formState.errors.subcategory
+                              ? "border-destructive"
+                              : ""
+                          }
+                        >
+                          <SelectValue
+                            placeholder={
+                              selectedCategory
+                                ? "Select subcategory"
+                                : "Select category first"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableSubcategories.length === 0 ? (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              Select a category first
+                            </div>
+                          ) : (
+                            availableSubcategories.map((subcategory) => (
+                              <SelectItem
+                                key={subcategory.id}
+                                value={subcategory.id}
+                              >
+                                {subcategory.label}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {form.formState.errors.subcategory && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.subcategory.message}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CategorySchema, SubcategorySchema } from "./foodValidationSchema";
 
 /**
  * Dietary options available for products.
@@ -35,9 +36,11 @@ export const productFormSchema = z.object({
     .min(0, "Price must be at least 0")
     .max(1000000, "Price is too high"),
 
-  // Menu is required because every product belongs to a menu
-  menuId: z.string().min(1, "Please select a menu"),
+  //producta and categories
+  category: CategorySchema,
+  subcategory: SubcategorySchema,
 
+  
   // Product availability toggle
   isAvailable: z.boolean(),
 
@@ -46,9 +49,6 @@ export const productFormSchema = z.object({
     .array(z.instanceof(File))
     .max(5, "You can upload up to 5 images")
     .optional(),
-
-  // Optional category
-  category: z.string().optional(),
 
   // Preparation time in minutes (0–240)
   preparationTime: z.number().min(0).max(240).optional(),
@@ -70,4 +70,3 @@ export type ProductFormData = z.infer<typeof productFormSchema>;
  * (after converting to the database format)
  */
 export type ProductFormInput = Omit<ProductFormData, "businessId">;
-

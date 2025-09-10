@@ -166,7 +166,7 @@ export default function MyOrders() {
 
   useEffect(() => {
     fetchOrders();
-  } , [businessId, currentPage, statusFilter]);
+  } , [businessId, currentPage, statusFilter, ]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

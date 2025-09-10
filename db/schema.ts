@@ -53,7 +53,6 @@ export const auditActionEnum = pgEnum("audit_action", [
 export const auditEntityEnum = pgEnum("audit_entity", [
   "user",
   "business",
-  "menu",
   "menu_item",
   "order",
   "payment",
@@ -180,33 +179,21 @@ export const business = pgTable("business", {
 });
 
 /* ==============================================
-   MENU TABLE
-============================================== */
-export const menu = pgTable("menu", {
-  id: text("id").primaryKey(),
-  businessId: text("business_id")
-    .notNull()
-    .references(() => business.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  description: text("description"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-/* ==============================================
-   MENU ITEM TABLE
+   MENU ITEM TABLE (UPDATED - NO menuId)
 ============================================== */
 export const menuItem = pgTable("menu_item", {
   id: text("id").primaryKey(),
 
-  menuId: text("menu_id")
-    .notNull()
-    .references(() => menu.id, { onDelete: "cascade" }),
+  // REMOVED: menuId field - using categories instead
+  // menuId: text("menu_id").references(() => menu.id, { onDelete: "cascade" }),
 
   businessId: text("business_id")
     .notNull()
     .references(() => business.id, { onDelete: "cascade" }),
+
+  // Category system - primary organization method
+  category: text("category").notNull(),
+  subcategory: text("subcategory").notNull(),
 
   name: text("name").notNull(),
   description: text("description"),
@@ -214,10 +201,10 @@ export const menuItem = pgTable("menu_item", {
   // Price in minor units (e.g., TZS cents)
   price: integer("price").notNull(),
 
-  // New fields for compatibility
-  ingredients: jsonb("ingredients").$type<string[]>(), // ["Chicken", "Rice", "Spices"]
-  dietaryInfo: jsonb("dietary_info").$type<string[]>(), // ["vegan", "spicy"]
-  preparationTime: integer("preparation_time"), // minutes
+  // Additional fields
+  ingredients: jsonb("ingredients").$type<string[]>(),
+  dietaryInfo: jsonb("dietary_info").$type<string[]>(),
+  preparationTime: integer("preparation_time"),
 
   likes: integer("likes").default(0),
   comments: integer("comments").default(0),
