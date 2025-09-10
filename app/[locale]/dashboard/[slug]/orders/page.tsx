@@ -1,9 +1,9 @@
-import OrdersPage from "@/components/Dashboard/Orderspage";
+import MyOrders from "@/components/Dashboard/Orderspage";
 
 export default function OrdersListPage(){
     return (
         <main className="w-full">
-            <OrdersPage />
+            <MyOrders />
         </main>
     )
 }

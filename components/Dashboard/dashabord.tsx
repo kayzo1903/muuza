@@ -31,7 +31,7 @@ export default function Dashboard({ businessId }: DashboardProps) {
         setLoading(true);
         setError(null);
         
-        const res = await fetch(`/api/dashboard/${businessId}`);
+        const res = await fetch(`/api/dashboard/${businessId}/summary`);
         
         if (!res.ok) {
           throw new Error(`Failed to fetch data: ${res.status}`);
