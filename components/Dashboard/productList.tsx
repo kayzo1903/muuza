@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, useCallback, ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import ProductCard from "./productlistcard";
+import { toast } from "sonner";
 
 export interface Product {
   rating: ReactNode;
@@ -47,17 +48,18 @@ export default function ProductList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState<{
-    open: boolean;
-    productId: string | null;
-    productName: string;
-  }>({
-    open: false,
-    productId: null,
-    productName: "",
-  });
 
-  const fetchProducts = async () => {
+  // Delete Dialog State
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  /**
+   * Fetch products for the business
+   */
+  const fetchProducts = useCallback(async () => {
     try {
       setError(null);
       const response = await fetch(`/api/product/${businessId}/get-products`);
@@ -74,31 +76,37 @@ export default function ProductList() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [businessId]);
 
   useEffect(() => {
     fetchProducts();
-  }, [businessId]);
+  }, [fetchProducts]);
 
+  /**
+   * Refresh product list
+   */
   const handleRefresh = () => {
     setRefreshing(true);
     fetchProducts();
   };
 
+  /**
+   * Open delete confirmation dialog
+   */
   const handleDeleteClick = (productId: string, productName: string) => {
-    setDeleteDialog({
-      open: true,
-      productId,
-      productName,
-    });
+    setSelectedProduct({ id: productId, name: productName });
+    setIsDeleteDialogOpen(true);
   };
 
+  /**
+   * Confirm and delete product
+   */
   const handleDeleteConfirm = async () => {
-    if (!deleteDialog.productId) return;
+    if (!selectedProduct) return;
 
     try {
       const response = await fetch(
-        `/api/business/${businessId}/products/${deleteDialog.productId}`,
+        `/api/product/${businessId}/delete/${selectedProduct.id}`,
         {
           method: "DELETE",
         }
@@ -106,33 +114,38 @@ export default function ProductList() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        toast("failed to delete product", {
+          description: "Check out your connection",
+        });
         throw new Error(errorData.error || "Failed to delete product");
       }
 
-      // Remove the product from local state
+      // Update state by removing the deleted product
       setProducts((prev) =>
-        prev.filter((product) => product.id !== deleteDialog.productId)
+        prev.filter((product) => product.id !== selectedProduct.id)
       );
 
-      setDeleteDialog({
-        open: false,
-        productId: null,
-        productName: "",
+      // Close dialog
+      setIsDeleteDialogOpen(false);
+      setSelectedProduct(null);
+    } catch {
+      toast("failed to delete product", {
+        description: "Check out your connection",
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete product");
     }
   };
 
+  /**
+   * Cancel deletion
+   */
   const handleDeleteCancel = () => {
-    setDeleteDialog({
-      open: false,
-      productId: null,
-      productName: "",
-    });
+    setIsDeleteDialogOpen(false);
+    setSelectedProduct(null);
   };
 
-  // Group products by category
+  /**
+   * Group products by category
+   */
   const productsByCategory = products.reduce((acc, product) => {
     const category = product.category || "Uncategorized";
     if (!acc[category]) {
@@ -142,13 +155,16 @@ export default function ProductList() {
     return acc;
   }, {} as Record<string, Product[]>);
 
+  /**
+   * Loading state
+   */
   if (loading) {
     return <ProductsSkeleton />;
   }
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Products</h1>
@@ -176,6 +192,7 @@ export default function ProductList() {
         </div>
       </div>
 
+      {/* Error Alert */}
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -184,11 +201,12 @@ export default function ProductList() {
         </Alert>
       )}
 
-      {/* Products Grid */}
+      {/* Product Categories Grid */}
       <div className="space-y-8">
         {Object.entries(productsByCategory).map(
           ([category, categoryProducts]) => (
             <div key={category} className="space-y-4">
+              {/* Category Header */}
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Tag className="w-5 h-5" />
                 {category}
@@ -197,6 +215,7 @@ export default function ProductList() {
                 </Badge>
               </h2>
 
+              {/* Products Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryProducts.map((product) => (
                   <ProductCard
@@ -211,6 +230,7 @@ export default function ProductList() {
           )
         )}
 
+        {/* Empty State */}
         {products.length === 0 && !loading && (
           <Card className="text-center py-12">
             <CardContent>
@@ -232,17 +252,20 @@ export default function ProductList() {
         )}
       </div>
 
-      <AlertDialog open={deleteDialog.open} onOpenChange={handleDeleteCancel}>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={handleDeleteCancel}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Product</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete &quot;{deleteDialog.productName}
-              &quot;. This action cannot be undone.
+              Are you sure you want to permanently delete &quot;
+              {selectedProduct?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleDeleteCancel}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

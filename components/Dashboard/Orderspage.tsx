@@ -1,7 +1,7 @@
 // app/dashboard/[slug]/orders/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { 
   ShoppingCart, 
@@ -11,6 +11,7 @@ import {
   Copy,
   Phone
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -85,21 +86,25 @@ const statusColor = {
 export default function MyOrders() {
   const params = useParams();
   const businessId = params.slug as string;
-  
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filters and pagination
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchOrders = async () => {
+  /**
+   * Fetch Orders - useCallback ensures stable reference
+   */
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
+
       const queryParams = new URLSearchParams({
         page: currentPage.toString(),
         limit: "10",
@@ -108,11 +113,11 @@ export default function MyOrders() {
       });
 
       const response = await fetch(`/api/business/${businessId}/orders?${queryParams}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch orders");
       }
-      
+
       const data = await response.json();
       setOrders(data.orders);
       setTotalPages(data.pagination.totalPages);
@@ -121,16 +126,19 @@ export default function MyOrders() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessId, currentPage, statusFilter, searchTerm]);
 
+  /**
+   * Fetch Order Details
+   */
   const fetchOrderDetails = async (orderId: string) => {
     try {
       const response = await fetch(`/api/business/${businessId}/orders/${orderId}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch order details");
       }
-      
+
       const orderDetails = await response.json();
       setSelectedOrder(orderDetails);
     } catch (err) {
@@ -138,6 +146,9 @@ export default function MyOrders() {
     }
   };
 
+  /**
+   * Update Order Status
+   */
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       const response = await fetch(`/api/business/${businessId}/orders`, {
@@ -152,10 +163,10 @@ export default function MyOrders() {
         throw new Error("Failed to update order status");
       }
 
-      // Refresh orders list
+      // Refresh orders
       fetchOrders();
-      
-      // Update selected order if it's the one being modified
+
+      // Update dialog if open
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
       }
@@ -164,9 +175,12 @@ export default function MyOrders() {
     }
   };
 
+  /**
+   * Fetch orders whenever dependencies change
+   */
   useEffect(() => {
     fetchOrders();
-  } , [businessId, currentPage, statusFilter, ]);
+  }, [fetchOrders]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +213,7 @@ export default function MyOrders() {
           </h1>
         </div>
         <div className="text-center py-12 text-destructive">
-          <p>Error: Failed to get Orders</p>
+          <p>Error: {error}</p>
           <Button onClick={fetchOrders} className="mt-4">
             Try Again
           </Button>
@@ -269,6 +283,7 @@ export default function MyOrders() {
             </div>
           ) : (
             <>
+              {/* Orders Table */}
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -303,6 +318,7 @@ export default function MyOrders() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
+                          {/* View Order Details */}
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
@@ -354,6 +370,7 @@ export default function MyOrders() {
                                     </div>
                                   </div>
                                   
+                                  {/* Order Items */}
                                   <div>
                                     <h3 className="font-semibold mb-2">Order Items</h3>
                                     <Table>
@@ -404,6 +421,8 @@ export default function MyOrders() {
                               )}
                             </DialogContent>
                           </Dialog>
+
+                          {/* Copy Order ID */}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -412,6 +431,8 @@ export default function MyOrders() {
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
+
+                          {/* Call Customer */}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -433,7 +454,7 @@ export default function MyOrders() {
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
-                        <PaginationPrevious 
+                        <PaginationPrevious
                           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                           className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
@@ -453,7 +474,7 @@ export default function MyOrders() {
                         );
                       })}
                       <PaginationItem>
-                        <PaginationNext 
+                        <PaginationNext
                           onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                           className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
