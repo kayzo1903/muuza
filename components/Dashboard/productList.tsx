@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Tag, RefreshCw, AlertCircle } from "lucide-react";
+import { Plus, Tag, RefreshCw, AlertCircle, Menu } from "lucide-react";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ProductsSkeleton } from "./Productlistskeleton";
@@ -19,6 +19,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import ProductCard from "./productlistcard";
 import { toast } from "sonner";
@@ -163,38 +170,75 @@ export default function ProductList() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       {/* Header Section */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Products</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold">Products</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your menu items and categories
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            <RefreshCw
-              className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
-          <Button asChild>
-            <Link href={`/dashboard/${businessId}/products/add`}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Product
-            </Link>
-          </Button>
+          {/* Mobile Menu Button */}
+          <Sheet>
+            <SheetTrigger asChild className="sm:hidden">
+              <Button variant="outline" size="icon">
+                <Menu className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[250px] sm:hidden">
+              <SheetHeader>
+                <SheetTitle>Menu Actions</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="justify-start"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </Button>
+                <Button asChild className="justify-start">
+                  <Link href={`/dashboard/${businessId}/products/add`}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Product
+                  </Link>
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Desktop Buttons */}
+          <div className="hidden sm:flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              size="sm"
+            >
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+            <Button asChild size="sm">
+              <Link href={`/dashboard/${businessId}/products/add`}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Product
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Error Alert */}
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="text-sm">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
@@ -202,21 +246,21 @@ export default function ProductList() {
       )}
 
       {/* Product Categories Grid */}
-      <div className="space-y-8">
+      <div className="space-y-6">
         {Object.entries(productsByCategory).map(
           ([category, categoryProducts]) => (
-            <div key={category} className="space-y-4">
+            <div key={category} className="space-y-3">
               {/* Category Header */}
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Tag className="w-5 h-5" />
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Tag className="w-4 h-4" />
                 {category}
-                <Badge variant="secondary" className="ml-2">
+                <Badge variant="secondary" className="ml-2 text-xs">
                   {categoryProducts.length} items
                 </Badge>
               </h2>
 
               {/* Products Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categoryProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -232,15 +276,15 @@ export default function ProductList() {
 
         {/* Empty State */}
         {products.length === 0 && !loading && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <div className="flex flex-col items-center justify-center space-y-4">
-                <Tag className="w-12 h-12 text-muted-foreground" />
-                <h3 className="text-lg font-semibold">No products yet</h3>
-                <p className="text-muted-foreground">
+          <Card className="text-center py-8 md:py-12">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col items-center justify-center space-y-3 md:space-y-4">
+                <Tag className="w-8 h-8 md:w-12 md:h-12 text-muted-foreground" />
+                <h3 className="text-base md:text-lg font-semibold">No products yet</h3>
+                <p className="text-sm md:text-base text-muted-foreground">
                   Get started by adding your first menu item
                 </p>
-                <Button asChild>
+                <Button asChild size="sm" className="mt-2">
                   <Link href={`/dashboard/${businessId}/products/add`}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Your First Product
@@ -254,16 +298,16 @@ export default function ProductList() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={handleDeleteCancel}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[95vw] rounded-md sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Product</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-lg">Delete Product</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               Are you sure you want to permanently delete &quot;
               {selectedProduct?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleDeleteCancel}>
+          <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
+            <AlertDialogCancel onClick={handleDeleteCancel} className="mt-2 sm:mt-0">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
