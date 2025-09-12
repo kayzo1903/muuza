@@ -5,6 +5,29 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { sql } from "drizzle-orm";
+import { z } from "zod";
+import { foodCategories } from "@/lib/data/food-categories";
+
+// Zod validation schema (same as add-product)
+const CategorySchema = z.enum(
+  foodCategories.map(cat => cat.id) as [string, ...string[]]
+);
+
+const SubcategorySchema = z.enum(
+  foodCategories.flatMap(cat => cat.subcategories.map(sub => sub.id)) as [string, ...string[]]
+);
+
+const productApiSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  price: z.number().min(0).max(1000000),
+  category: CategorySchema,
+  subcategory: SubcategorySchema,
+  isAvailable: z.boolean().default(true),
+  ingredients: z.array(z.string()).optional(),
+  dietaryInfo: z.array(z.string()).optional(),
+  preparationTime: z.number().min(0).max(240).optional(),
+});
 
 export async function PUT(
   request: Request,
@@ -37,7 +60,7 @@ export async function PUT(
 
     // Verify the product exists and belongs to this business
     const productCheck = await db.execute(sql`
-      SELECT id FROM menu_item 
+      SELECT id, name, category, normalized_name FROM menu_item 
       WHERE id = ${productId} AND business_id = ${businessId}
     `);
 
@@ -48,12 +71,20 @@ export async function PUT(
       );
     }
 
+    interface ExistingProduct {
+      id: string;
+      name: string;
+      category: string;
+      normalized_name: string;
+    }
+    const existingProduct = productCheck.rows[0] as unknown as ExistingProduct;
+
     // Parse form data
     const formData = await request.formData();
     
     // Extract form data
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
+    const name = (formData.get("name") as string).trim();
+    const description = (formData.get("description") as string)?.trim() || null;
     const price = parseFloat(formData.get("price") as string);
     const category = formData.get("category") as string;
     const subcategory = formData.get("subcategory") as string;
@@ -67,36 +98,80 @@ export async function PUT(
     // Get images to delete
     const imagesToDelete = JSON.parse(formData.get("imagesToDelete") as string || "[]");
     
-    // Get new image files (for development, we'll just store file names)
+    // Get new image files
     const imageFiles = formData.getAll("images") as File[];
 
-    // Validate required fields
-    if (!name || !price || !category || !subcategory) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+    // Validate data
+    const validatedData = productApiSchema.parse({
+      name,
+      description,
+      price,
+      category,
+      subcategory,
+      isAvailable,
+      ingredients,
+      dietaryInfo,
+      preparationTime,
+    });
+
+    const normalizedName = validatedData.name.toLowerCase();
+    const priceInCents = Math.round(validatedData.price * 100);
+
+    // Check for duplicate product (excluding the current product)
+    // Only check if name, category, or normalized_name changed
+    if (existingProduct.name !== name || existingProduct.category !== category) {
+      const duplicateCheck = await db.execute(sql`
+        SELECT id, name FROM menu_item 
+        WHERE business_id = ${businessId}
+        AND category = ${validatedData.category}
+        AND normalized_name = ${normalizedName}
+        AND id != ${productId}
+        LIMIT 1;
+      `);
+
+      if (duplicateCheck.rows.length > 0) {
+        interface DuplicateProduct {
+          id: string;
+          name: string;
+        }
+        const duplicateProduct = duplicateCheck.rows[0] as unknown as DuplicateProduct;
+        return NextResponse.json(
+          {
+            error: "Duplicate product",
+            message: `A product with the name "${duplicateProduct.name}" already exists in this category.`,
+            duplicate: true,
+            existingProduct: duplicateProduct
+          },
+          { status: 409 }
+        );
+      }
     }
 
-    // Convert price to minor units (cents) for storage
-    const priceInCents = Math.round(price * 100);
-
     // Update the main product information
-    await db.execute(sql`
+    const updateResult = await db.execute(sql`
       UPDATE menu_item 
       SET 
-        name = ${name},
+        name = ${validatedData.name},
+        normalized_name = ${normalizedName},
         description = ${description || null},
         price = ${priceInCents},
-        category = ${category},
-        subcategory = ${subcategory},
-        is_available = ${isAvailable},
-        preparation_time = ${preparationTime},
-        ingredients = ${JSON.stringify(ingredients)}::jsonb,
-        dietary_info = ${JSON.stringify(dietaryInfo)}::jsonb,
+        category = ${validatedData.category},
+        subcategory = ${validatedData.subcategory},
+        is_available = ${validatedData.isAvailable},
+        preparation_time = ${validatedData.preparationTime},
+        ingredients = ${JSON.stringify(validatedData.ingredients)}::jsonb,
+        dietary_info = ${JSON.stringify(validatedData.dietaryInfo)}::jsonb,
         updated_at = NOW()
       WHERE id = ${productId} AND business_id = ${businessId}
+      RETURNING *;
     `);
+
+    if (updateResult.rows.length === 0) {
+      return NextResponse.json(
+        { error: "Failed to update product" },
+        { status: 500 }
+      );
+    }
 
     // Handle image deletions
     if (imagesToDelete.length > 0) {
@@ -107,7 +182,7 @@ export async function PUT(
       `);
     }
 
-    // Handle new image uploads (for development, we'll just store file names)
+    // Handle new image uploads
     if (imageFiles.length > 0) {
       // Get current max sort_order to append new images
       const maxSortOrderResult = await db.execute(sql`
@@ -119,17 +194,40 @@ export async function PUT(
       const maxSortOrderRaw = maxSortOrderResult.rows[0]?.max_sort_order;
       const maxSortOrder = typeof maxSortOrderRaw === "number" ? maxSortOrderRaw : parseInt(maxSortOrderRaw as string) || 0;
       
+      // Check if we need to set a primary image (if all existing ones were deleted)
+      const remainingImagesResult = await db.execute(sql`
+        SELECT COUNT(*) as count FROM menu_item_image 
+        WHERE menu_item_id = ${productId} AND is_primary = true
+      `);
+      
+      const remainingPrimaryImages = parseInt(remainingImagesResult.rows[0]?.count as string) || 0;
+      const needsPrimaryImage = remainingPrimaryImages === 0;
+      
       // Insert new images
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
         // For development, we'll just store the file name as a placeholder URL
         const placeholderUrl = `/uploads/${file.name}`;
         const sortOrder = maxSortOrder + i + 1;
-        const isPrimary = i === 0 && imagesToDelete.length > 0; // Make first new image primary if we deleted some
+        const isPrimary = needsPrimaryImage && i === 0;
         
         await db.execute(sql`
-          INSERT INTO menu_item_image (menu_item_id, url, sort_order, is_primary)
-          VALUES (${productId}, ${placeholderUrl}, ${sortOrder}, ${isPrimary})
+          INSERT INTO menu_item_image (
+            id,
+            menu_item_id, 
+            url, 
+            alt_text,
+            sort_order, 
+            is_primary
+          )
+          VALUES (
+            ${crypto.randomUUID()},
+            ${productId}, 
+            ${placeholderUrl}, 
+            ${`${validatedData.name} - Image ${i + 1}`},
+            ${sortOrder}, 
+            ${isPrimary}
+          )
         `);
       }
     }
@@ -144,7 +242,22 @@ export async function PUT(
       WHERE id = ${productId}
     `);
 
-    const updatedProduct = updatedProductResult.rows[0];
+    interface UpdatedProduct {
+      id: string;
+      name: string;
+      description: string | null;
+      price: number;
+      category: string;
+      subcategory: string;
+      is_available: boolean;
+      preparation_time: number | null;
+      ingredients: string[] | null;
+      dietary_info: string[] | null;
+      created_at: string;
+      updated_at: string;
+      business_id: string;
+    }
+    const updatedProduct = updatedProductResult.rows[0] as unknown as UpdatedProduct;
 
     // Fetch all images for the product
     const imagesResult = await db.execute(sql`
@@ -154,7 +267,7 @@ export async function PUT(
       ORDER BY is_primary DESC, sort_order ASC, created_at ASC
     `);
 
-    const images = imagesResult.rows.map((row) => (row as Record<string, unknown>)["url"] as string);
+    const images = imagesResult.rows.map(row => (row as { url: string }).url);
 
     // Format the response
     const productData = {
@@ -175,14 +288,30 @@ export async function PUT(
     };
 
     return NextResponse.json({
+      success: true,
       message: "Product updated successfully",
       product: productData
     });
 
   } catch (error) {
     console.error("Product update error:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          message: "Please check your input fields",
+          fieldErrors: error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      { 
+        error: "Internal server error",
+        message: "An unexpected error occurred. Please try again."
+      },
       { status: 500 }
     );
   }

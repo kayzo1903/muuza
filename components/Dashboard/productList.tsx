@@ -113,7 +113,7 @@ export default function ProductList() {
 
     try {
       const response = await fetch(
-        `/api/product/${businessId}/delete/${selectedProduct.id}`,
+        `/api/product/${businessId}/delete-product/${selectedProduct.id}`,
         {
           method: "DELETE",
         }
@@ -126,6 +126,10 @@ export default function ProductList() {
         });
         throw new Error(errorData.error || "Failed to delete product");
       }
+
+      toast("sucessfull deleted product", {
+        description: "You deleted your product",
+      });
 
       // Update state by removing the deleted product
       setProducts((prev) =>
@@ -199,7 +203,9 @@ export default function ProductList() {
                   className="justify-start"
                 >
                   <RefreshCw
-                    className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+                    className={`w-4 h-4 mr-2 ${
+                      refreshing ? "animate-spin" : ""
+                    }`}
                   />
                   Refresh
                 </Button>
@@ -280,7 +286,9 @@ export default function ProductList() {
             <CardContent className="p-4 md:p-6">
               <div className="flex flex-col items-center justify-center space-y-3 md:space-y-4">
                 <Tag className="w-8 h-8 md:w-12 md:h-12 text-muted-foreground" />
-                <h3 className="text-base md:text-lg font-semibold">No products yet</h3>
+                <h3 className="text-base md:text-lg font-semibold">
+                  No products yet
+                </h3>
                 <p className="text-sm md:text-base text-muted-foreground">
                   Get started by adding your first menu item
                 </p>
@@ -300,14 +308,19 @@ export default function ProductList() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={handleDeleteCancel}>
         <AlertDialogContent className="max-w-[95vw] rounded-md sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg">Delete Product</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg">
+              Delete Product
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
               Are you sure you want to permanently delete &quot;
               {selectedProduct?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
-            <AlertDialogCancel onClick={handleDeleteCancel} className="mt-2 sm:mt-0">
+            <AlertDialogCancel
+              onClick={handleDeleteCancel}
+              className="mt-2 sm:mt-0"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

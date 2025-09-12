@@ -6,19 +6,20 @@ import { CategorySchema, SubcategorySchema } from "./foodValidationSchema";
  * These match exactly with what you have in your UI and database.
  */
 const dietaryEnum = z.enum([
+  "halal",
   "vegetarian",
   "vegan",
-  "gluten-free",
-  "dairy-free",
+  "no-pork",
+  "no-beef",
+  "fish-only",
   "spicy",
-  "halal",
-  "kosher",
-  "traditional-african",
+  "mild",
+  "traditional-local",
   "plant-based",
-  "nut-free",
-  "seafood-free",
-  "low-carb",
+  "no-dairy",
+  "low-sugar",
 ]);
+
 
 /**
  * Validation schema for the product form

@@ -35,21 +35,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { foodCategories } from "@/lib/data/food-categories";
-
-// Define the dietary options type
-type DietaryOptionValue =
-  | "vegetarian"
-  | "vegan"
-  | "gluten-free"
-  | "dairy-free"
-  | "spicy"
-  | "halal"
-  | "kosher"
-  | "traditional-african"
-  | "plant-based"
-  | "nut-free"
-  | "seafood-free"
-  | "low-carb";
+import { dietaryOptions, DietaryOptionValue } from "@/lib/data/dietary-info";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -60,6 +46,12 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ingredientInput, setIngredientInput] = useState("");
+  const [duplicateProduct, setDuplicateProduct] = useState<{
+    id: string;
+    name: string;
+    image?: string;
+    price?: number;
+  } | null>(null);
 
   const [availableSubcategories, setAvailableSubcategories] = useState<
     { id: string; label: string }[]
@@ -197,6 +189,8 @@ export default function NewProductPage() {
   const onSubmit = async (data: ProductFormData) => {
     setLoading(true);
     setError(null);
+    setDuplicateProduct(null);
+
     try {
       const formData = new FormData();
       formData.append("name", data.name);
@@ -217,7 +211,7 @@ export default function NewProductPage() {
         formData.append("dietaryInfo", JSON.stringify(data.dietaryInfo));
       }
 
-      // Image validation and appending
+      // Validate and append images
       const maxFileSize = 5 * 1024 * 1024;
       const validTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
       if (data.images?.length) {
@@ -238,6 +232,13 @@ export default function NewProductPage() {
       });
 
       const responseData = await response.json();
+
+      // Handle duplicate product
+      if (response.status === 409 && responseData.duplicate) {
+        setDuplicateProduct(responseData.existingProduct);
+        return;
+      }
+
       if (!response.ok) {
         if (responseData.fieldErrors) {
           Object.entries(responseData.fieldErrors).forEach(
@@ -266,69 +267,6 @@ export default function NewProductPage() {
     }
   };
 
-  const dietaryOptions: {
-    value: DietaryOptionValue;
-    label: string;
-    description: string;
-  }[] = [
-    {
-      value: "vegetarian",
-      label: "Vegetarian",
-      description: "Contains no meat or fish",
-    },
-    {
-      value: "vegan",
-      label: "Vegan",
-      description: "Contains no animal products",
-    },
-    {
-      value: "gluten-free",
-      label: "Gluten Free",
-      description: "Suitable for gluten intolerance",
-    },
-    {
-      value: "dairy-free",
-      label: "Dairy Free",
-      description: "Contains no milk products",
-    },
-    {
-      value: "spicy",
-      label: "Spicy",
-      description: "Contains hot peppers or spices",
-    },
-    {
-      value: "halal",
-      label: "Halal",
-      description: "Prepared according to Islamic dietary laws",
-    },
-    {
-      value: "kosher",
-      label: "Kosher",
-      description: "Prepared according to Jewish dietary laws",
-    },
-    {
-      value: "traditional-african",
-      label: "Traditional African",
-      description: "Authentic African recipe",
-    },
-    {
-      value: "plant-based",
-      label: "Plant Based",
-      description: "Mainly vegetables, grains, and legumes",
-    },
-    { value: "nut-free", label: "Nut Free", description: "Contains no nuts" },
-    {
-      value: "seafood-free",
-      label: "Seafood Free",
-      description: "Contains no fish or seafood",
-    },
-    {
-      value: "low-carb",
-      label: "Low Carb",
-      description: "Contains minimal carbohydrates",
-    },
-  ];
-
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -348,6 +286,73 @@ export default function NewProductPage() {
         <div className="bg-destructive/15 text-destructive p-3 rounded-md text-sm">
           {error}
         </div>
+      )}
+
+      {/* //this for dublicates message */}
+      {duplicateProduct && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <X className="w-5 h-5" />
+              Duplicate Product Detected
+            </CardTitle>
+            <CardDescription>
+              A product with this name already exists in this category.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row gap-4 items-center">
+            {/* Product Image */}
+            <div className="relative w-32 h-32 rounded-md overflow-hidden border">
+              <Image
+                src={duplicateProduct.image || "/placeholder.png"}
+                alt={duplicateProduct.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Product Details */}
+            <div className="flex-1 space-y-2">
+              <p className="text-lg font-semibold">{duplicateProduct.name}</p>
+              {duplicateProduct.price && (
+                <p className="text-sm text-muted-foreground">
+                  Price: Ksh {duplicateProduct.price}
+                </p>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  router.push(
+                    `/dashboard/${businessId}/products/${duplicateProduct.id}/edit`
+                  )
+                }
+              >
+                Edit Existing
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setDuplicateProduct(null); // clear and allow overwrite
+                }}
+              >
+                Replace
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setDuplicateProduct(null);
+                  router.back();
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

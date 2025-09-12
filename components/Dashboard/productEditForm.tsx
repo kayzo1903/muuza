@@ -36,21 +36,7 @@ import {
 } from "@/components/ui/tooltip";
 import { foodCategories } from "@/lib/data/food-categories";
 import { toast } from "sonner";
-
-// Define the dietary options type
-type DietaryOptionValue =
-  | "vegetarian"
-  | "vegan"
-  | "gluten-free"
-  | "dairy-free"
-  | "spicy"
-  | "halal"
-  | "kosher"
-  | "traditional-african"
-  | "plant-based"
-  | "nut-free"
-  | "seafood-free"
-  | "low-carb";
+import { dietaryOptions, DietaryOptionValue } from "@/lib/data/dietary-info";
 
 interface ProductEditFormProps {
   businessId: string;
@@ -69,6 +55,12 @@ export default function ProductEditForm({
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [ingredientInput, setIngredientInput] = useState("");
+  const [duplicateProduct, setDuplicateProduct] = useState<{
+    id: string;
+    name: string;
+    image?: string;
+    price?: number;
+  } | null>(null);
   const [availableSubcategories, setAvailableSubcategories] = useState<
     { id: string; label: string }[]
   >([]);
@@ -105,11 +97,17 @@ export default function ProductEditForm({
 
         if (!response.ok) {
           if (response.status === 404) {
+            setError("Product not found");
             toast("Product not found", {
-              description: "check out your connection",
+              description: "The product you're trying to edit doesn't exist",
+            });
+          } else {
+            setError("Failed to load product data");
+            toast("Failed to load product data", {
+              description: "Please check your connection and try again",
             });
           }
-          throw new Error("Failed to fetch product");
+          return;
         }
 
         const productData = await response.json();
@@ -141,10 +139,12 @@ export default function ProductEditForm({
           );
           setPreviews(existingPreviews);
         }
-      } catch {
+      } catch (err) {
+        setError("Failed to load product data");
         toast("Failed to load product data", {
-          description: "check out your connection",
+          description: "An unexpected error occurred",
         });
+        console.error("Fetch error:", err);
       } finally {
         setFetchLoading(false);
       }
@@ -180,10 +180,6 @@ export default function ProductEditForm({
             URL.revokeObjectURL(preview.url);
           } catch (e) {
             console.debug("Failed to revoke URL during cleanup:", e);
-            toast("image upload faled", {
-              description:
-                "check out your image or try to select another image",
-            });
           }
         }
       });
@@ -197,9 +193,11 @@ export default function ProductEditForm({
 
     const currentFiles = form.getValues("images") || [];
     if (previews.length + files.length > 5) {
+      setError("You can upload a maximum of 5 images.");
       toast("Image limit reached", {
-        description: "maximum of 5 image allowed",
+        description: "Maximum of 5 images allowed",
       });
+      return;
     }
 
     const newPreviews = files.map((file) => ({
@@ -232,9 +230,6 @@ export default function ProductEditForm({
         URL.revokeObjectURL(previewToRemove.url);
       } catch (e) {
         console.debug("Failed to revoke URL:", e);
-        toast("image upload faled", {
-          description: "check out your image or try to select another image",
-        });
       }
     }
 
@@ -257,9 +252,11 @@ export default function ProductEditForm({
     if (!value) return;
     const current = form.getValues("ingredients") || [];
     if (current.some((c) => c.toLowerCase() === value.toLowerCase())) {
-      toast("This ingredient is already added", {
-        description: "you can not add same ingredient twice",
+      setError("This ingredient is already added");
+      toast("Duplicate ingredient", {
+        description: "This ingredient is already added to the list",
       });
+      return;
     }
     form.setValue("ingredients", [...current, value], { shouldValidate: true });
     setIngredientInput("");
@@ -293,6 +290,8 @@ export default function ProductEditForm({
   const onSubmit = async (data: ProductFormData) => {
     setLoading(true);
     setError(null);
+    setDuplicateProduct(null);
+
     try {
       const formData = new FormData();
       formData.append("name", data.name);
@@ -324,23 +323,19 @@ export default function ProductEditForm({
       if (data.images?.length) {
         data.images.forEach((file) => {
           if (file instanceof File) {
-            if (!validTypes.includes(file.type))
+            if (!validTypes.includes(file.type)) {
               throw new Error(`Invalid file type: ${file.name}`);
-            toast("image upload faled", {
-              description: `Invalid file type: ${file.name}`,
-            });
-            if (file.size > maxFileSize)
+            }
+            if (file.size > maxFileSize) {
               throw new Error(`File too large: ${file.name}`);
-            toast("image upload faled", {
-              description: `file too large : ${file.name}`,
-            });
+            }
             formData.append("images", file);
           }
         });
       }
 
       const response = await fetch(
-        `/api/product/${businessId}/add-edit-product/${productId}`,
+        `/api/product/${businessId}/edit-product/${productId}`,
         {
           method: "PUT",
           body: formData,
@@ -348,6 +343,16 @@ export default function ProductEditForm({
       );
 
       const responseData = await response.json();
+
+      // Handle duplicate product
+      if (response.status === 409 && responseData.duplicate) {
+        setDuplicateProduct(responseData.existingProduct);
+        toast("Duplicate product detected", {
+          description: "A product with this name already exists in this category",
+        });
+        return;
+      }
+
       if (!response.ok) {
         if (responseData.fieldErrors) {
           Object.entries(responseData.fieldErrors).forEach(
@@ -363,79 +368,23 @@ export default function ProductEditForm({
         throw new Error(responseData.error || "Failed to update product");
       }
 
+      // Success
+      toast("Product updated successfully", {
+        description: "Your product has been updated",
+      });
       router.push(`/dashboard/${businessId}/products`);
       router.refresh();
-    } catch {
-      toast("Failed to update a product", {
-        description: "An error occured while updating the product",
+    } catch (err) {
+      console.error("Submission error:", err);
+      const errorMessage = err instanceof Error ? err.message : "An error occurred while updating the product";
+      setError(errorMessage);
+      toast("Failed to update product", {
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
     }
   };
-
-  const dietaryOptions: {
-    value: DietaryOptionValue;
-    label: string;
-    description: string;
-  }[] = [
-    {
-      value: "vegetarian",
-      label: "Vegetarian",
-      description: "Contains no meat or fish",
-    },
-    {
-      value: "vegan",
-      label: "Vegan",
-      description: "Contains no animal products",
-    },
-    {
-      value: "gluten-free",
-      label: "Gluten Free",
-      description: "Suitable for gluten intolerance",
-    },
-    {
-      value: "dairy-free",
-      label: "Dairy Free",
-      description: "Contains no milk products",
-    },
-    {
-      value: "spicy",
-      label: "Spicy",
-      description: "Contains hot peppers or spices",
-    },
-    {
-      value: "halal",
-      label: "Halal",
-      description: "Prepared according to Islamic dietary laws",
-    },
-    {
-      value: "kosher",
-      label: "Kosher",
-      description: "Prepared according to Jewish dietary laws",
-    },
-    {
-      value: "traditional-african",
-      label: "Traditional African",
-      description: "Authentic African recipe",
-    },
-    {
-      value: "plant-based",
-      label: "Plant Based",
-      description: "Mainly vegetables, grains, and legumes",
-    },
-    { value: "nut-free", label: "Nut Free", description: "Contains no nuts" },
-    {
-      value: "seafood-free",
-      label: "Seafood Free",
-      description: "Contains no fish or seafood",
-    },
-    {
-      value: "low-carb",
-      label: "Low Carb",
-      description: "Contains minimal carbohydrates",
-    },
-  ];
 
   if (fetchLoading) {
     return (
@@ -469,8 +418,75 @@ export default function ProductEditForm({
         </div>
       )}
 
+      {/* Duplicate product message */}
+      {duplicateProduct && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <X className="w-5 h-5" />
+              Duplicate Product Detected
+            </CardTitle>
+            <CardDescription>
+              A product with this name already exists in this category.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row gap-4 items-center">
+            {/* Product Image */}
+            <div className="relative w-32 h-32 rounded-md overflow-hidden border">
+              <Image
+                src={duplicateProduct.image || "/placeholder.png"}
+                alt={duplicateProduct.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Product Details */}
+            <div className="flex-1 space-y-2">
+              <p className="text-lg font-semibold">{duplicateProduct.name}</p>
+              {duplicateProduct.price && (
+                <p className="text-sm text-muted-foreground">
+                  Price: Ksh {duplicateProduct.price}
+                </p>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  router.push(
+                    `/dashboard/${businessId}/products/${duplicateProduct.id}/edit`
+                  )
+                }
+              >
+                Edit Existing
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setDuplicateProduct(null); // clear and allow overwrite
+                }}
+              >
+                Replace Anyway
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setDuplicateProduct(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <fieldset disabled={loading} className="space-y-6">
+          {/* ... (rest of your form JSX remains the same) */}
           {/* Basic Information Card */}
           <Card>
             <CardHeader>
@@ -743,8 +759,7 @@ export default function ProductEditForm({
             <CardHeader>
               <CardTitle>Ingredients</CardTitle>
               <CardDescription>
-                List the main ingredients (separate with commas or add one by
-                one)
+                List the main ingredients (separate with commas or add one by one)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -799,8 +814,7 @@ export default function ProductEditForm({
             <CardHeader>
               <CardTitle>Dietary Information</CardTitle>
               <CardDescription>
-                Select applicable dietary tags to help customers find your
-                product
+                Select applicable dietary tags to help customers find your product
               </CardDescription>
             </CardHeader>
             <CardContent>

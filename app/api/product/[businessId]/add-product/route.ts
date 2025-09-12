@@ -6,11 +6,11 @@ import { join } from "path";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { menuItem, menuItemImage } from "@/db/schema";
 import { nanoid } from "nanoid";
+import { sql } from "drizzle-orm";
 import { foodCategories } from "@/lib/data/food-categories";
 
-// Create enum schemas from categories
+// Zod validation schema
 const CategorySchema = z.enum(
   foodCategories.map(cat => cat.id) as [string, ...string[]]
 );
@@ -19,7 +19,6 @@ const SubcategorySchema = z.enum(
   foodCategories.flatMap(cat => cat.subcategories.map(sub => sub.id)) as [string, ...string[]]
 );
 
-// Simplified validation schema (no menuId)
 const productApiSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
@@ -48,10 +47,14 @@ export async function POST(
     }
 
     // Verify business ownership
-    const business = await db.query.business.findFirst({
-      where: (business, { eq, and }) =>
-        and(eq(business.id, businessId), eq(business.ownerId, session.user.id)),
-    });
+    const businessResult = await db.execute(
+      sql`
+        SELECT id FROM business
+        WHERE id = ${businessId} AND owner_id = ${session.user.id}
+        LIMIT 1;
+      `
+    );
+    const business = businessResult.rows[0];
 
     if (!business) {
       return NextResponse.json(
@@ -62,28 +65,25 @@ export async function POST(
 
     // Parse form data
     const formData = await request.formData();
-
-    // Extract text fields
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
+    const name = (formData.get("name") as string).trim();
+    const description = (formData.get("description") as string)?.trim() || null;
     const price = parseFloat(formData.get("price") as string);
     const category = formData.get("category") as string;
     const subcategory = formData.get("subcategory") as string;
     const isAvailable = formData.get("isAvailable") === "true";
     const preparationTime = formData.get("preparationTime")
       ? parseInt(formData.get("preparationTime") as string)
-      : undefined;
+      : null;
 
     // Parse JSON arrays
     const ingredients = formData.get("ingredients")
       ? JSON.parse(formData.get("ingredients") as string)
       : [];
-
     const dietaryInfo = formData.get("dietaryInfo")
       ? JSON.parse(formData.get("dietaryInfo") as string)
       : [];
 
-    // Validate the data
+    // Validate data
     const validatedData = productApiSchema.parse({
       name,
       description,
@@ -96,38 +96,64 @@ export async function POST(
       preparationTime,
     });
 
-    // Convert price to minor units (cents)
+    const normalizedName = validatedData.name.toLowerCase();
     const priceInMinorUnits = Math.round(validatedData.price * 100);
+    const productId = nanoid();
 
-    // Create menu item in database (NO menuId)
-    const [newMenuItem] = await db
-      .insert(menuItem)
-      .values({
-        id: nanoid(),
-        businessId,
-        category: validatedData.category,
-        subcategory: validatedData.subcategory,
-        name: validatedData.name,
-        description: validatedData.description,
-        price: priceInMinorUnits,
-        ingredients: validatedData.ingredients,
-        dietaryInfo: validatedData.dietaryInfo,
-        preparationTime: validatedData.preparationTime,
-        isAvailable: validatedData.isAvailable,
-      })
-      .returning();
+    // --- RAW SQL Insert with Duplicate Handling ---
+    const result = await db.execute(
+      sql`
+        INSERT INTO menu_item (
+          id,
+          business_id,
+          category,
+          subcategory,
+          name,
+          normalized_name,
+          description,
+          price,
+          ingredients,
+          dietary_info,
+          preparation_time,
+          is_available
+        )
+        VALUES (
+          ${productId},
+          ${businessId},
+          ${validatedData.category},
+          ${validatedData.subcategory},
+          ${validatedData.name},
+          ${normalizedName},
+          ${validatedData.description},
+          ${priceInMinorUnits},
+          ${JSON.stringify(validatedData.ingredients)},
+          ${JSON.stringify(validatedData.dietaryInfo)},
+          ${validatedData.preparationTime},
+          ${validatedData.isAvailable}
+        )
+        ON CONFLICT (business_id, category, normalized_name) 
+        DO NOTHING
+        RETURNING *;
+      `
+    );
 
-    // Handle image uploads (unchanged)
+    // If nothing was inserted, it means duplicate
+    if (!result || !result.rows || result.rows.length === 0) {
+      return NextResponse.json(
+        {
+          error: "A product with this name already exists in this category.",
+          duplicate: true,
+        },
+        { status: 409 }
+      );
+    }
+
+    // --- Handle Image Uploads ---
     const imageFiles = formData.getAll("images") as File[];
     const uploadedImages = [];
 
     if (imageFiles.length > 0) {
-      const uploadsDir = join(
-        process.cwd(),
-        "public/uploads",
-        businessId,
-        newMenuItem.id
-      );
+      const uploadsDir = join(process.cwd(), "public/uploads", businessId, productId);
       await mkdir(uploadsDir, { recursive: true });
 
       for (let i = 0; i < imageFiles.length; i++) {
@@ -142,21 +168,30 @@ export async function POST(
 
           await writeFile(filePath, buffer);
 
-          const imageUrl = `/uploads/${businessId}/${newMenuItem.id}/${fileName}`;
+          const imageUrl = `/uploads/${businessId}/${productId}/${fileName}`;
 
-          const [imageRecord] = await db
-            .insert(menuItemImage)
-            .values({
-              id: nanoid(),
-              menuItemId: newMenuItem.id,
-              url: imageUrl,
-              altText: `${validatedData.name} - Image ${i + 1}`,
-              isPrimary: i === 0,
-              sortOrder: i,
-            })
-            .returning();
+          await db.execute(
+            sql`
+              INSERT INTO menu_item_image (
+                id,
+                menu_item_id,
+                url,
+                alt_text,
+                is_primary,
+                sort_order
+              )
+              VALUES (
+                ${nanoid()},
+                ${productId},
+                ${imageUrl},
+                ${`${validatedData.name} - Image ${i + 1}`},
+                ${i === 0},
+                ${i}
+              );
+            `
+          );
 
-          uploadedImages.push(imageRecord);
+          uploadedImages.push({ url: imageUrl, isPrimary: i === 0 });
         }
       }
     }
@@ -164,7 +199,7 @@ export async function POST(
     return NextResponse.json(
       {
         success: true,
-        menuItem: newMenuItem,
+        product: result.rows[0],
         images: uploadedImages,
         message: "Product created successfully",
       },
