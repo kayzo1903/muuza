@@ -286,7 +286,6 @@ export default function ProductEditForm({
   };
 
   const onSubmit = async (data: ProductFormData) => {
-     alert(`Product ID: ${productId}, Business ID: ${businessId}`);
     setLoading(true);
     setError(null);
     setDuplicateProduct(null);

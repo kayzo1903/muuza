@@ -37,7 +37,7 @@ export async function PUT(
 
     // Verify the product exists and belongs to this business
     const productCheck = await db.execute(sql`
-      SELECT id FROM menu_item 
+      SELECT id, name, category FROM menu_item 
       WHERE id = ${productId} AND business_id = ${businessId}
     `);
 
@@ -52,7 +52,7 @@ export async function PUT(
     const formData = await request.formData();
     
     // Extract form data
-    const name = formData.get("name") as string;
+    const name = (formData.get("name") as string)?.trim();
     const description = formData.get("description") as string;
     const price = parseFloat(formData.get("price") as string);
     const category = formData.get("category") as string;
@@ -67,7 +67,7 @@ export async function PUT(
     // Get images to delete
     const imagesToDelete = JSON.parse(formData.get("imagesToDelete") as string || "[]");
     
-    // Get new image files (for development, we'll just store file names)
+    // Get new image files
     const imageFiles = formData.getAll("images") as File[];
 
     // Validate required fields
@@ -76,6 +76,49 @@ export async function PUT(
         { error: "Missing required fields" },
         { status: 400 }
       );
+    }
+
+    // --- DUPLICATE CHECK: Prevent naming conflict ---
+    const existingProduct = productCheck.rows[0] as { name: string; category: string };
+    
+    // Only check for duplicates if the name or category has changed
+    if (name !== existingProduct.name || category !== existingProduct.category) {
+      const duplicateCheck = await db.execute(sql`
+        SELECT id, name 
+        FROM menu_item 
+        WHERE business_id = ${businessId} 
+          AND category = ${category}
+          AND name = ${name}
+          AND id != ${productId}  -- Exclude the current product being edited
+        LIMIT 1
+      `);
+
+      if (duplicateCheck.rows.length > 0) {
+        const duplicateProduct = duplicateCheck.rows[0] as { id: string; name: string };
+        
+        // Fetch the duplicate product details for better error message
+        const duplicateDetails = await db.execute(sql`
+          SELECT mi.name, mi.price, mi.image_url
+          FROM menu_item mi
+          WHERE mi.id = ${duplicateProduct.id}
+        `);
+        
+        const duplicate = duplicateDetails.rows[0] as { name: string; price: number; image_url?: string };
+        
+        return NextResponse.json(
+          {
+            error: "A product with this name already exists in this category.",
+            duplicate: true,
+            existingProduct: {
+              id: duplicateProduct.id,
+              name: duplicate.name,
+              price: duplicate.price ? Number(duplicate.price) / 100 : 0,
+              image: duplicate.image_url
+            }
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // Convert price to minor units (cents) for storage
@@ -107,7 +150,7 @@ export async function PUT(
       `);
     }
 
-    // Handle new image uploads (for development, we'll just store file names)
+    // Handle new image uploads
     if (imageFiles.length > 0) {
       // Get current max sort_order to append new images
       const maxSortOrderResult = await db.execute(sql`
@@ -119,13 +162,23 @@ export async function PUT(
       const maxSortOrderRaw = maxSortOrderResult.rows[0]?.max_sort_order;
       const maxSortOrder = typeof maxSortOrderRaw === "number" ? maxSortOrderRaw : parseInt(maxSortOrderRaw as string) || 0;
       
+      // Check if we need to set any image as primary (if all existing primaries were deleted)
+      const primaryImageCheck = await db.execute(sql`
+        SELECT COUNT(*) as primary_count 
+        FROM menu_item_image 
+        WHERE menu_item_id = ${productId} AND is_primary = true
+      `);
+      
+      const primaryCount = parseInt((primaryImageCheck.rows[0] as { primary_count: string }).primary_count || "0");
+      const needsPrimary = primaryCount === 0;
+      
       // Insert new images
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
         // For development, we'll just store the file name as a placeholder URL
         const placeholderUrl = `/uploads/${file.name}`;
         const sortOrder = maxSortOrder + i + 1;
-        const isPrimary = i === 0 && imagesToDelete.length > 0; // Make first new image primary if we deleted some
+        const isPrimary = (i === 0 && needsPrimary) || false;
         
         await db.execute(sql`
           INSERT INTO menu_item_image (menu_item_id, url, sort_order, is_primary)
