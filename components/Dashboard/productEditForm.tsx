@@ -97,12 +97,10 @@ export default function ProductEditForm({
 
         if (!response.ok) {
           if (response.status === 404) {
-            setError("Product not found");
             toast("Product not found", {
               description: "The product you're trying to edit doesn't exist",
             });
           } else {
-            setError("Failed to load product data");
             toast("Failed to load product data", {
               description: "Please check your connection and try again",
             });
@@ -288,6 +286,7 @@ export default function ProductEditForm({
   };
 
   const onSubmit = async (data: ProductFormData) => {
+     alert(`Product ID: ${productId}, Business ID: ${businessId}`);
     setLoading(true);
     setError(null);
     setDuplicateProduct(null);
@@ -335,7 +334,7 @@ export default function ProductEditForm({
       }
 
       const response = await fetch(
-        `/api/product/${businessId}/edit-product/${productId}`,
+        `/api/product/${businessId}/add-edit-product/${productId}`,
         {
           method: "PUT",
           body: formData,

@@ -1,3 +1,5 @@
+// app/api/product/[businessId]/edit-product/[productId]/route.ts
+
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";

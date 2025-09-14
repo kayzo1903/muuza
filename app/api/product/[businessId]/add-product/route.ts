@@ -9,14 +9,18 @@ import { db } from "@/db";
 import { nanoid } from "nanoid";
 import { sql } from "drizzle-orm";
 import { foodCategories } from "@/lib/data/food-categories";
+import { menuItem, menuItemImage } from "@/db/schema";
 
 // Zod validation schema
 const CategorySchema = z.enum(
-  foodCategories.map(cat => cat.id) as [string, ...string[]]
+  foodCategories.map((cat) => cat.id) as [string, ...string[]]
 );
 
 const SubcategorySchema = z.enum(
-  foodCategories.flatMap(cat => cat.subcategories.map(sub => sub.id)) as [string, ...string[]]
+  foodCategories.flatMap((cat) => cat.subcategories.map((sub) => sub.id)) as [
+    string,
+    ...string[]
+  ]
 );
 
 const productApiSchema = z.object({
@@ -96,115 +100,102 @@ export async function POST(
       preparationTime,
     });
 
-    const normalizedName = validatedData.name.toLowerCase();
     const priceInMinorUnits = Math.round(validatedData.price * 100);
     const productId = nanoid();
 
-    // --- RAW SQL Insert with Duplicate Handling ---
-    const result = await db.execute(
-      sql`
-        INSERT INTO menu_item (
-          id,
-          business_id,
-          category,
-          subcategory,
-          name,
-          normalized_name,
-          description,
-          price,
-          ingredients,
-          dietary_info,
-          preparation_time,
-          is_available
-        )
-        VALUES (
-          ${productId},
-          ${businessId},
-          ${validatedData.category},
-          ${validatedData.subcategory},
-          ${validatedData.name},
-          ${normalizedName},
-          ${validatedData.description},
-          ${priceInMinorUnits},
-          ${JSON.stringify(validatedData.ingredients)},
-          ${JSON.stringify(validatedData.dietaryInfo)},
-          ${validatedData.preparationTime},
-          ${validatedData.isAvailable}
-        )
-        ON CONFLICT (business_id, category, normalized_name) 
-        DO NOTHING
-        RETURNING *;
-      `
-    );
+    try {
+      // --- Use Drizzle ORM for insertion ---
+      const result = await db.insert(menuItem)
+        .values({
+          id: productId,
+          businessId: businessId,
+          category: validatedData.category,
+          subcategory: validatedData.subcategory,
+          name: validatedData.name,
+          description: validatedData.description,
+          price: priceInMinorUnits,
+          ingredients: validatedData.ingredients,
+          dietaryInfo: validatedData.dietaryInfo,
+          preparationTime: validatedData.preparationTime,
+          isAvailable: validatedData.isAvailable
+        })
+        .onConflictDoNothing({
+          target: [menuItem.businessId, menuItem.category, menuItem.name]
+        })
+        .returning();
 
-    // If nothing was inserted, it means duplicate
-    if (!result || !result.rows || result.rows.length === 0) {
+      // If nothing was inserted, it means duplicate
+      if (result.length === 0) {
+        return NextResponse.json(
+          {
+            error: "A product with this name already exists in this category.",
+            duplicate: true,
+          },
+          { status: 409 }
+        );
+      }
+
+      // --- Handle Image Uploads ---
+      const imageFiles = formData.getAll("images") as File[];
+      const uploadedImages = [];
+
+      if (imageFiles.length > 0) {
+        const uploadsDir = join(
+          process.cwd(),
+          "public/uploads",
+          businessId,
+          productId
+        );
+        await mkdir(uploadsDir, { recursive: true });
+
+        for (let i = 0; i < imageFiles.length; i++) {
+          const file = imageFiles[i];
+          if (file instanceof File) {
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+
+            const fileExtension = file.name.split(".").pop();
+            const fileName = `${nanoid()}.${fileExtension}`;
+            const filePath = join(uploadsDir, fileName);
+
+            await writeFile(filePath, buffer);
+
+            const imageUrl = `/uploads/${businessId}/${productId}/${fileName}`;
+
+            // Use Drizzle ORM for image insertion too
+            await db.insert(menuItemImage)
+              .values({
+                id: nanoid(),
+                menuItemId: productId,
+                url: imageUrl,
+                altText: `${validatedData.name} - Image ${i + 1}`,
+                isPrimary: i === 0,
+                sortOrder: i
+              });
+
+            uploadedImages.push({ url: imageUrl, isPrimary: i === 0 });
+          }
+        }
+      }
+
       return NextResponse.json(
         {
-          error: "A product with this name already exists in this category.",
-          duplicate: true,
+          success: true,
+          product: result[0], // Drizzle returns an array, not rows
+          images: uploadedImages,
+          message: "Product created successfully",
         },
-        { status: 409 }
+        { status: 201 }
+      );
+
+    } catch (error) {
+      console.error("Database error:", error);
+      return NextResponse.json(
+        { error: "Failed to create product" },
+        { status: 500 }
       );
     }
 
-    // --- Handle Image Uploads ---
-    const imageFiles = formData.getAll("images") as File[];
-    const uploadedImages = [];
-
-    if (imageFiles.length > 0) {
-      const uploadsDir = join(process.cwd(), "public/uploads", businessId, productId);
-      await mkdir(uploadsDir, { recursive: true });
-
-      for (let i = 0; i < imageFiles.length; i++) {
-        const file = imageFiles[i];
-        if (file instanceof File) {
-          const bytes = await file.arrayBuffer();
-          const buffer = Buffer.from(bytes);
-
-          const fileExtension = file.name.split(".").pop();
-          const fileName = `${nanoid()}.${fileExtension}`;
-          const filePath = join(uploadsDir, fileName);
-
-          await writeFile(filePath, buffer);
-
-          const imageUrl = `/uploads/${businessId}/${productId}/${fileName}`;
-
-          await db.execute(
-            sql`
-              INSERT INTO menu_item_image (
-                id,
-                menu_item_id,
-                url,
-                alt_text,
-                is_primary,
-                sort_order
-              )
-              VALUES (
-                ${nanoid()},
-                ${productId},
-                ${imageUrl},
-                ${`${validatedData.name} - Image ${i + 1}`},
-                ${i === 0},
-                ${i}
-              );
-            `
-          );
-
-          uploadedImages.push({ url: imageUrl, isPrimary: i === 0 });
-        }
-      }
-    }
-
-    return NextResponse.json(
-      {
-        success: true,
-        product: result.rows[0],
-        images: uploadedImages,
-        message: "Product created successfully",
-      },
-      { status: 201 }
-    );
   } catch (error) {
     console.error("Error creating product:", error);
 

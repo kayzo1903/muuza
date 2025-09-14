@@ -6,6 +6,7 @@ import {
   pgEnum,
   jsonb,
   integer,
+  unique,
 } from "drizzle-orm/pg-core";
 
 /* ==============================================
@@ -213,7 +214,12 @@ export const menuItem = pgTable("menu_item", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => {
+  return {
+    // Case-sensitive unique constraint: business + category + name
+    business_category_name_unique: unique()
+      .on(table.businessId, table.category, table.name),
+  }});
 
 /* ==============================================
    MENU ITEM IMAGE TABLE
