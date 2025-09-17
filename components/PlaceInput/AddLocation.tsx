@@ -18,7 +18,7 @@ const AddLocation: React.FC = () => {
     useRef<google.maps.places.AutocompleteService | null>(null);
 
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY as string,
     libraries,
   });
 
